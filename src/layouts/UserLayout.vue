@@ -3,19 +3,19 @@
   <div id="userLayout" :class="['user-layout-wrapper', isMobile && 'mobile']">
     <div class="container">
       <div class="user-layout-lang">
-        <select-lang class="select-lang-trigger" />
+        <!-- <select-lang class="select-lang-trigger" /> -->
       </div>
       <div class="user-layout-content">
         <div class="top">
           <div class="header">
             <a href="/">
-              <img src="~@/assets/logo.svg" class="logo" alt="logo">
-              <span class="title">Ant Design</span>
+              <img src="~@/assets/logo.png" class="logo" alt="logo">
+              <span class="title">DATA GO·数汇轮</span>
             </a>
           </div>
-          <div class="desc">
+          <!-- <div class="desc">
             {{ $t('layouts.userLayout.title') }}
-          </div>
+          </div> -->
         </div>
 
         <router-view />
@@ -97,6 +97,7 @@ export default {
       padding: 32px 0 24px;
 
       .top {
+        margin-bottom: 50px;
         text-align: center;
 
         .header {
