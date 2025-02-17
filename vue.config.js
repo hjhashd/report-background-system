@@ -109,7 +109,7 @@ const vueConfig = {
     loaderOptions: {
       less: {
         modifyVars: {
-          // less vars，customize ant design theme
+          // less vars，customize Data Go theme
 
           // 'primary-color': '#F5222D',
           // 'link-color': '#F5222D',
@@ -136,7 +136,7 @@ const vueConfig = {
 
   // disable source map in production
   productionSourceMap: false,
-  lintOnSave: undefined,
+  lintOnSave: false,
   // babel-loader no-ignore node_modules/*
   transpileDependencies: []
 }

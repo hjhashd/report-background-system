@@ -1,3 +1,12 @@
+/*
+ * @Author: bekon
+ * @Date: 2022-10-10 22:31:07
+ * @LastEditors: bekon
+ * @LastEditTime: 2025-02-17 18:16:55
+ * @FilePath: /report-background-system/src/locales/lang/en-US/menu.js
+ * @Description: 
+ * 
+ */
 export default {
     'menu.welcome': 'Welcome',
     'menu.home': 'Home',
@@ -35,5 +44,9 @@ export default {
     'menu.account.center': 'Account Center',
     'menu.account.settings': 'Account Settings',
     'menu.account.trigger': 'Trigger Error',
-    'menu.account.logout': 'Logout'
+    'menu.account.logout': 'Logout',
+
+
+    /// 新增
+    'menu.overview': 'Data OverView',
 }

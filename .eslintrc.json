@@ -1,5 +1,5 @@
 {
-  "rules": {
-    "space-before-function-paren": 0
-  }
+  // "rules": {
+  //   "space-before-function-paren": 0
+  // }
 }

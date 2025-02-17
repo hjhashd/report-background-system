@@ -1,8 +1,8 @@
 English | [简体中文](./README.zh-CN.md)
 
-<h1 align="center">Ant Design Vue Pro</h1>
+<h1 align="center">Data Go Vue Pro</h1>
 <div align="center">
-An out-of-box UI solution for enterprise applications as a Vue boilerplate. based on  <a href="https://vuecomponent.github.io/ant-design-vue/docs/vue/introduce-cn/" target="_blank">Ant Design of Vue</a>
+An out-of-box UI solution for enterprise applications as a Vue boilerplate. based on  <a href="https://vuecomponent.github.io/ant-design-vue/docs/vue/introduce-cn/" target="_blank">Data Go of Vue</a>
 </div>
 
 <div align="center">
@@ -33,7 +33,7 @@ Overview
 - webpack
 - eslint
 - @vue/cli
-- [ant-design-vue@1.x](https://github.com/vueComponent/ant-design-vue) - Ant Design Of Vue 
+- [ant-design-vue@1.x](https://github.com/vueComponent/ant-design-vue) - Data Go Of Vue 
 - [vue-cropper](https://github.com/xyxiao001/vue-cropper) - Picture edit
 - [@antv/g2](https://antv.alipay.com/zh-cn/index.html) - AntV G2
 - [Viser-vue](https://viserjs.github.io/docs.html#/viser/guide/installation)  - Antv/G2 of Vue

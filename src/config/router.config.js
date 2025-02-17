@@ -1,5 +1,5 @@
 // eslint-disable-next-line
-import { UserLayout, BasicLayout, BlankLayout } from '@/layouts'
+import { UserLayout, BasicLayout, BlankLayout, PageView } from '@/layouts'
 import { bxAnaalyse } from '@/core/icons'
 
 const RouteView = {
@@ -15,6 +15,21 @@ export const asyncRouterMap = [
     meta: { title: 'menu.home' },
     redirect: '/dashboard/workplace',
     children: [
+      // new add
+      {
+        path: '/overviewPage',
+        name: 'overviewPage',
+        component: RouteView,
+        redirect: '/overviewPage/index',
+        meta: { title: 'menu.overview', keepAlive: true, icon: bxAnaalyse, permission: ['overview'] },
+        children: [
+          {
+            path: '/overviewPage/index',
+            name: 'overview',
+            component: () => import('@/views/dataGo/overview'),
+            meta: { title: 'menu.overview', keepAlive: false, permission: ['overview'] }
+          },]
+      },
       // dashboard
       {
         path: '/dashboard',
@@ -267,27 +282,26 @@ export const asyncRouterMap = [
             ]
           }
         ]
-      }
+      },
 
       // other
-      /*
       {
         path: '/other',
         name: 'otherPage',
         component: PageView,
-        meta: { title: '其他组件', icon: 'slack', permission: [ 'dashboard' ] },
+        meta: { title: '其他组件', icon: 'slack', permission: ['dashboard'] },
         redirect: '/other/icon-selector',
         children: [
           {
             path: '/other/icon-selector',
             name: 'TestIconSelect',
             component: () => import('@/views/other/IconSelectorView'),
-            meta: { title: 'IconSelector', icon: 'tool', keepAlive: true, permission: [ 'dashboard' ] }
+            meta: { title: 'IconSelector', icon: 'tool', keepAlive: true, permission: ['dashboard'] }
           },
           {
             path: '/other/list',
             component: RouteView,
-            meta: { title: '业务布局', icon: 'layout', permission: [ 'support' ] },
+            meta: { title: '业务布局', icon: 'layout', permission: ['support'] },
             redirect: '/other/list/tree-list',
             children: [
               {
@@ -317,7 +331,7 @@ export const asyncRouterMap = [
               {
                 path: '/other/list/system-role',
                 name: 'SystemRole',
-                component: () => import('@/views/role/RoleList'),
+                component: () => import('@/views/other/RoleList'),
                 meta: { title: '角色列表2', keepAlive: true }
               },
               {
@@ -330,7 +344,6 @@ export const asyncRouterMap = [
           }
         ]
       }
-      */
     ]
   },
   {
