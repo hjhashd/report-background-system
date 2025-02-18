@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <page-header-wrapper>
         <div class="flex top-card-content">
             <div v-for="item in overview" :key="item.name" class="flex-1">
                 <div class="title">{{ item.name }}</div>
@@ -32,8 +32,7 @@
                 </template>
             </s-table>
         </div>
-
-    </div>
+    </page-header-wrapper>
 </template>
 
 <script>

@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2022-10-10 22:31:07
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-18 16:02:46
+ * @LastEditTime: 2025-02-18 17:59:40
  * @FilePath: /report-background-system/src/components/index.js
  * @Description: 
  * 
@@ -34,6 +34,7 @@ import IconSelector from '@/components/IconSelector'
 import TagSelect from '@/components/TagSelect'
 import StandardFormRow from '@/components/StandardFormRow'
 import ArticleListContent from '@/components/ArticleListContent'
+import ReportCardSlider from '@/components/ReportCardSlider';
 
 import Dialog from '@/components/Dialog'
 
@@ -62,6 +63,6 @@ export {
   TagSelect,
   StandardFormRow,
   ArticleListContent,
-
+  ReportCardSlider,
   Dialog
 }
