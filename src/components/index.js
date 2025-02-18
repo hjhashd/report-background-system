@@ -1,5 +1,15 @@
+/*
+ * @Author: bekon
+ * @Date: 2022-10-10 22:31:07
+ * @LastEditors: bekon
+ * @LastEditTime: 2025-02-18 16:02:46
+ * @FilePath: /report-background-system/src/components/index.js
+ * @Description: 
+ * 
+ */
 // chart
 import Bar from '@/components/Charts/Bar'
+import EChartsComponent from '@/components/Charts/EChartsComponent.vue';
 import ChartCard from '@/components/Charts/ChartCard'
 import Liquid from '@/components/Charts/Liquid'
 import MiniArea from '@/components/Charts/MiniArea'
@@ -30,6 +40,7 @@ import Dialog from '@/components/Dialog'
 export {
   AvatarList,
   Bar,
+  EChartsComponent,
   ChartCard,
   Liquid,
   MiniArea,

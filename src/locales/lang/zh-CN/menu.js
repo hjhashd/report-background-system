@@ -40,4 +40,8 @@ export default {
 
     /// 新增
     'menu.overview': '数据看板',
+    'menu.uploadData': '数据上传',
+    'menu.readWord': '慧读文档',
+    'menu.anomaly': '异常分析',
+    'menu.client': '客户列表',
 }

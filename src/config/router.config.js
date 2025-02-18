@@ -15,7 +15,22 @@ export const asyncRouterMap = [
     meta: { title: 'menu.home' },
     redirect: '/dashboard/workplace',
     children: [
-      // new add
+      // home
+      {
+        path: '/homePage',
+        name: 'homePage',
+        component: RouteView,
+        redirect: '/homePage/index',
+        meta: { title: 'menu.home', keepAlive: true, icon: bxAnaalyse, permission: ['home'] },
+        children: [
+          {
+            path: '/homePage/index',
+            name: 'home',
+            component: () => import('@/views/dataGo/home'),
+            meta: { title: 'menu.home', keepAlive: false, permission: ['home'] }
+          },]
+      },
+      // overview
       {
         path: '/overviewPage',
         name: 'overviewPage',
@@ -30,6 +45,67 @@ export const asyncRouterMap = [
             meta: { title: 'menu.overview', keepAlive: false, permission: ['overview'] }
           },]
       },
+      // uploadData
+      {
+        path: '/uploadDataPage',
+        name: 'uploadDataPage',
+        component: RouteView,
+        redirect: '/uploadDataPage/index',
+        meta: { title: 'menu.uploadData', keepAlive: true, icon: bxAnaalyse, permission: ['uploadData'] },
+        children: [
+          {
+            path: '/uploadDataPage/index',
+            name: 'uploadData',
+            component: () => import('@/views/dataGo/uploadData'),
+            meta: { title: 'menu.uploadData', keepAlive: false, permission: ['uploadData'] }
+          },]
+      },
+      // readWord
+      {
+        path: '/readWordPage',
+        name: 'readWordPage',
+        component: RouteView,
+        redirect: '/readWordPage/index',
+        meta: { title: 'menu.readWord', keepAlive: true, icon: bxAnaalyse, permission: ['readWord'] },
+        children: [
+          {
+            path: '/readWordPage/index',
+            name: 'readWord',
+            component: () => import('@/views/dataGo/readWord'),
+            meta: { title: 'menu.readWord', keepAlive: false, permission: ['readWord'] }
+          },]
+      },
+      // anomaly
+      {
+        path: '/anomalyPage',
+        name: 'anomalyPage',
+        component: RouteView,
+        redirect: '/anomalyPage/index',
+        meta: { title: 'menu.anomaly', keepAlive: true, icon: bxAnaalyse, permission: ['anomaly'] },
+        children: [
+          {
+            path: '/anomalyPage/index',
+            name: 'anomaly',
+            component: () => import('@/views/dataGo/anomaly'),
+            meta: { title: 'menu.anomaly', keepAlive: false, permission: ['anomaly'] }
+          },]
+      },
+      // client
+      {
+        path: '/clientPage',
+        name: 'clientPage',
+        component: RouteView,
+        redirect: '/clientPage/index',
+        meta: { title: 'menu.client', keepAlive: true, icon: bxAnaalyse, permission: ['client'] },
+        children: [
+          {
+            path: '/clientPage/index',
+            name: 'client',
+            component: () => import('@/views/dataGo/client'),
+            meta: { title: 'menu.client', keepAlive: false, permission: ['client'] }
+          },]
+      },
+
       // dashboard
       {
         path: '/dashboard',

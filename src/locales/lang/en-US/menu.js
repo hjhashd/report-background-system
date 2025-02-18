@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2022-10-10 22:31:07
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-17 18:16:55
+ * @LastEditTime: 2025-02-18 17:08:51
  * @FilePath: /report-background-system/src/locales/lang/en-US/menu.js
  * @Description: 
  * 
@@ -49,4 +49,8 @@ export default {
 
     /// 新增
     'menu.overview': 'Data OverView',
+    'menu.uploadData': 'Data UploadData',
+    'menu.readWord': 'Data ReadWord',
+    'menu.anomaly': 'Data Anomaly',
+    'menu.client': 'Data Client',
 }

@@ -1,5 +1,14 @@
+<!--
+ * @Author: bekon
+ * @Date: 2022-10-10 22:31:07
+ * @LastEditors: bekon
+ * @LastEditTime: 2025-02-18 14:18:52
+ * @FilePath: /report-background-system/src/components/Charts/Bar.vue
+ * @Description: 
+ * 
+-->
 <template>
-  <div :style="{ padding: '0 0 32px 32px' }">
+  <div>
     <h4 :style="{ marginBottom: '20px' }">{{ title }}</h4>
     <v-chart
       height="254"
