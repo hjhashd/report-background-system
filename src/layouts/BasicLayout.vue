@@ -140,7 +140,7 @@ export default {
       // 是否手机模式
       isMobile: false,
       // 生产二维码
-      buildQrCodePop: true,
+      buildQrCodePop: false,
     }
   },
   computed: {
