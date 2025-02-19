@@ -13,42 +13,79 @@
       广告代码 真实项目中请移除
       production remove this Ads
     -->
-    <ads v-if="isProPreviewSite && !collapsed"/>
+    <!-- <ads v-if="isProPreviewSite && !collapsed"/> -->
     <!-- Ads end -->
 
     <!-- 1.0.0+ 版本 pro-layout 提供 API，
           我们推荐使用这种方式进行 LOGO 和 title 自定义
     -->
     <template v-slot:menuHeaderRender>
-      <div>
+      <div v-if="collapsed">
         <img src="@/assets/logo.png" />
-        <h1>{{ title }}</h1>
+      </div>
+      <div style="z-index: 1000" @click="preventStop" v-if="!collapsed">
+        <div>
+          <img src="@/assets/logo.png" />
+          <h1>{{ title }}</h1>
+        </div>
+        <div class="user-box flex-row-spacearound">
+          <div class="user-ava">
+            <a-avatar :src="userInfo.avatar" style="width: 50px; height: 50px" />
+            <div class="user-name">{{ userInfo.name }}</div>
+          </div>
+          <div @click="buildQRcode">
+            <img src="@/assets/images/qrcode.png" alt="点击生产二维码" style="width: 50px; height: 50px" />
+          </div>
+        </div>
+        <div class="user-report-info">
+          <div class="report-info-item">
+            <div class="num">20</div>
+            <div class="item-name">客户</div>
+          </div>
+          <div class="report-info-item">
+            <div class="num">20</div>
+            <div class="item-name">报告</div>
+          </div>
+          <div class="report-info-item">
+            <div class="num">20</div>
+            <div class="item-name">草稿</div>
+          </div>
+        </div>
       </div>
     </template>
     <!-- 1.0.0+ 版本 pro-layout 提供 API,
           增加 Header 左侧内容区自定义
     -->
-    <template v-slot:headerContentRender>
+    <!-- <template v-slot:headerContentRender>
       <div>
         <a-tooltip title="刷新页面">
           <a-icon type="reload" style="font-size: 18px;cursor: pointer;" @click="() => { $message.info('只是一个DEMO') }" />
         </a-tooltip>
       </div>
-    </template>
-
-    <setting-drawer v-if="isDev" :settings="settings" @change="handleSettingChange">
+    </template> -->
+    <!-- <setting-drawer v-if="isDev" :settings="settings" @change="handleSettingChange">
       <div style="margin: 12px 0;">
         This is SettingDrawer custom footer content.
       </div>
-    </setting-drawer>
+    </setting-drawer> -->
     <template v-slot:rightContentRender>
       <right-content :top-menu="settings.layout === 'topmenu'" :is-mobile="isMobile" :theme="settings.theme" />
     </template>
     <!-- custom footer / 自定义Footer -->
-    <template v-slot:footerRender>
+    <!-- <template v-slot:footerRender>
       <global-footer />
-    </template>
+    </template> -->
     <router-view />
+
+    <!-- 全局弹窗-生产二维码 -->
+    <a-modal
+      v-model="buildQrCodePop"
+      :footer="null"
+      :bodyStyle="{ padding: 0, backgroundColor: 'transparent' }"
+      :maskClosable="false"
+    >
+      <build-q-r-code></build-q-r-code>
+    </a-modal>
   </pro-layout>
 </template>
 
@@ -57,7 +94,7 @@ import { SettingDrawer, updateTheme } from '@ant-design-vue/pro-layout'
 import { i18nRender } from '@/locales'
 import { mapState } from 'vuex'
 import { CONTENT_WIDTH_TYPE, SIDEBAR_TYPE, TOGGLE_MOBILE_TYPE } from '@/store/mutation-types'
-
+import { buildQRCode } from '@/components'
 import defaultSettings from '@/config/defaultSettings'
 import RightContent from '@/components/GlobalHeader/RightContent'
 import GlobalFooter from '@/components/GlobalFooter'
@@ -69,15 +106,15 @@ export default {
     SettingDrawer,
     RightContent,
     GlobalFooter,
-    Ads
+    Ads,
+    buildQRCode,
   },
-  data () {
+  data() {
     return {
       // preview.pro.antdv.com only use.
       isProPreviewSite: process.env.VUE_APP_PREVIEW === 'true' && process.env.NODE_ENV !== 'development',
       // end
       isDev: process.env.NODE_ENV === 'development' || process.env.VUE_APP_PREVIEW === 'true',
-
       // base
       menus: [],
       // 侧栏收起状态
@@ -95,25 +132,26 @@ export default {
         fixedHeader: defaultSettings.fixedHeader,
         fixSiderbar: defaultSettings.fixSiderbar,
         colorWeak: defaultSettings.colorWeak,
-
         hideHintAlert: false,
-        hideCopyButton: false
+        hideCopyButton: false,
       },
       // 媒体查询
       query: {},
-
       // 是否手机模式
-      isMobile: false
+      isMobile: false,
+      // 生产二维码
+      buildQrCodePop: true,
     }
   },
   computed: {
     ...mapState({
       // 动态主路由
-      mainMenu: state => state.permission.addRouters
-    })
+      mainMenu: (state) => state.permission.addRouters,
+      userInfo: (state) => state.user.info,
+    }),
   },
-  created () {
-    const routes = this.mainMenu.find(item => item.path === '/')
+  created() {
+    const routes = this.mainMenu.find((item) => item.path === '/')
     this.menus = (routes && routes.children) || []
     // 处理侧栏收起状态
     this.$watch('collapsed', () => {
@@ -123,7 +161,7 @@ export default {
       this.$store.commit(TOGGLE_MOBILE_TYPE, this.isMobile)
     })
   },
-  mounted () {
+  mounted() {
     const userAgent = navigator.userAgent
     if (userAgent.indexOf('Edge') > -1) {
       this.$nextTick(() => {
@@ -133,7 +171,6 @@ export default {
         }, 16)
       })
     }
-
     // first update color
     // TIPS: THEME COLOR HANDLER!! PLEASE CHECK THAT!!
     if (process.env.NODE_ENV !== 'production' || process.env.VUE_APP_PREVIEW === 'true') {
@@ -142,7 +179,7 @@ export default {
   },
   methods: {
     i18nRender,
-    handleMediaQuery (val) {
+    handleMediaQuery(val) {
       this.query = val
       if (this.isMobile && !val['screen-xs']) {
         this.isMobile = false
@@ -155,10 +192,10 @@ export default {
         // this.settings.fixSiderbar = false
       }
     },
-    handleCollapse (val) {
+    handleCollapse(val) {
       this.collapsed = val
     },
-    handleSettingChange ({ type, value }) {
+    handleSettingChange({ type, value }) {
       console.log('type', type, value)
       type && (this.settings[type] = value)
       switch (type) {
@@ -174,11 +211,56 @@ export default {
           }
           break
       }
-    }
-  }
+    },
+    preventStop(event) {
+      event.preventDefault()
+    },
+    buildQRcode(event) {
+      event.preventDefault()
+      this.buildQrCodePop = true
+    },
+  },
 }
 </script>
 
 <style lang="less">
-@import "./BasicLayout.less";
+@import './BasicLayout.less';
+.ant-pro-sider-menu-logo {
+  height: auto;
+}
+.user-box {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  line-height: 1.2;
+  .user-ava {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .user-name {
+    margin-top: 8px;
+    font-size: 18px;
+    color: #000;
+  }
+}
+.user-report-info {
+  margin-left: -24px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-bottom: 10px;
+  .report-info-item {
+    text-align: center;
+    line-height: 1.5;
+    .num {
+      font-size: 16px;
+      font-weight: bold;
+      color: #f4d4ad;
+    }
+    .item-name {
+      color: #000;
+    }
+  }
+}
 </style>

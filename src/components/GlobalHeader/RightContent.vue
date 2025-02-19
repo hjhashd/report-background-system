@@ -1,7 +1,16 @@
+<!--
+ * @Author: bekon
+ * @Date: 2022-10-10 22:31:07
+ * @LastEditors: bekon
+ * @LastEditTime: 2025-02-19 14:37:13
+ * @FilePath: /report-background-system/src/components/GlobalHeader/RightContent.vue
+ * @Description: 
+ * 
+-->
 <template>
   <div :class="wrpCls">
     <avatar-dropdown :menu="showMenu" :current-user="currentUser" :class="prefixCls" />
-    <select-lang :class="prefixCls" />
+    <!-- <select-lang :class="prefixCls" /> -->
   </div>
 </template>
 
@@ -13,46 +22,46 @@ export default {
   name: 'RightContent',
   components: {
     AvatarDropdown,
-    SelectLang
+    SelectLang,
   },
   props: {
     prefixCls: {
       type: String,
-      default: 'ant-pro-global-header-index-action'
+      default: 'ant-pro-global-header-index-action',
     },
     isMobile: {
       type: Boolean,
-      default: () => false
+      default: () => false,
     },
     topMenu: {
       type: Boolean,
-      required: true
+      required: true,
     },
     theme: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
-  data () {
+  data() {
     return {
       showMenu: true,
-      currentUser: {}
+      currentUser: {},
     }
   },
   computed: {
-    wrpCls () {
+    wrpCls() {
       return {
         'ant-pro-global-header-index-right': true,
-        [`ant-pro-global-header-index-${(this.isMobile || !this.topMenu) ? 'light' : this.theme}`]: true
+        [`ant-pro-global-header-index-${this.isMobile || !this.topMenu ? 'light' : this.theme}`]: true,
       }
-    }
+    },
   },
-  mounted () {
+  mounted() {
     setTimeout(() => {
       this.currentUser = {
-        name: 'Serati Ma'
+        name: 'Serati Ma',
       }
     }, 1500)
-  }
+  },
 }
 </script>

@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2022-10-10 22:31:07
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-18 17:59:40
+ * @LastEditTime: 2025-02-19 16:52:38
  * @FilePath: /report-background-system/src/components/index.js
  * @Description: 
  * 
@@ -34,8 +34,8 @@ import IconSelector from '@/components/IconSelector'
 import TagSelect from '@/components/TagSelect'
 import StandardFormRow from '@/components/StandardFormRow'
 import ArticleListContent from '@/components/ArticleListContent'
-import ReportCardSlider from '@/components/ReportCardSlider';
-
+import ReportCardSlider from '@/components/ReportCardSlider'
+import buildQRCode from '@/components/buildQRCode/buildQRCode.vue';
 import Dialog from '@/components/Dialog'
 
 export {
@@ -64,5 +64,6 @@ export {
   StandardFormRow,
   ArticleListContent,
   ReportCardSlider,
-  Dialog
+  Dialog,
+  buildQRCode
 }
