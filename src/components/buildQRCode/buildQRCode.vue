@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-19 16:51:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-19 18:03:06
+ * @LastEditTime: 2025-02-20 18:46:26
  * @FilePath: /report-background-system/src/components/buildQRCode/buildQRCode.vue
  * @Description: 
  * 
@@ -24,10 +24,8 @@
         <span>{{ employeeId }}</span>
       </div>
       <div class="form-item">
-        <a-select style="width: 80%" placeholder="银行">
-          <a-select-option value="lucy1"> 银行1 </a-select-option>
-          <a-select-option value="lucy2"> 银行2 </a-select-option>
-        </a-select>
+        <label>银行</label>
+        <span>{{ bank }}</span>
       </div>
       <div class="form-item">
         <a-select style="width: 80%" placeholder="用途">
@@ -55,10 +53,8 @@
         <span>{{ employeeId }}</span>
       </div>
       <div class="form-item">
-        <a-select style="width: 80%" placeholder="银行">
-          <a-select-option value="lucy1"> 银行1 </a-select-option>
-          <a-select-option value="lucy2"> 银行2 </a-select-option>
-        </a-select>
+        <label>银行</label>
+        <span>{{ bank }}</span>
       </div>
       <div class="form-item">
         <a-select style="width: 80%" placeholder="用途">
@@ -86,7 +82,7 @@ export default {
       activeTab: 'apply',
       salesperson: '张三',
       employeeId: '4001214',
-      bank: '',
+      bank: '工商银行',
       usage: '',
       uploadData: '',
       dataTypes: ['财务数据', '企业基础数据', '电力数据'],
