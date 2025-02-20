@@ -1,35 +1,19 @@
 <template>
-
   <div id="userLayout" :class="['user-layout-wrapper', isMobile && 'mobile']">
     <div class="container">
-      <div class="user-layout-lang">
-        <!-- <select-lang class="select-lang-trigger" /> -->
-      </div>
       <div class="user-layout-content">
         <div class="top">
           <div class="header">
             <a href="/">
-              <img src="~@/assets/logo.png" class="logo" alt="logo">
-              <span class="title">DATA GO·数汇轮</span>
+              <img src="~@/assets/logo.png" class="logo" alt="logo" />
+              <span class="title">智能报告助手</span>
             </a>
           </div>
           <!-- <div class="desc">
             {{ $t('layouts.userLayout.title') }}
           </div> -->
         </div>
-
         <router-view />
-
-        <div class="footer">
-          <div class="links">
-            <a href="_self">帮助</a>
-            <a href="_self">隐私</a>
-            <a href="_self">条款</a>
-          </div>
-          <div class="copyright">
-            Copyright &copy; 2018 vueComponent
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -42,15 +26,15 @@ import SelectLang from '@/components/SelectLang'
 export default {
   name: 'UserLayout',
   components: {
-    SelectLang
+    SelectLang,
   },
   mixins: [deviceMixin],
-  mounted () {
+  mounted() {
     document.body.classList.add('userLayout')
   },
-  beforeDestroy () {
+  beforeDestroy() {
     document.body.classList.remove('userLayout')
-  }
+  },
 }
 </script>
 
@@ -74,7 +58,9 @@ export default {
     background-size: 100%;
     //padding: 50px 0 84px;
     position: relative;
-
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
     .user-layout-lang {
       width: 100%;
       height: 40px;
@@ -94,8 +80,12 @@ export default {
     }
 
     .user-layout-content {
-      padding: 32px 0 24px;
-
+      margin-right: 200px;
+      padding: 32px 24px 24px;
+      background: #ffffff url(~@/assets/images/login-box-bg.png) no-repeat;
+      background-size: 100% 100%;
+      box-shadow: 0px 1px 4px 3px rgba(114, 119, 123, 0.41);
+      border-radius: 17.45px;
       .top {
         margin-bottom: 50px;
         text-align: center;
@@ -123,7 +113,7 @@ export default {
 
           .title {
             font-size: 33px;
-            color: rgba(0, 0, 0, .85);
+            color: rgba(0, 0, 0, 0.85);
             font-family: Avenir, 'Helvetica Neue', Arial, Helvetica, sans-serif;
             font-weight: 600;
             position: relative;
@@ -173,7 +163,6 @@ export default {
     a {
       text-decoration: none;
     }
-
   }
 }
 </style>
