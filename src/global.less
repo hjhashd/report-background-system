@@ -31,24 +31,31 @@ ol {
   list-style: none;
 }
 
-.flex{
+.flex {
   display: flex;
 }
 
-.flex-center{
+.flex-center {
   align-items: center;
 }
 
-.flex-row-spacearound{
+.flex-row-spacearound {
   display: flex;
   align-items: center;
   justify-content: space-around;
+}
+
+.page-content {
+  min-height: 65vh;
+  background-color: #fff;
+  padding: 24px;
 }
 
 // 数据列表 样式
 .table-alert {
   margin-bottom: 16px;
 }
+
 // 数据列表 操作
 .table-operator {
   margin-bottom: 18px;
@@ -57,6 +64,7 @@ ol {
     margin-right: 8px;
   }
 }
+
 // 数据列表 搜索条件
 .table-page-search-wrapper {
   .ant-form-inline {
@@ -71,7 +79,7 @@ ol {
         vertical-align: middle;
       }
 
-      > .ant-form-item-label {
+      >.ant-form-item-label {
         width: auto;
         padding-right: 8px;
         line-height: 32px;
@@ -96,13 +104,14 @@ ol {
     width: 100%;
     overflow-x: auto;
 
-    &-thead > tr,
-    &-tbody > tr {
-      > th,
-      > td {
+    &-thead>tr,
+    &-tbody>tr {
+
+      >th,
+      >td {
         white-space: pre;
 
-        > span {
+        >span {
           display: block;
         }
       }

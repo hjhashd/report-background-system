@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-21 14:46:52
+ * @LastEditTime: 2025-02-21 16:47:35
  * @FilePath: /report-background-system/src/views/dataGo/uploadData/index.vue
  * @Description: 数据上传
  * 
@@ -14,21 +14,28 @@
         <img style="width: 18px; height: 18px" src="@/assets/images/customer.png" alt="dark" />
         <span>选择查询客户</span>
         <a-select style="width: 200px" placeholder="选择查询客户" @change="customerHandle">
-          <a-select-option v-for="(cu, index) in customers" :value="cu" :key="index">
-            {{ cu }}
+          <a-select-option v-for="(cu, index) in customers" :value="cu.creditCode" :key="index">
+            {{ cu.userName }}
           </a-select-option>
         </a-select>
+      </div>
+      <div class="upload-data-box" v-if="customerUploadList">
+        <customer-upload-detail :customerUploadList="customerUploadList"></customer-upload-detail>
       </div>
     </div>
   </page-header-wrapper>
 </template>
 
 <script>
-import { getCustomerList } from '@/api/report'
+import { getCustomerList, customerData } from '@/api/report'
+import { classifyDataByClassName } from '../client/util'
+import customerUploadDetail from '../client/customerUploadDetail.vue'
 export default {
+  components: { customerUploadDetail },
   data() {
     return {
-      customers: ['广州**香料有限公司'],
+      customers: [],
+      customerUploadList: null,
     }
   },
   created() {
@@ -36,16 +43,30 @@ export default {
   },
   methods: {
     initData() {
-      getCustomerList()
+      getCustomerList({})
         .then((res) => {
-          console.log('res :>> ', res);
+          const reD = res.data
+          this.customers = reD.map((item) => {
+            const { userName, enterprise } = item
+            return {
+              userName,
+              creditCode: (enterprise && enterprise.enterpriseCreditCode) || '',
+              enterpriseName: (enterprise && enterprise.enterpriseName) || '',
+            }
+          })
         })
         .catch((err) => {
           this.$message.error('获取客户列表失败:' + err)
         })
     },
     customerHandle(v) {
-      console.log('object :>> ', v)
+      customerData({ creditCode: v })
+        .then((res) => {
+          this.customerUploadList = classifyDataByClassName(res.data)
+        })
+        .catch((err) => {
+          this.$message.error('获取客户数据:' + err)
+        })
     },
   },
 }
@@ -53,6 +74,7 @@ export default {
 
 <style lang="less" scoped>
 .page-content {
+  min-height: 65vh;
   background-color: #fff;
   padding: 24px;
 }

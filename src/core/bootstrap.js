@@ -1,3 +1,12 @@
+/*
+ * @Author: bekon
+ * @Date: 2022-10-10 22:31:07
+ * @LastEditors: bekon
+ * @LastEditTime: 2025-02-21 16:08:06
+ * @FilePath: /report-background-system/src/core/bootstrap.js
+ * @Description: 
+ * 
+ */
 import store from '@/store'
 import storage from 'store'
 import {
@@ -13,7 +22,7 @@ import { printANSI } from '@/utils/screenLog'
 import defaultSettings from '@/config/defaultSettings'
 
 export default function Initializer () {
-  printANSI() // 请自行移除该行.  please remove this line
+  // printANSI() // 请自行移除该行.  please remove this line
 
   store.commit(TOGGLE_LAYOUT, storage.get(TOGGLE_LAYOUT, defaultSettings.layout))
   store.commit(TOGGLE_FIXED_HEADER, storage.get(TOGGLE_FIXED_HEADER, defaultSettings.fixedHeader))
