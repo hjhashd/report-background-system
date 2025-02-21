@@ -1,7 +1,7 @@
 import Mock from 'mockjs2'
 import { builder } from '../util'
 
-const info = options => {
+export const info = options => {
   console.log('options', options)
   const userInfo = {
     id: '4291d7da9005377ec9aec4a71ea837f',
@@ -690,7 +690,7 @@ const info = options => {
  * @param {*} options
  * @returns
  */
-const userNav = options => {
+export const userNav = options => {
   const nav = [
     //  新增实际使用的自定义路由
     {
@@ -1085,7 +1085,6 @@ const userNav = options => {
     }
   ]
   const json = builder(nav)
-  console.log('json', json)
   return json
 }
 

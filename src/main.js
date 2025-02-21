@@ -1,3 +1,12 @@
+/*
+ * @Author: bekon
+ * @Date: 2022-10-10 22:31:07
+ * @LastEditors: bekon
+ * @LastEditTime: 2025-02-21 12:02:58
+ * @FilePath: /report-background-system/src/main.js
+ * @Description: 
+ * 
+ */
 // with polyfills
 import 'core-js/stable'
 import 'regenerator-runtime/runtime'
@@ -13,7 +22,7 @@ import themePluginConfig from '../config/themePluginConfig'
 
 // mock
 // WARNING: `mockjs` NOT SUPPORT `IE` PLEASE DO NOT USE IN `production` ENV.
-import './mock'
+// import './mock'
 
 import bootstrap from './core/bootstrap'
 import './core/lazy_use' // use lazy load components

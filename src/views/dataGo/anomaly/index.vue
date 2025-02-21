@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-19 18:33:18
+ * @LastEditTime: 2025-02-21 11:10:54
  * @FilePath: /report-background-system/src/views/dataGo/anomaly/index.vue
  * @Description: 
  * 
@@ -11,13 +11,8 @@
   <page-header-wrapper>
     <div class="page-content">
       <div class="flex top-card-content">
-        <a-tabs style="flex-1">
-          <a-tab-pane key="financialBasic" tab="财务基础指标"> </a-tab-pane>
-          <a-tab-pane key="financialAbnormal" tab="财务异常指标"> </a-tab-pane>
-          <a-tab-pane key="derivedAbnormal" tab="衍生异常指标"> </a-tab-pane>
-        </a-tabs>
         <div class="search-item">
-          <a-icon type="customer-service" theme="filled" />
+          <img style="width: 18px; height: 18px" src="@/assets/images/customer.png" alt="dark" />
           <span>选择查询客户</span>
           <a-select style="width: 200px" placeholder="选择查询客户" v-model="selectedCustomer">
             <a-select-option v-for="(customer, index) in customers" :value="customer" :key="index">
@@ -25,6 +20,11 @@
             </a-select-option>
           </a-select>
         </div>
+        <a-tabs style="flex-1">
+          <a-tab-pane key="financialBasic" tab="财务基础指标"> </a-tab-pane>
+          <a-tab-pane key="financialAbnormal" tab="财务异常指标"> </a-tab-pane>
+          <a-tab-pane key="derivedAbnormal" tab="衍生异常指标"> </a-tab-pane>
+        </a-tabs>
         <div class="search-item">
           <a-icon type="eye" theme="filled" />
           <span>选择预览报告</span>

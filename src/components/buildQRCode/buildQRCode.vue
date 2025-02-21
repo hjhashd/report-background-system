@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-19 16:51:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-20 18:46:26
+ * @LastEditTime: 2025-02-21 14:07:41
  * @FilePath: /report-background-system/src/components/buildQRCode/buildQRCode.vue
  * @Description: 
  * 
@@ -70,12 +70,13 @@
       </div>
     </div>
     <div class="button-group">
-      <button @click="generateQrCode">生成二维码</button>
+      <button @click="generateQrCode">申请数据</button>
     </div>
   </div>
 </template>
   
-  <script>
+<script>
+import { buildQRCode } from '@/api/qrcode'
 export default {
   data() {
     return {

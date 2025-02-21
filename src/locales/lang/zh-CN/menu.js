@@ -1,6 +1,6 @@
 export default {
     'menu.welcome': '欢迎',
-    'menu.home': '主页',
+    'menu.home': '首页',
     'menu.dashboard': '仪表盘',
     'menu.dashboard.analysis': '分析页',
     'menu.dashboard.monitor': '监控页',
@@ -39,6 +39,7 @@ export default {
 
 
     /// 新增
+    'menu.homepage': '智能报告助手',
     'menu.overview': '数据看板',
     'menu.uploadData': '数据上传',
     'menu.readWord': '慧读文档',

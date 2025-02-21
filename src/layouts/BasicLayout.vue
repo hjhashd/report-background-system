@@ -31,23 +31,23 @@
         <div class="user-box flex-row-spacearound">
           <div class="user-ava">
             <a-avatar :src="userInfo.avatar" style="width: 50px; height: 50px" />
-            <div class="user-name">{{ userInfo.name }}</div>
+            <div class="user-name">{{ userInfo.username }}</div>
           </div>
           <div @click="buildQRcode">
-            <img src="@/assets/images/qrcode.png" alt="点击生产二维码" style="width: 50px; height: 50px" />
+            <img src="@/assets/images/apply-data.png" alt="点击生产二维码" style="width: 60px; height: 50px" />
           </div>
         </div>
         <div class="user-report-info">
           <div class="report-info-item">
-            <div class="num">20</div>
+            <div class="num">-</div>
             <div class="item-name">客户</div>
           </div>
           <div class="report-info-item">
-            <div class="num">20</div>
+            <div class="num">-</div>
             <div class="item-name">报告</div>
           </div>
           <div class="report-info-item">
-            <div class="num">20</div>
+            <div class="num">-</div>
             <div class="item-name">草稿</div>
           </div>
         </div>

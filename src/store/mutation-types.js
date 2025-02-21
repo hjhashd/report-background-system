@@ -1,4 +1,13 @@
-export const ACCESS_TOKEN = 'Access-Token'
+/*
+ * @Author: bekon
+ * @Date: 2022-10-10 22:31:07
+ * @LastEditors: bekon
+ * @LastEditTime: 2025-02-21 12:34:33
+ * @FilePath: /report-background-system/src/store/mutation-types.js
+ * @Description: 
+ * 
+ */
+export const ACCESS_TOKEN = 'Authorization'
 
 export const SIDEBAR_TYPE = 'sidebar_type'
 export const TOGGLE_MOBILE_TYPE = 'is_mobile'

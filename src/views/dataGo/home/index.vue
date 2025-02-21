@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-19 14:24:11
+ * @LastEditTime: 2025-02-21 09:53:16
  * @FilePath: /report-background-system/src/views/dataGo/home/index.vue
  * @Description: 主页
  * 
@@ -14,8 +14,11 @@
         <h1>新建报告</h1>
         <div class="flex-row-spacearound">
           <div class="card" v-for="item in newAddReport" :key="item.type">
-            <div class="add-card">
+            <div class="add-card" v-if="!item.src">
               <img class="plus-icon" src="@/assets/images/plus.png" alt="dark" />
+            </div>
+            <div class="add-card" v-else>
+              <img class="repoert-image" :src="item.src" alt="dark" />
             </div>
             <div class="add-name">{{ item.name }}</div>
           </div>
@@ -90,24 +93,6 @@ const reportTypeList = [
     name: '能耗分析报告',
   },
 ]
-const newAddReport = [
-  {
-    name: '标准化报告',
-    type: 'addReport',
-  },
-  {
-    name: '授信调查报告',
-    type: 'addCreditReport',
-  },
-  {
-    name: '财务分析报告',
-    type: 'addFinanceReport',
-  },
-  {
-    name: '能耗分析报告',
-    type: 'addEnergyReport',
-  },
-]
 
 import { ReportCardSlider } from '@/components'
 export default {
@@ -117,7 +102,27 @@ export default {
       reportTypeList,
       finishedReportTypeSelected: null,
       finishedReportSearch: null,
-      newAddReport,
+      newAddReport: [
+        {
+          name: '标准化报告',
+          type: 'addReport',
+        },
+        {
+          name: '授信调查报告',
+          type: 'addCreditReport',
+          src: require('@/assets/images/auth.png'),
+        },
+        {
+          name: '财务分析报告',
+          type: 'addFinanceReport',
+          src: require('@/assets/images/finance.png'),
+        },
+        {
+          name: '能耗分析报告',
+          type: 'addEnergyReport',
+          src: require('@/assets/images/energy.png'),
+        },
+      ],
       reportCards: [
         {
           title: '报告 1',
@@ -205,8 +210,13 @@ export default {
   border: 1px solid #015dea;
   border-radius: 5px;
   cursor: pointer;
+  overflow: hidden;
   .plus-icon {
     width: 24px;
+  }
+  .repoert-image {
+    width: 100%;
+    height: 100%;
   }
   &:hover {
     border: 2px solid #015dea;

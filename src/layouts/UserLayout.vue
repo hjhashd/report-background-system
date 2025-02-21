@@ -87,7 +87,7 @@ export default {
       box-shadow: 0px 1px 4px 3px rgba(114, 119, 123, 0.41);
       border-radius: 17.45px;
       .top {
-        margin-bottom: 50px;
+        margin-bottom: 30px;
         text-align: center;
 
         .header {

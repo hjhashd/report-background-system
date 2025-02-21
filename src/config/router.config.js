@@ -12,83 +12,43 @@ export const asyncRouterMap = [
     path: '/',
     name: 'index',
     component: BasicLayout,
-    meta: { title: 'menu.home' },
+    meta: { title: 'menu.homepage' },
     redirect: '/homePage/index',
     children: [
       // home
       {
-        path: '/homePage',
-        name: 'homePage',
-        component: RouteView,
-        redirect: '/homePage/index',
-        meta: { title: 'menu.home', keepAlive: true, icon: bxAnaalyse, permission: ['home'] },
-        children: [
-          {
-            path: '/homePage/index',
-            name: 'home',
-            component: () => import('@/views/dataGo/home'),
-            meta: { title: 'menu.home', keepAlive: false, permission: ['home'] }
-          },]
+        path: '/homePage/index',
+        name: 'home',
+        component: () => import('@/views/dataGo/home'),
+        meta: { title: 'menu.home', keepAlive: true, icon: bxAnaalyse, permission: ['home'] }
       },
       // overview
       {
-        path: '/overviewPage',
-        name: 'overviewPage',
-        component: RouteView,
-        redirect: '/overviewPage/index',
-        meta: { title: 'menu.overview', keepAlive: true, icon: bxAnaalyse, permission: ['overview'] },
-        children: [
-          {
-            path: '/overviewPage/index',
-            name: 'overview',
-            component: () => import('@/views/dataGo/overview'),
-            meta: { title: 'menu.overview', keepAlive: false, permission: ['overview'] }
-          },]
+        path: '/overviewPage/index',
+        name: 'overview',
+        component: () => import('@/views/dataGo/overview'),
+        meta: { title: 'menu.overview', keepAlive: true, icon: bxAnaalyse, permission: ['overview'] }
       },
       // uploadData
       {
-        path: '/uploadDataPage',
-        name: 'uploadDataPage',
-        component: RouteView,
-        redirect: '/uploadDataPage/index',
-        meta: { title: 'menu.uploadData', keepAlive: true, icon: bxAnaalyse, permission: ['uploadData'] },
-        children: [
-          {
-            path: '/uploadDataPage/index',
-            name: 'uploadData',
-            component: () => import('@/views/dataGo/uploadData'),
-            meta: { title: 'menu.uploadData', keepAlive: false, permission: ['uploadData'] }
-          },]
+        path: '/uploadDataPage/index',
+        name: 'uploadData',
+        component: () => import('@/views/dataGo/uploadData'),
+        meta: { title: 'menu.uploadData', keepAlive: true, icon: bxAnaalyse, permission: ['uploadData'] }
       },
       // readWord
       {
-        path: '/readWordPage',
-        name: 'readWordPage',
-        component: RouteView,
-        redirect: '/readWordPage/index',
-        meta: { title: 'menu.readWord', keepAlive: true, icon: bxAnaalyse, permission: ['readWord'] },
-        children: [
-          {
-            path: '/readWordPage/index',
-            name: 'readWord',
-            component: () => import('@/views/dataGo/readWord'),
-            meta: { title: 'menu.readWord', keepAlive: false, permission: ['readWord'] }
-          },]
+        path: '/readWordPage/index',
+        name: 'readWord',
+        component: () => import('@/views/dataGo/readWord'),
+        meta: { title: 'menu.readWord', keepAlive: true, icon: bxAnaalyse, permission: ['readWord'] }
       },
       // anomaly
       {
-        path: '/anomalyPage',
-        name: 'anomalyPage',
-        component: RouteView,
-        redirect: '/anomalyPage/index',
-        meta: { title: 'menu.anomaly', keepAlive: true, icon: bxAnaalyse, permission: ['anomaly'] },
-        children: [
-          {
-            path: '/anomalyPage/index',
-            name: 'anomaly',
-            component: () => import('@/views/dataGo/anomaly'),
-            meta: { title: 'menu.anomaly', keepAlive: false, permission: ['anomaly'] }
-          },]
+        path: '/anomalyPage/index',
+        name: 'anomaly',
+        component: () => import('@/views/dataGo/anomaly'),
+        meta: { title: 'menu.anomaly', keepAlive: true, icon: bxAnaalyse, permission: ['anomaly'] }
       },
       // client
       {

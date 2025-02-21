@@ -1,3 +1,12 @@
+/*
+ * @Author: bekon
+ * @Date: 2025-02-13 16:01:48
+ * @LastEditors: bekon
+ * @LastEditTime: 2025-02-21 12:35:44
+ * @FilePath: /report-background-system/src/api/login.js
+ * @Description: 
+ * 
+ */
 import request from '@/utils/request'
 
 const userApi = {
@@ -10,7 +19,71 @@ const userApi = {
   SendSmsErr: '/account/sms_err',
   // get my info
   UserInfo: '/user/info',
-  UserMenu: '/user/nav'
+  UserMenu: '/user/nav',
+
+  // ai api
+  AILogin: '/auth/agent/login',
+  AIRegister: '',
+  AIGetCode: '/auth/sms/sendCode',
+  AILogout: '/auth/agent/logout',
+  AILoginByCode: '/auth/agent/sms/login',
+  AIGetInfo: '/system/agent/user/getInfo',
+  AIChangeInfo: '/system/agent/user/profile',
+  AISetPsw: '/system/agent/user/setPassword',
+}
+
+export function AILogin (parameter) {
+  return request({
+    url: userApi.AILogin,
+    method: 'post',
+    data: parameter
+  })
+}
+
+export function AIGetCode (parameter) {
+  return request({
+    url: userApi.AIGetCode,
+    method: 'post',
+    data: parameter
+  })
+}
+
+export function AILoginByCode (parameter) {
+  return request({
+    url: userApi.AILoginByCode,
+    method: 'post',
+    data: parameter
+  })
+}
+
+export function AIGetInfo () {
+  return request({
+    url: userApi.AIGetInfo,
+    method: 'get'
+  })
+}
+
+export function AIChangeInfo (parameter) {
+  return request({
+    url: userApi.AIChangeInfo,
+    method: 'put',
+    data: parameter
+  })
+}
+
+export function AISetPsw (parameter) {
+  return request({
+    url: userApi.AISetPsw,
+    method: 'post',
+    data: parameter
+  })
+}
+
+export function AILogout () {
+  return request({
+    url: userApi.AILogout,
+    method: 'delete'
+  })
 }
 
 /**
