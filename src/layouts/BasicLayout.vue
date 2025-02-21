@@ -79,12 +79,13 @@
 
     <!-- 全局弹窗-生产二维码 -->
     <a-modal
+      class="qr-modal"
       v-model="buildQrCodePop"
       :footer="null"
       :bodyStyle="{ padding: 0, backgroundColor: 'transparent' }"
       :maskClosable="false"
     >
-      <build-q-r-code></build-q-r-code>
+      <build-q-r-code :userInfo="userInfo" @close="buildQrCodePop = false"></build-q-r-code>
     </a-modal>
   </pro-layout>
 </template>
@@ -261,6 +262,13 @@ export default {
     .item-name {
       color: #000;
     }
+  }
+}
+.qr-modal {
+  .ant-modal-content {
+    background: #ffffff url(~@/assets/images/login-box-bg.png) no-repeat;
+    background-size: 100% 100%;
+    border-radius: 20px;
   }
 }
 </style>
