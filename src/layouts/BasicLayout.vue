@@ -31,7 +31,7 @@
         <div class="user-box flex-row-spacearound">
           <div class="user-ava">
             <a-avatar :src="userInfo.avatar" style="width: 50px; height: 50px" />
-            <div class="user-name">{{ userInfo.username }}</div>
+            <div class="user-name">{{ userInfo.userName }}</div>
           </div>
           <div @click="buildQRcode">
             <img src="@/assets/images/apply-data.png" alt="点击生产二维码" style="width: 60px; height: 50px" />

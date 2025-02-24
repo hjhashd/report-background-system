@@ -66,32 +66,38 @@ const user = {
     },
 
     // 获取用户信息
-    GetInfo({ commit }) {
+    GetInfo({ commit, dispatch }) {
       return new Promise((resolve, reject) => {
         // 请求后端获取用户信息 /api/user/info
         AIGetInfo().then(async (response) => {
-          const mockinfos = await info();
-          const { result } = mockinfos
-          const { user } = response;
-          if (result.role && result.role.permissions.length > 0) {
-            const role = { ...result.role }
-            role.permissions = result.role.permissions.map(permission => {
-              const per = {
-                ...permission,
-                actionList: (permission.actionEntitySet || {}).map(item => item.action)
-              }
-              return per
-            })
-            role.permissionList = role.permissions.map(permission => { return permission.permissionId })
-            // 覆盖响应体的 role, 供下游使用
-            result.role = role
-            const userInfo = Object.assign(result, user)
-            commit('SET_ROLES', role)
-            commit('SET_INFO', userInfo)
-            commit('SET_NAME', { name: userInfo.username || userInfo.name, welcome: welcome() })
-            commit('SET_AVATAR', userInfo.avatar)
-            // 下游
-            resolve(userInfo)
+          if (response.code === 200) {
+            const mockinfos = await info();
+            const { result } = mockinfos
+            const { user } = response;
+            if (result.role && result.role.permissions.length > 0) {
+              const role = { ...result.role }
+              role.permissions = result.role.permissions.map(permission => {
+                const per = {
+                  ...permission,
+                  actionList: (permission.actionEntitySet || {}).map(item => item.action)
+                }
+                return per
+              })
+              role.permissionList = role.permissions.map(permission => { return permission.permissionId })
+              // 覆盖响应体的 role, 供下游使用
+              result.role = role
+              const userInfo = Object.assign(result, user)
+              commit('SET_ROLES', role)
+              commit('SET_INFO', userInfo)
+              commit('SET_NAME', { name: userInfo.username || userInfo.name, welcome: welcome() })
+              commit('SET_AVATAR', userInfo.avatar)
+              // 下游
+              resolve(userInfo).then((re)=>{
+                resolve(re)
+              })
+            } else {
+              dispatch('Logout')
+            }
           } else {
             reject(new Error('getInfo: roles must be a non-null array !'))
           }

@@ -25,10 +25,7 @@
           v-decorator="[
             'mobile',
             {
-              rules: [
-                { required: true, message: $t('user.phone-number.required'), pattern: /^1[3456789]\d{9}$/ },
-                { validator: this.handlePhoneCheck },
-              ],
+              rules: [{ required: true, message: $t('user.phone-number.required'), pattern: /^1[3456789]\d{9}$/ }],
               validateTrigger: ['change', 'blur'],
             },
           ]"
@@ -42,10 +39,10 @@
           <a-form-item>
             <a-input
               size="large"
-              type="text"
+              type="number"
               :placeholder="$t('user.login.mobile.verification-code.placeholder')"
               v-decorator="[
-                'captcha',
+                'smsCode',
                 { rules: [{ required: true, message: '请输入验证码' }], validateTrigger: 'blur' },
               ]"
             >
@@ -64,7 +61,7 @@
         </a-col>
       </a-row>
 
-      <!-- <a-popover
+      <a-popover
         placement="rightTop"
         :trigger="['focus']"
         :getPopupContainer="(trigger) => trigger.parentElement"
@@ -96,9 +93,9 @@
             ]"
           ></a-input-password>
         </a-form-item>
-      </a-popover> -->
+      </a-popover>
 
-      <!-- <a-form-item>
+      <a-form-item>
         <a-input-password
           size="large"
           :placeholder="$t('user.register.confirm-password.placeholder')"
@@ -113,24 +110,11 @@
             },
           ]"
         ></a-input-password>
-      </a-form-item> -->
+      </a-form-item>
 
       <a-form-item>
-        <a-input
-          size="large"
-          type="text"
-          placeholder="企业名称"
-          :disabled="true"
-          v-decorator="[
-            'username',
-            {
-              rules: [{ required: true, message: '选择企业名称' }],
-              validateTrigger: ['change', 'blur'],
-            },
-          ]"
-        >
-          <span slot="suffix" class="to-select" @click="openSelect">去选择</span>
-        </a-input>
+        <cascader :options="bankList" :show-search="{ filter }" placeholder="请选择所属银行" @change="onBankChoose">
+        </cascader>
       </a-form-item>
 
       <a-form-item>
@@ -138,9 +122,8 @@
           size="large"
           type="text"
           placeholder="岗位工号"
-          :disabled="true"
           v-decorator="[
-            'username',
+            'jobNumber',
             {
               rules: [{ required: true, message: '选择岗位工号' }],
               validateTrigger: ['change', 'blur'],
@@ -164,7 +147,7 @@
         <router-link class="login" :to="{ name: 'login' }">{{ $t('user.register.sign-in') }}</router-link>
       </a-form-item>
       <a-form-item>
-        <a-checkbox :checked="checkNick" class="flex xieyi-box">
+        <a-checkbox v-model="checkNick" class="flex xieyi-box">
           <div class="flex">
             我已阅读并同意
             <div class="xieyi" @click="toXieYiPop('user')">《用户协议》</div>
@@ -177,10 +160,11 @@
 </template>
 
 <script>
-import { getSmsCaptcha } from '@/api/login'
+import { Cascader } from 'ant-design-vue'
+import { AIGetCode, AIRegister } from '@/api/login'
+import { bankTree } from '@/api/qrcode'
 import { deviceMixin } from '@/store/device-mixin'
-import { scorePassword } from '@/utils/util'
-
+import { scorePassword, transformData } from '@/utils/util'
 const levelNames = {
   0: 'user.password.strength.short',
   1: 'user.password.strength.low',
@@ -201,7 +185,7 @@ const levelColor = {
 }
 export default {
   name: 'Register',
-  components: {},
+  components: { Cascader },
   mixins: [deviceMixin],
   data() {
     return {
@@ -217,6 +201,13 @@ export default {
         progressColor: '#FF0000',
       },
       registerBtn: false,
+      bankList: [],
+      selectedBank: {
+        bankName1: '',
+        bankName2: '',
+        bankId1: null,
+        bankId2: null,
+      },
     }
   },
   computed: {
@@ -230,12 +221,31 @@ export default {
       return levelColor[this.state.passwordLevel]
     },
   },
+  created() {
+    bankTree().then((res) => {
+      this.bankList = res.data.map(transformData)
+    })
+  },
   methods: {
+    // 企业选择
+    filter(inputValue, path) {
+      return path.some((option) => option.label.toLowerCase().indexOf(inputValue.toLowerCase()) > -1)
+    },
+    onBankChoose(value, selectedOptions) {
+      selectedOptions.forEach((item) => {
+        if (!item.pid) {
+          this.selectedBank.bankId1 = item.value
+          this.selectedBank.bankName1 = item.label
+        } else {
+          this.selectedBank.bankId2 = item.value
+          this.selectedBank.bankName2 = item.label
+        }
+      })
+    },
     handlePasswordLevel(rule, value, callback) {
       if (!value) {
         return callback()
       }
-      console.log('scorePassword ; ', scorePassword(value))
       if (value.length >= 6) {
         if (scorePassword(value) >= 30) {
           this.state.level = 1
@@ -258,12 +268,8 @@ export default {
     toXieYiPop(type) {
       console.log('打开协议', type)
     },
-    openSelect() {
-      // 打开选择银行列表
-    },
     handlePasswordCheck(rule, value, callback) {
       const password = this.form.getFieldValue('password')
-      // console.log('value', value)
       if (value === undefined) {
         callback(new Error(this.$t('user.password.required')))
       }
@@ -272,15 +278,6 @@ export default {
       }
       callback()
     },
-
-    handlePhoneCheck(rule, value, callback) {
-      console.log('handlePhoneCheck, rule:', rule)
-      console.log('handlePhoneCheck, value', value)
-      console.log('handlePhoneCheck, callback', callback)
-
-      callback()
-    },
-
     handlePasswordInputClick() {
       if (!this.isMobile) {
         this.state.passwordLevelChecked = true
@@ -294,11 +291,36 @@ export default {
         form: { validateFields },
         state,
         $router,
+        $notification,
       } = this
       validateFields({ force: true }, (err, values) => {
         if (!err) {
+          if (!this.checkNick) {
+            $notification['info']({
+              message: '提示',
+              description: '请您仔细阅读并勾选用户协议与隐私政策，这是完成注册的必要步骤，以确保您的权益得到充分保障。',
+              duration: 8,
+            })
+            return
+          }
           state.passwordLevelChecked = false
-          $router.push({ name: 'registerResult', params: { ...values } })
+          let request = Object.assign(values, this.selectedBank)
+          delete request.password2
+          AIRegister(request).then((res) => {
+            if (res.code == 200) {
+              $notification['success']({
+                message: '提示',
+                description: '注册成功！',
+                duration: 8,
+              })
+              setTimeout(() => {
+                $router.push({ name: 'login' })
+              }, 1200)
+            } else {
+              this.requestFailed(res)
+            }
+          })
+          // $router.push({ name: 'registerResult', params: { ...values } })
         }
       })
     },
@@ -326,21 +348,9 @@ export default {
 
           const hide = $message.loading('验证码发送中..', 0)
 
-          getSmsCaptcha({ mobile: values.mobile })
+          AIGetCode({ mobile: values.mobile })
             .then((res) => {
               setTimeout(hide, 2500)
-              $notification['success']({
-                message: '提示',
-                description: '验证码获取成功，您的验证码为：' + res.result.captcha,
-                duration: 8,
-              })
-            })
-            .catch((err) => {
-              setTimeout(hide, 1)
-              clearInterval(interval)
-              state.time = 60
-              state.smsSendBtn = false
-              this.requestFailed(err)
             })
         }
       })
@@ -348,15 +358,10 @@ export default {
     requestFailed(err) {
       this.$notification['error']({
         message: '错误',
-        description: ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试',
+        description: err.msg || '请求出现错误，请稍后再试',
         duration: 4,
       })
       this.registerBtn = false
-    },
-  },
-  watch: {
-    'state.passwordLevel'(val) {
-      console.log(val)
     },
   },
 }
@@ -421,13 +426,14 @@ export default {
   color: rgba(0, 0, 0, 0.5);
   letter-spacing: 0;
   font-weight: 400;
+  z-index: 1000;
 }
 .layout-input .phone-input/deep/ .ant-input {
   padding-left: 55px;
 }
 .layout-input /deep/ .ant-input {
   font-size: 16px;
-  background: #f2f7ff;
+  background: #f2f7ff !important;
   border-radius: 21px;
   border: none;
 }

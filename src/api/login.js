@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-13 16:01:48
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-21 12:35:44
+ * @LastEditTime: 2025-02-24 16:10:48
  * @FilePath: /report-background-system/src/api/login.js
  * @Description: 
  * 
@@ -23,18 +23,26 @@ const userApi = {
 
   // ai api
   AILogin: '/auth/agent/login',
-  AIRegister: '',
+  AIRegister: '/system/agent/user/register',
   AIGetCode: '/auth/sms/sendCode',
   AILogout: '/auth/agent/logout',
   AILoginByCode: '/auth/agent/sms/login',
   AIGetInfo: '/system/agent/user/getInfo',
   AIChangeInfo: '/system/agent/user/profile',
-  AISetPsw: '/system/agent/user/setPassword',
+  AISetPsw: '/system/agent/user/setPassword'
 }
 
 export function AILogin (parameter) {
   return request({
     url: userApi.AILogin,
+    method: 'post',
+    data: parameter
+  })
+}
+
+export function AIRegister (parameter) {
+  return request({
+    url: userApi.AIRegister,
     method: 'post',
     data: parameter
   })

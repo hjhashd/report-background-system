@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-19 16:51:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-21 18:28:30
+ * @LastEditTime: 2025-02-24 19:17:05
  * @FilePath: /report-background-system/src/components/buildQRCode/buildQRCode.vue
  * @Description: 
  * 
@@ -18,15 +18,15 @@
       </ul>
       <div class="form-item">
         <label>营业员</label>
-        <span>{{ salesperson }}</span>
+        <span>{{ userInfo.userName }}</span>
       </div>
       <div class="form-item">
         <label>员工号</label>
-        <span>{{ employeeId }}</span>
+        <span>{{ userInfo.jobNumber }}</span>
       </div>
       <div class="form-item">
         <label>银行</label>
-        <span>{{ bank }}</span>
+        <span>{{ userInfo.bankName1 }} - {{ userInfo.bankName2 }}</span>
       </div>
       <div class="form-item">
         <a-select style="width: 80%" placeholder="用途" @change="usageHandle">
@@ -45,7 +45,14 @@
       </div>
       <div v-if="activeTab === 'upload'" class="tab-content">
         <div class="form-item">
-          <a-select style="width: 80%" placeholder="选择上传数据" @change="uploadTypeHandle">
+          <a-select style="width: 80%" placeholder="选择客户" @change="uploadCustomerHandle">
+            <a-select-option :value="item.userId" v-for="item in customerList" :key="item.userId">
+              {{ item.userName }}
+            </a-select-option>
+          </a-select>
+        </div>
+        <div class="form-item">
+          <a-select style="width: 80%" placeholder="选择上传数据" @change="uploadTypeHandle" mode="multiple">
             <a-select-option :value="item.id" v-for="item in dataType" :key="item.id">
               {{ item.name }}
             </a-select-option>
@@ -53,7 +60,7 @@
         </div>
       </div>
       <div class="button-group">
-        <button style="width: 80%" @click="generateQrCode">申请数据</button>
+        <a-button :loading="applyLoading" style="width: 80%; height: 48px" @click="generateQrCode">申请数据</a-button>
       </div>
     </div>
     <!-- 申请完成 -->
@@ -64,11 +71,11 @@
       <a-row>
         <a-col :span="12" class="qr-info-item">
           <label>营业员</label>
-          <span>{{ salesperson }}</span>
+          <span>{{ userInfo.userName }}</span>
         </a-col>
         <a-col :span="12" class="qr-info-item">
           <label>员工号</label>
-          <span>{{ salesperson }}</span>
+          <span>{{ userInfo.jobNumber }}</span>
         </a-col>
         <a-col :span="24" class="qr-info-item">
           <label>银行</label>
@@ -89,7 +96,9 @@
   
 <script>
 import { buildQRCode } from '@/api/qrcode'
+import { getCustomerList } from '@/api/report'
 import { uploadType, yongtu, dataTypes } from '@/config/constants'
+import { mapState } from 'vuex'
 export default {
   props: {
     userInfo: {
@@ -99,17 +108,18 @@ export default {
   },
   data() {
     return {
-      activeTab: 'apply',
-      salesperson: '张三',
-      employeeId: '4001214',
-      bank: '工商银行',
+      activeTab: 'upload',
+      bank: '',
       usage: '',
-      uploadData: null,
+      uploadData: [],
       dataTypes,
       selectedDataTypes: [],
       yongtu,
       reD: null,
       dataType: null,
+      customerList: [],
+      customer: null,
+      applyLoading: false,
     }
   },
   filters: {
@@ -126,40 +136,82 @@ export default {
         value: i.id,
       })
     })
+    this.getCustomerList()
   },
+  ...mapState({
+    userInfo: (state) => state.user.info,
+  }),
   methods: {
+    getCustomerList() {
+      getCustomerList({}).then((res) => {
+        this.customerList = res.data
+      })
+    },
     generateQrCode() {
+      const { $notification } = this
+      let params = {
+        useRemark: this.usage,
+        needTypes:
+          this.activeTab === 'apply' ? JSON.stringify(this.selectedDataTypes) : JSON.stringify(this.uploadData),
+        codeType: this.activeTab === 'apply' ? 1 : 2,
+        bankName1: this.userInfo.bankName1,
+        bankName2: this.userInfo.bankName2,
+        bankId1: this.userInfo.bankId1,
+        bankId2: this.userInfo.bankId2,
+      }
+      if (this.activeTab === 'upload') {
+        if (!(this.customer || this.usage || this.uploadData.length)) {
+          $notification['info']({
+            message: '通知：',
+            description: '请完成所有选项选择/填写',
+            duration: 8,
+          })
+          return
+        }
+        // 新增客户项
+        params.appUserId = this.customer
+      } else {
+        if (!(this.usage || this.selectedDataTypes.length)) {
+          $notification['info']({
+            message: '通知：',
+            description: '请完成所有选项选择/填写',
+            duration: 8,
+          })
+          return
+        }
+      }
+      this.applyLoading = true
       // 这里可以添加生成二维码的逻辑，比如调用后端接口等
-      console.log('生成二维码操作')
-      console.log('object :>> ', this.selectedDataTypes, this.usage)
-
-      // const params = {
-      //   useRemark: 1,
-      //   needTypes: '[1,2,3]',
-      //   codeType: 1,
-      //   bankName1: '中国农业银行',
-      //   bankName2: '北京潞阳支行',
-      //   bankId1: 2,
-      //   bankId2: 10002,
-      // }
-      // buildQRCode(params)
-      //   .then((res) => {
-      //     console.log('res :>> ', res)
-      //   })
-      //   .catch((err) => {
-      //     this.$message.error('申请失败：' + err)
-      //   })
+      buildQRCode(params)
+        .then((res) => {
+          if (this.activeTab === 'upload') {
+            $notification['success']({
+              message: '通知：',
+              description: '已成功发送上传数据请求至客户',
+              duration: 8,
+            })
+            this.applyLoading = false
+          } else {
+            this.reD = res.data
+            this.applyLoading = false
+          }
+        })
+        .catch((err) => {
+          this.applyLoading = false
+          this.$message.error('申请失败：' + err)
+        })
     },
     finishClose() {
       this.reD = null
       this.$emit('close')
     },
     uploadTypeHandle(v) {
-      console.log('v :>> ', v)
       this.uploadData = v
     },
+    uploadCustomerHandle(v) {
+      this.customer = v
+    },
     usageHandle(v) {
-      console.log('v :>> ', v)
       this.usage = v
     },
   },
