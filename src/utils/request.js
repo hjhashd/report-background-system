@@ -1,3 +1,12 @@
+/*
+ * @Author: bekon
+ * @Date: 2022-10-10 22:31:07
+ * @LastEditors: bekon
+ * @LastEditTime: 2025-02-26 18:46:02
+ * @FilePath: /report-background-system/src/utils/request.js
+ * @Description: 
+ * 
+ */
 import axios from 'axios'
 import store from '@/store'
 import storage from 'store'
@@ -54,12 +63,26 @@ request.interceptors.request.use(config => {
 
 // response interceptor
 request.interceptors.response.use((response) => {
-  return response.data
+  const res = response.data
+  if (res.code && res.code == 401) {
+    notification.error({
+      message: 'Unauthorized',
+      description: res.msg || 'Authorization verification failed'
+    })
+    if (token) {
+      store.dispatch('Logout').then(() => {
+        setTimeout(() => {
+          window.location.reload()
+        }, 1500)
+      })
+    }
+  }
+  return res
 }, errorHandler)
 
 const installer = {
   vm: {},
-  install (Vue) {
+  install(Vue) {
     Vue.use(VueAxios, request)
   }
 }

@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-21 09:53:16
+ * @LastEditTime: 2025-02-25 15:31:43
  * @FilePath: /report-background-system/src/views/dataGo/home/index.vue
  * @Description: 主页
  * 
@@ -13,7 +13,7 @@
       <div class="home-part-box">
         <h1>新建报告</h1>
         <div class="flex-row-spacearound">
-          <div class="card" v-for="item in newAddReport" :key="item.type">
+          <div class="card" v-for="item in newAddReport" :key="item.type" @click="addReport(item)">
             <div class="add-card" v-if="!item.src">
               <img class="plus-icon" src="@/assets/images/plus.png" alt="dark" />
             </div>
@@ -42,12 +42,12 @@
                 v-model="finishedReportSearch"
                 style="width: 200px"
                 placeholder="输入报告名称"
-                @change="finishedReportSearchChange"
+                @blur="finishedReportSearchChange"
               />
             </div>
           </div>
         </div>
-        <ReportCardSlider :cards="reportCards" />
+        <ReportCardSlider :cards="finishedReportList" @getNextPage="getReportFinishedList" />
       </div>
       <div class="home-part-box">
         <div class="flex flex-center home-part-title">
@@ -55,7 +55,7 @@
           <div class="flex home-part-title-right flex-1">
             <div class="flex flex-center">
               <div class="right-item-title">报告类型：</div>
-              <a-select v-model="finishedReportTypeSelected" style="width: 200px" @change="finishedReportTypeChange">
+              <a-select v-model="draftTypeSelected" style="width: 200px" @change="draftTypeChange">
                 <a-select-option v-for="item in reportTypeList" :key="item.type" :value="item.type">
                   {{ item.name }}
                 </a-select-option>
@@ -64,17 +64,27 @@
             <div class="flex flex-center">
               <div class="right-item-title">草稿箱查询：</div>
               <a-input
-                v-model="finishedReportSearch"
+                v-model="draftSearch"
                 style="width: 200px"
-                placeholder="输入报告名称"
-                @change="finishedReportSearchChange"
+                placeholder="输入草稿名称"
+                @blur="draftSearchChange"
               />
             </div>
           </div>
         </div>
-        <ReportCardSlider :cards="reportCards" />
+        <ReportCardSlider :cards="draftList" @getNextPage="getDraftList" />
       </div>
     </div>
+    <a-modal v-model="visible" title="新增报告" @ok="handleOk">
+      <div class="flex flex-center">
+        <div class="right-item-title">选择新增报告类型：</div>
+        <a-select v-model="addReportType" style="width: 200px">
+          <a-select-option v-for="item in reportTypeList" :key="item.type" :value="item.type">
+            {{ item.name }}
+          </a-select-option>
+        </a-select>
+      </div>
+    </a-modal>
   </page-header-wrapper>
 </template>
 
@@ -95,13 +105,19 @@ const reportTypeList = [
 ]
 
 import { ReportCardSlider } from '@/components'
+import { reportList } from '@/api/report'
 export default {
   components: { ReportCardSlider },
   data() {
     return {
+      firstLoading: true,
       reportTypeList,
       finishedReportTypeSelected: null,
       finishedReportSearch: null,
+      draftTypeSelected: null,
+      draftSearch: null,
+      addReportType: null,
+      visible: false,
       newAddReport: [
         {
           name: '标准化报告',
@@ -123,64 +139,95 @@ export default {
           src: require('@/assets/images/energy.png'),
         },
       ],
-      reportCards: [
-        {
-          title: '报告 1',
-          description: '这是报告 1 的详细描述',
-        },
-        {
-          title: '报告 2',
-          description: '这是报告 2 的详细描述',
-        },
-        {
-          title: '报告 3',
-          description: '这是报告 3 的详细描述',
-        },
-        {
-          title: '报告 4',
-          description: '这是报告 4 的详细描述',
-        },
-        {
-          title: '报告 1',
-          description: '这是报告 1 的详细描述',
-        },
-        {
-          title: '报告 2',
-          description: '这是报告 2 的详细描述',
-        },
-        {
-          title: '报告 3',
-          description: '这是报告 3 的详细描述',
-        },
-        {
-          title: '报告 4',
-          description: '这是报告 4 的详细描述',
-        },
-        {
-          title: '报告 1',
-          description: '这是报告 1 的详细描述',
-        },
-        {
-          title: '报告 2',
-          description: '这是报告 2 的详细描述',
-        },
-        {
-          title: '报告 3',
-          description: '这是报告 3 的详细描述',
-        },
-        {
-          title: '报告 4',
-          description: '这是报告 4 的详细描述',
-        },
-      ],
+      finishedRequest: {
+        status: 1,
+        pageNum: 1,
+        pageSize: 10,
+        total: 0,
+      },
+      draftRequest: {
+        status: 0,
+        pageNum: 1,
+        pageSize: 10,
+        total: 0,
+      },
+      finishedReportList: [],
+      draftList: [],
     }
   },
-  created() {},
+  created() {
+    this.initData()
+  },
   methods: {
+    initData() {
+      Promise.all([this.getReportFinishedList(), this.getDraftList()]).then((res) => {
+        // 完成初始化请求
+        this.firstLoading = false
+      })
+    },
+    addReport(v) {
+      if (v.type == 'addReport') {
+        // 弹窗选择模板类型
+        this.visible = true
+      } else {
+        // 前往新建模板内页
+        let typeid = v.type == 'addCreditReport' ? 1 : v.type == 'addFinanceReport' ? 2 : 3
+        this.toPage(typeid)
+      }
+    },
+    handleOk() {
+      this.toPage(this.addReportType)
+      this.visible = false
+    },
+    toPage(type) {
+      console.log('typeid :>> ', type)
+      this.$router.push({ path: '/homePage/addReport/' + type })
+    },
+    // 获取已完成报告列表
+    getReportFinishedList() {
+      return new Promise((resolve, reject) => {
+        if (
+          this.firstLoading ||
+          this.finishedRequest.total > this.finishedRequest.pageNum * this.finishedRequest.pageSize
+        ) {
+          reportList(this.finishedRequest)
+            .then((res) => {
+              this.finishedReportList = res.rows
+              this.finishedRequest.total = res.total
+              resolve(true)
+            })
+            .catch((err) => {
+              reject(err)
+            })
+        }
+      })
+    },
+    // 获取草稿箱列表
+    getDraftList() {
+      return new Promise((resolve, reject) => {
+        if (this.firstLoading || this.draftRequest.total > this.draftRequest.pageNum * this.draftRequest.pageSize) {
+          reportList(this.draftRequest)
+            .then((res) => {
+              this.draftList = res.rows
+              this.draftRequest.total = res.total
+              resolve(true)
+            })
+            .catch((err) => {
+              reject(err)
+            })
+        }
+      })
+    },
     finishedReportTypeChange(v) {
       console.log(v)
     },
     finishedReportSearchChange(v) {
+      console.log(v)
+    },
+    draftTypeChange(v) {
+      console.log(v)
+    },
+    draftSearchChange(v) {
       console.log(v)
     },
   },

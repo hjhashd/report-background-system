@@ -45,4 +45,7 @@ export default {
     'menu.readWord': '慧读文档',
     'menu.anomaly': '异常分析',
     'menu.client': '客户列表',
+    'menu.home.addReport': '新增报告',
+    'menu.home.viewReport': '报告预览',
+    'menu.report': '报告',
 }

@@ -84,8 +84,9 @@
       :footer="null"
       :bodyStyle="{ padding: 0, backgroundColor: 'transparent' }"
       :maskClosable="false"
+      @cancel="toClosePop"
     >
-      <build-q-r-code :userInfo="userInfo" @close="buildQrCodePop = false"></build-q-r-code>
+      <build-q-r-code :userInfo="userInfo" @close="toClosePop"></build-q-r-code>
     </a-modal>
   </pro-layout>
 </template>
@@ -93,7 +94,7 @@
 <script>
 import { SettingDrawer, updateTheme } from '@ant-design-vue/pro-layout'
 import { i18nRender } from '@/locales'
-import { mapState } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 import { CONTENT_WIDTH_TYPE, SIDEBAR_TYPE, TOGGLE_MOBILE_TYPE } from '@/store/mutation-types'
 import { buildQRCode } from '@/components'
 import defaultSettings from '@/config/defaultSettings'
@@ -140,8 +141,6 @@ export default {
       query: {},
       // 是否手机模式
       isMobile: false,
-      // 生产二维码
-      buildQrCodePop: false,
     }
   },
   computed: {
@@ -149,6 +148,7 @@ export default {
       // 动态主路由
       mainMenu: (state) => state.permission.addRouters,
       userInfo: (state) => state.user.info,
+      buildQrCodePop: (state) => state.user.buildQrCodePop,
     }),
   },
   created() {
@@ -179,6 +179,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions(['changeBuildQrCodePop']),
     i18nRender,
     handleMediaQuery(val) {
       this.query = val
@@ -197,7 +198,6 @@ export default {
       this.collapsed = val
     },
     handleSettingChange({ type, value }) {
-      console.log('type', type, value)
       type && (this.settings[type] = value)
       switch (type) {
         case 'contentWidth':
@@ -218,7 +218,11 @@ export default {
     },
     buildQRcode(event) {
       event.preventDefault()
-      this.buildQrCodePop = true
+      this.changeBuildQrCodePop(true)
+    },
+    toClosePop(event) {
+      event.preventDefault()
+      this.changeBuildQrCodePop(false)
     },
   },
 }

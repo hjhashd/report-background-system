@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-19 16:51:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-24 19:17:05
+ * @LastEditTime: 2025-02-26 17:28:57
  * @FilePath: /report-background-system/src/components/buildQRCode/buildQRCode.vue
  * @Description: 
  * 
@@ -108,7 +108,7 @@ export default {
   },
   data() {
     return {
-      activeTab: 'upload',
+      activeTab: 'apply',
       bank: '',
       usage: '',
       uploadData: [],

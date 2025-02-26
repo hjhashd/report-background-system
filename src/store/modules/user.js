@@ -13,7 +13,8 @@ const user = {
     welcome: '',
     avatar: '',
     roles: [],
-    info: {}
+    info: {},
+    buildQrCodePop: false,
   },
 
   mutations: {
@@ -32,7 +33,10 @@ const user = {
     },
     SET_INFO: (state, info) => {
       state.info = info
-    }
+    },
+    SET_BUILD_QRCODE: (state, status) => {
+      state.buildQrCodePop = status
+    },
   },
 
   actions: {
@@ -92,7 +96,7 @@ const user = {
               commit('SET_NAME', { name: userInfo.username || userInfo.name, welcome: welcome() })
               commit('SET_AVATAR', userInfo.avatar)
               // 下游
-              resolve(userInfo).then((re)=>{
+              resolve(userInfo).then((re) => {
                 resolve(re)
               })
             } else {
@@ -121,8 +125,15 @@ const user = {
         }).finally(() => {
         })
       })
-    }
+    },
 
+    // 打开/关闭生产二维码界面
+    changeBuildQrCodePop({ commit }, status) {
+      return new Promise((resolve) => {
+        commit('SET_BUILD_QRCODE', status)
+        resolve();
+      })
+    }
   }
 }
 

@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-21 14:47:39
+ * @LastEditTime: 2025-02-26 19:09:33
  * @FilePath: /report-background-system/src/api/report.js
  * @Description: 
  * 
@@ -17,6 +17,10 @@ const reportAPI = {
     buildReport: '/report/entity/save/report',
     wopiFile: '/report/wopi/files/',
     abnormalReport: '/report/entity/abnormal/report',
+    reportList: '/report/entity/list',
+    getReportModal: '/report/entity/template/list',
+    getModalInfo: '/report/entity/template/type/list',
+    uploadFile: '/report/entity/upload/data/'
 }
 
 export function dataAccredit(parameter) {
@@ -70,5 +74,36 @@ export function abnormalReport(parameter) {
         url: reportAPI.abnormalReport,
         method: 'post',
         data: parameter
+    })
+}
+
+export function reportList(parameter) {
+    return request({
+        url: reportAPI.reportList,
+        method: 'post',
+        data: parameter
+    })
+}
+
+export function getReportModal(parameter) {
+    return request({
+        url: reportAPI.getReportModal,
+        method: 'post',
+        data: parameter
+    })
+}
+
+export function uploadFile(parameter, customerId) {
+    return request({
+        url: reportAPI.uploadFile + customerId,
+        method: 'post',
+        data: parameter
+    })
+}
+
+export function getModalInfo() {
+    return request({
+        url: reportAPI.getModalInfo,
+        method: 'get',
     })
 }

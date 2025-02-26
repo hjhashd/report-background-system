@@ -17,10 +17,40 @@ export const asyncRouterMap = [
     children: [
       // home
       {
-        path: '/homePage/index',
+        path: '/homePage',
         name: 'home',
-        component: () => import('@/views/dataGo/home'),
-        meta: { title: 'menu.home', keepAlive: true, icon: bxAnaalyse, permission: ['home'] }
+        redirect: 'homePage/index',
+        component: RouteView,
+        meta: { title: 'menu.home', keepAlive: true, icon: bxAnaalyse, permission: ['home'] },
+        children: [
+          {
+            path: '/homePage/index',
+            name: 'home',
+            component: () => import('@/views/dataGo/home'),
+            meta: { title: 'menu.report', keepAlive: true, icon: bxAnaalyse, permission: ['home'] }, 
+          },
+          {
+            path: '/homePage/addReport/:reportType',
+            name: 'AddReport',
+            component: () => import('@/views/dataGo/home/addReport'),
+            hidden: true,
+            meta: { title: 'menu.home.addReport', keepAlive: false, permission: ['home'] }
+          },
+          {
+            path: '/homePage/viewReport/:reportId',
+            name: 'ViewReport',
+            hidden: true,
+            component: () => import('@/views/dataGo/home/viewReport'),
+            meta: { title: 'menu.home.viewReport', keepAlive: false, permission: ['home'] }
+          },
+          {
+            path: '/homePage/viewCustomerData',
+            name: 'viewCustomerData',
+            hidden: true,
+            component: () => import('@/views/dataGo/home/viewCustomerData'),
+            meta: { title: 'menu.uploadData', keepAlive: false, permission: ['home'] }
+          },
+        ]
       },
       // overview
       {
