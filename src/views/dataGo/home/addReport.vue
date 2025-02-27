@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-26 13:47:50
+ * @LastEditTime: 2025-02-27 16:01:29
  * @FilePath: /report-background-system/src/views/dataGo/home/addReport.vue
  * @Description: 
  * 
@@ -18,13 +18,16 @@
         </a-col>
         <a-col :span="8">
           <div class="model-choose">
-            <h2>客户</h2>
+            <div class="flex-row-spacebetween">
+              <h2>客户</h2>
+              <a-button icon="user-add" :loading="addLoading" style="width: 120px" @click="addCustomer">新增客户</a-button>
+            </div>
             <div class="search-item">
               <img style="width: 18px; height: 18px" src="@/assets/images/customer.png" alt="dark" />
               <span>选择客户：</span>
-              <a-select style="width: 180px" placeholder="选择查询客户" @change="customerHandle">
+              <a-select style="width: 60%" placeholder="选择查询客户" @change="customerHandle">
                 <a-select-option v-for="(cu, index) in customers" :value="cu.creditCode" :key="index">
-                  {{ cu.userName }}
+                  {{ cu.enterpriseName }}
                 </a-select-option>
               </a-select>
             </div>
@@ -64,6 +67,8 @@ export default {
       currentModalInfo: null,
       chooseModal: null,
       chooseCustomer: null,
+      addLoading: false,
+      addCustomerPop: false,
     }
   },
   created() {
@@ -133,6 +138,11 @@ export default {
       }
       // 去往查看数据页面
       $router.push({ path: '/homePage/viewCustomerData', query: paramsRequest })
+    },
+    // 新增客户
+    addCustomer() {
+      this.addCustomerPop = true
+      this.addLoading = true
     },
   },
 }

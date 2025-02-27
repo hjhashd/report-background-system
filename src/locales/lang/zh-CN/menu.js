@@ -1,3 +1,12 @@
+/*
+ * @Author: bekon
+ * @Date: 2022-10-10 22:31:07
+ * @LastEditors: bekon
+ * @LastEditTime: 2025-02-27 16:04:21
+ * @FilePath: /report-background-system/src/locales/lang/zh-CN/menu.js
+ * @Description: 
+ * 
+ */
 export default {
     'menu.welcome': '欢迎',
     'menu.home': '首页',
@@ -41,7 +50,7 @@ export default {
     /// 新增
     'menu.homepage': '智能报告助手',
     'menu.overview': '数据看板',
-    'menu.uploadData': '数据上传',
+    'menu.uploadData': '数据详情',
     'menu.readWord': '慧读文档',
     'menu.anomaly': '异常分析',
     'menu.client': '客户列表',

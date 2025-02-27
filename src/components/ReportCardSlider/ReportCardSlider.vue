@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-18 17:57:40
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-25 13:57:59
+ * @LastEditTime: 2025-02-27 10:39:18
  * @FilePath: /report-background-system/src/components/ReportCardSlider/ReportCardSlider.vue
  * @Description: 
  * 
@@ -14,11 +14,11 @@
     </button>
     <div class="slider-container" ref="slider" v-if="cards.length">
       <div class="card-wrapper" :style="{ transform: `translateX(-${currentIndex * cardWidth}px)` }">
-        <div class="report-card" v-for="(card, index) in cards" :key="index">
-          <div style="width: 100%">
+        <div class="card-wrapper">
+          <div class="report-card" v-for="(card, index) in cards" :key="index">
             <img style="width: 100%" src="@/assets/images/report-bg.png" alt="dark" />
+            <h3 class="line2">{{ card.reportName }}</h3>
           </div>
-          <h3>{{ card.reportName }}</h3>
         </div>
       </div>
     </div>
@@ -34,22 +34,14 @@ export default {
   props: {
     cards: {
       type: Array,
-      default: () => [],
+      required: true,
     },
   },
   data() {
     return {
       currentIndex: 0,
+      cardWidth: 188,
     }
-  },
-  computed: {
-    cardWidth() {
-      if (this.$refs.slider) {
-        return this.$refs.slider.querySelector('.report-card').offsetWidth || 0
-      } else {
-        return 0
-      }
-    },
   },
   methods: {
     prevSlide() {
@@ -113,9 +105,17 @@ export default {
   text-align: center;
   cursor: pointer;
   overflow-wrap: break-word;
+  box-sizing: border-box;
   &:hover {
     transform: scale(1.05);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 0, 0, 0.19);
   }
+}
+.line2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>

@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2022-10-10 22:31:07
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-26 18:46:02
+ * @LastEditTime: 2025-02-27 10:09:57
  * @FilePath: /report-background-system/src/utils/request.js
  * @Description: 
  * 
@@ -63,6 +63,7 @@ request.interceptors.request.use(config => {
 
 // response interceptor
 request.interceptors.response.use((response) => {
+  const token = storage.get(ACCESS_TOKEN)
   const res = response.data
   if (res.code && res.code == 401) {
     notification.error({
