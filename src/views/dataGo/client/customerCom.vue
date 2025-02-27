@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 16:15:56
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-21 17:03:02
+ * @LastEditTime: 2025-02-27 21:11:13
  * @FilePath: /report-background-system/src/views/dataGo/client/customerCom.vue
  * @Description: 
  * 
@@ -30,8 +30,11 @@
     </div>
     <!-- 右侧详情区域 -->
     <div :class="{ 'detail-expanded': isListCollapsed }" class="right-detail">
-      <a-spin v-if="selectedItem" :spinning="spinningLoad">
-        <customer-upload-detail :customerUploadList="customerUploadList"></customer-upload-detail>
+      <a-spin v-if="customerUploadList" :spinning="spinningLoad">
+        <customer-upload-detail
+          :customerUploadList="customerUploadList"
+          :customerInfo="chooseCustomer"
+        ></customer-upload-detail>
       </a-spin>
       <div v-else>
         <p>请选择一个客户查看详情。</p>
@@ -50,6 +53,7 @@ export default {
     return {
       customers: [],
       selectedItem: '',
+      chooseCustomer: {},
       customerUploadList: null,
       isListCollapsed: false,
       spinningLoad: true,
@@ -78,6 +82,7 @@ export default {
               enterpriseName: (enterprise && enterprise.enterpriseName) || '',
             }
           })
+          this.chooseCustomer = this.getSelectedItem()
         })
         .catch((err) => {
           this.$message.error('获取客户列表失败:' + err)
@@ -102,7 +107,7 @@ export default {
       this.isListCollapsed = !this.isListCollapsed
     },
     getSelectedItem() {
-      return this.listData.find((item) => item.id === this.selectedItem)
+      return this.customers[this.selectedItem - 1]
     },
   },
 }

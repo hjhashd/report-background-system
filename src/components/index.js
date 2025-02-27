@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2022-10-10 22:31:07
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-19 16:52:38
+ * @LastEditTime: 2025-02-27 20:21:23
  * @FilePath: /report-background-system/src/components/index.js
  * @Description: 
  * 
@@ -37,6 +37,7 @@ import ArticleListContent from '@/components/ArticleListContent'
 import ReportCardSlider from '@/components/ReportCardSlider'
 import buildQRCode from '@/components/buildQRCode/buildQRCode.vue';
 import Dialog from '@/components/Dialog'
+import OnlyOfficeEditor from '@/components/OnlyOfficeEditor/OnlyOfficeEditor.vue'
 
 export {
   AvatarList,
@@ -65,5 +66,6 @@ export {
   ArticleListContent,
   ReportCardSlider,
   Dialog,
-  buildQRCode
+  buildQRCode,
+  OnlyOfficeEditor
 }

@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-27 16:01:29
+ * @LastEditTime: 2025-02-27 17:19:56
  * @FilePath: /report-background-system/src/views/dataGo/home/addReport.vue
  * @Description: 
  * 
@@ -20,7 +20,9 @@
           <div class="model-choose">
             <div class="flex-row-spacebetween">
               <h2>客户</h2>
-              <a-button icon="user-add" :loading="addLoading" style="width: 120px" @click="addCustomer">新增客户</a-button>
+              <a-button icon="user-add" :loading="addLoading" style="width: 120px" @click="addCustomer"
+                >新增客户</a-button
+              >
             </div>
             <div class="search-item">
               <img style="width: 18px; height: 18px" src="@/assets/images/customer.png" alt="dark" />
@@ -50,6 +52,16 @@
         </a-col>
       </a-row>
     </div>
+    <a-modal v-model="addCustomerPop" title="新增客户" @ok="handleOk">
+      <div class="flex flex-center">
+        <div class="right-item-title">选择新增报告类型：</div>
+        <a-select v-model="addReportType" style="width: 200px">
+          <a-select-option v-for="item in reportTypeList" :key="item.type" :value="item.type">
+            {{ item.name }}
+          </a-select-option>
+        </a-select>
+      </div>
+    </a-modal>
   </page-header-wrapper>
 </template>
 

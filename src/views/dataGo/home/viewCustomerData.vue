@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-26 11:22:54
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-26 16:50:46
+ * @LastEditTime: 2025-02-27 17:35:21
  * @FilePath: /report-background-system/src/views/dataGo/home/viewCustomerData.vue
  * @Description: 
  * 
@@ -30,11 +30,16 @@
         </div>
       </div>
       <div class="upload-data-box" v-if="customerUploadList">
-        <customer-upload-detail :customerUploadList="customerUploadList"></customer-upload-detail>
+        <customer-upload-detail
+          :customerUploadList="customerUploadList"
+          :customerInfo="queryParams"
+        ></customer-upload-detail>
       </div>
       <div class="button-group">
-        <a-button :loading="buildLoading" style="width: 25%; height: 40px" @click="buildReport">生产报告</a-button>
-        <a-button style="width: 25%; height: 40px" @click="reviewReport">报告预览</a-button>
+        <a-button v-if="!buildReportId" :loading="buildLoading" style="width: 25%; height: 40px" @click="buildReport"
+          >生产报告</a-button
+        >
+        <a-button v-if="buildReportId" style="width: 25%; height: 40px" @click="reviewReport">报告预览</a-button>
       </div>
     </div>
   </page-header-wrapper>
@@ -55,6 +60,7 @@ export default {
       queryParams: null,
       modalList: null,
       buildLoading: false,
+      buildReportId: null,
     }
   },
   created() {
@@ -73,18 +79,29 @@ export default {
         })
     },
     buildReport() {
+      const { $notification } = this
       const paramsRequest = {
         appUserId: parseInt(this.queryParams.appUserId),
         reportType: parseInt(this.queryParams.reportType),
         enterpriseName: this.queryParams.enterpriseName,
         template: this.queryParams.template,
       }
+      this.buildLoading = true
       // 去往查看数据页面
-      buildReport(paramsRequest).then((res)=>{
-        
+      buildReport(paramsRequest).then((res) => {
+        this.buildReportId = res.data
+        this.buildLoading = false
+        $notification['success']({
+          message: '通知：',
+          description: '生成报告成功',
+          duration: 8,
+        })
       })
     },
-    reviewReport() {},
+    reviewReport() {
+      const { $router } = this
+      $router.push({ path: `/homePage/viewReport/` + this.buildReportId })
+    },
   },
 }
 </script>

@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2022-10-10 22:31:07
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-17 17:41:42
+ * @LastEditTime: 2025-02-27 20:46:19
  * @FilePath: /report-background-system/public/index.html
  * @Description: 
  * 
@@ -20,6 +20,8 @@
     <% for (var i in htmlWebpackPlugin.options.cdn && htmlWebpackPlugin.options.cdn.css) { %>
     <link rel="stylesheet" href="<%= htmlWebpackPlugin.options.cdn.css[i] %>" />
     <% } %>
+    <!-- <script type="text/javascript" src="<%= BASE_URL %>api.js"></script> -->
+    <script type="text/javascript" src="http://8.138.186.7:8188/web-apps/apps/api/documents/api.js"></script>
   </head>
   <body>
     <noscript>
