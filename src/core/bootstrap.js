@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2022-10-10 22:31:07
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-21 16:08:06
+ * @LastEditTime: 2025-02-28 18:58:18
  * @FilePath: /report-background-system/src/core/bootstrap.js
  * @Description: 
  * 
@@ -35,6 +35,6 @@ export default function Initializer () {
   store.commit(TOGGLE_MULTI_TAB, storage.get(TOGGLE_MULTI_TAB, defaultSettings.multiTab))
   store.commit('SET_TOKEN', storage.get(ACCESS_TOKEN))
 
-  store.dispatch('setLang', storage.get(APP_LANGUAGE, 'en-US'))
+  store.dispatch('setLang', storage.get(APP_LANGUAGE, 'zh-CN'))
   // last step
 }
