@@ -6,7 +6,7 @@
           <div class="header">
             <a href="/">
               <img src="~@/assets/logo.png" class="logo" alt="logo" />
-              <span class="title">智能报告助手</span>
+              <span class="title">智能分析助手</span>
             </a>
           </div>
           <!-- <div class="desc">

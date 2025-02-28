@@ -1,3 +1,12 @@
+/*
+ * @Author: bekon
+ * @Date: 2025-02-13 16:01:48
+ * @LastEditors: bekon
+ * @LastEditTime: 2025-02-28 18:10:25
+ * @FilePath: /report-background-system/src/config/defaultSettings.js
+ * @Description: 
+ * 
+ */
 /**
  * 项目默认配置项
  * primaryColor - 默认主题色, 如果修改颜色不生效，请清理 localStorage
@@ -23,7 +32,7 @@ export default {
   menu: {
     locale: true
   },
-  title: 'DATA GO·数汇轮',
+  title: '智能分析助手',
   pwa: false,
   iconfontUrl: '',
   production: process.env.NODE_ENV === 'production' && process.env.VUE_APP_PREVIEW !== 'true'

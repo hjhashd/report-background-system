@@ -161,7 +161,7 @@
 
 <script>
 import { Cascader } from 'ant-design-vue'
-import { AIGetCode, AIRegister } from '@/api/login'
+import { AIRegisterSmsCode, AIRegister } from '@/api/login'
 import { bankTree } from '@/api/qrcode'
 import { deviceMixin } from '@/store/device-mixin'
 import { scorePassword, transformData } from '@/utils/util'
@@ -336,22 +336,27 @@ export default {
 
       validateFields(['mobile'], { force: true }, (err, values) => {
         if (!err) {
-          state.smsSendBtn = true
-
-          const interval = window.setInterval(() => {
-            if (state.time-- <= 0) {
-              state.time = 60
-              state.smsSendBtn = false
-              window.clearInterval(interval)
-            }
-          }, 1000)
-
           const hide = $message.loading('验证码发送中..', 0)
 
-          AIGetCode({ mobile: values.mobile })
-            .then((res) => {
-              setTimeout(hide, 2500)
-            })
+          AIRegisterSmsCode({ mobile: values.mobile }).then((res) => {
+            setTimeout(hide, 1000)
+            if (res.code == 200) {
+              state.smsSendBtn = true
+              const interval = window.setInterval(() => {
+                if (state.time-- <= 0) {
+                  state.time = 60
+                  state.smsSendBtn = false
+                  window.clearInterval(interval)
+                }
+              }, 1000)
+            } else {
+              $notification['warn']({
+                message: '通知：',
+                description: `错误${res.code}：${res.msg}`,
+                duration: 8,
+              })
+            }
+          })
         }
       })
     },
