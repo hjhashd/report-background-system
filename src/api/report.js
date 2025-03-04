@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-27 18:59:17
+ * @LastEditTime: 2025-03-03 11:33:33
  * @FilePath: /report-background-system/src/api/report.js
  * @Description: 
  * 
@@ -20,7 +20,13 @@ const reportAPI = {
     reportList: '/report/entity/list',
     getReportModal: '/report/entity/template/list',
     getModalInfo: '/report/entity/template/type/list',
-    uploadFile: '/report/entity/upload/data/'
+    uploadFile: '/report/entity/upload/data/',
+    getReportDetail: '/report/entity/',
+    reportContentList: '/report/entity/content/list',
+    deleteReportContent: '/report/entity/content/delete/',
+    saveReportContent: '/report/entity/content/save/as',
+    useReportContent: '/report/entity/content/apply',
+    getCustomerDetail: '/system/agent/user/customer/info/'
 }
 
 export function dataAccredit(parameter) {
@@ -104,6 +110,57 @@ export function uploadFile(parameter, customerId) {
 export function getModalInfo() {
     return request({
         url: reportAPI.getModalInfo,
+        method: 'get',
+    })
+}
+
+// 获取报告详情信息
+export function getReportDetail(id) {
+    return request({
+        url: reportAPI.getReportDetail + id,
+        method: 'get',
+    })
+}
+
+// 获取报告评价内容列表
+export function reportContentList(parameter) {
+    return request({
+        url: reportAPI.reportContentList,
+        method: 'post',
+        data: parameter
+    })
+}
+
+// 获取报告评价内容列表
+export function deleteReportContent(id) {
+    return request({
+        url: reportAPI.deleteReportContent + id,
+        method: 'delete',
+    })
+}
+
+// 另存为报告评价内容
+export function saveReportContent(parameter) {
+    return request({
+        url: reportAPI.saveReportContent,
+        method: 'post',
+        data: parameter
+    })
+}
+
+// 应用报告评价内容
+export function useReportContent(parameter) {
+    return request({
+        url: reportAPI.useReportContent,
+        method: 'post',
+        data: parameter
+    })
+}
+
+// 获取客户详情信息
+export function getCustomerDetail(id) {
+    return request({
+        url: reportAPI.getCustomerDetail + id,
         method: 'get',
     })
 }

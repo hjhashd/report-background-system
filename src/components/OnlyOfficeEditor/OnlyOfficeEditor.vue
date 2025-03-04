@@ -2,13 +2,13 @@
  * @Author: bekon
  * @Date: 2025-02-27 20:20:34
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-27 20:59:14
+ * @LastEditTime: 2025-03-03 16:20:47
  * @FilePath: /report-background-system/src/components/OnlyOfficeEditor/OnlyOfficeEditor.vue
  * @Description: 
  * 
 -->
 <template>
-  <div style="padding-left: 20px; width: 100%; height: 78vh">
+  <div :style="{ 'padding-left': '20px', width: '100%', height: editorInnerHeight }">
     <div id="onlyoffice-container"></div>
   </div>
 </template>
@@ -22,12 +22,24 @@ export default {
       type: String,
       required: true,
     },
+    editorHeight: {
+      type: String,
+      default: '78vh',
+    },
   },
   data() {
     return {
       editor: null,
       config: null,
+      editorInnerHeight: '78vh',
     }
+  },
+  watch: {
+    editorHeight: {
+      handler(v) {
+        this.editorInnerHeight = v
+      },
+    },
   },
   mounted() {
     this.initReport()

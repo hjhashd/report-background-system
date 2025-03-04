@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-18 17:57:40
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-27 10:39:18
+ * @LastEditTime: 2025-03-01 08:44:12
  * @FilePath: /report-background-system/src/components/ReportCardSlider/ReportCardSlider.vue
  * @Description: 
  * 
@@ -15,7 +15,7 @@
     <div class="slider-container" ref="slider" v-if="cards.length">
       <div class="card-wrapper" :style="{ transform: `translateX(-${currentIndex * cardWidth}px)` }">
         <div class="card-wrapper">
-          <div class="report-card" v-for="(card, index) in cards" :key="index">
+          <div class="report-card" v-for="(card, index) in cards" :key="index" @click="toReportDetail(card)">
             <img style="width: 100%" src="@/assets/images/report-bg.png" alt="dark" />
             <h3 class="line2">{{ card.reportName }}</h3>
           </div>
@@ -58,6 +58,10 @@ export default {
         this.$emit('getNextPage')
       }
     },
+    toReportDetail(item){
+      const { $router } = this
+      $router.push({ path: `/homePage/viewReport/` + item.id })
+    }
   },
 }
 </script>
