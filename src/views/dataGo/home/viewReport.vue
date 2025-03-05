@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-03 17:23:56
+ * @LastEditTime: 2025-03-05 10:23:53
  * @FilePath: /report-background-system/src/views/dataGo/home/viewReport.vue
  * @Description: 报告预览
  * 
@@ -111,8 +111,24 @@
           </div>
         </div>
       </div>
-      <a-drawer title="Basic Drawer" placement="right" :closable="true" :visible="visible" @close="onClose">
-        <p>Some contents...</p>
+      <a-drawer
+        title="报告结论编辑"
+        placement="right"
+        :closable="true"
+        :visible="visible"
+        :maskClosable="false"
+        width="85vw"
+        @close="onClose"
+      >
+        <div class="drawer-container">
+          <div class="select-item">
+            选择模块<a-select :size="size" default-value="a1" style="width: 200px" @change="handleChange">
+              <a-select-option v-for="i in 25" :key="(i + 9).toString(36) + i">
+                {{ (i + 9).toString(36) + i }}
+              </a-select-option>
+            </a-select>
+          </div>
+        </div>
       </a-drawer>
     </div>
   </page-header-wrapper>
@@ -126,7 +142,7 @@ export default {
   components: { OnlyOfficeEditor },
   data() {
     return {
-      visible: false,
+      visible: true,
       getChangeHeight: true,
       editorHeight: null,
       config: null,
@@ -248,7 +264,6 @@ export default {
 .editor-container {
   flex: 1;
   width: 100%;
-  overflow: hidden;
 }
 .right-content {
   height: 100%;

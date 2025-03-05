@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-27 20:20:34
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-03 16:20:47
+ * @LastEditTime: 2025-03-05 10:04:59
  * @FilePath: /report-background-system/src/components/OnlyOfficeEditor/OnlyOfficeEditor.vue
  * @Description: 
  * 
@@ -37,6 +37,7 @@ export default {
   watch: {
     editorHeight: {
       handler(v) {
+        console.log('-0-0-0-0-0-0->', v)
         this.editorInnerHeight = v
       },
     },
