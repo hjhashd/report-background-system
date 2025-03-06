@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 18:03:38
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-21 18:27:02
+ * @LastEditTime: 2025-03-05 17:33:17
  * @FilePath: /report-background-system/src/config/constants.js
  * @Description: 
  * 
@@ -60,4 +60,27 @@ export const yongtu = [
         id: 3,
         name: '能耗分析报告',
     }
+]
+
+export const colorList = [
+    "#FF5733",
+    "#33FF57",
+    "#5733FF",
+    "#FF33E7",
+    "#33E7FF",
+    "#E7FF33",
+    "#FF9933",
+    "#33FF99",
+    "#9933FF",
+    "#FF3399",
+    "#3399FF",
+    "#99FF33",
+    "#FF3366",
+    "#3366FF",
+    "#66FF33",
+    "#FF6633",
+    "#33FFCC",
+    "#CC33FF",
+    "#FFCC33",
+    "#33CCFF",
 ]

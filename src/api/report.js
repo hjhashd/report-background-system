@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-03 11:33:33
+ * @LastEditTime: 2025-03-06 17:33:25
  * @FilePath: /report-background-system/src/api/report.js
  * @Description: 
  * 
@@ -26,7 +26,11 @@ const reportAPI = {
     deleteReportContent: '/report/entity/content/delete/',
     saveReportContent: '/report/entity/content/save/as',
     useReportContent: '/report/entity/content/apply',
-    getCustomerDetail: '/system/agent/user/customer/info/'
+    getCustomerDetail: '/system/agent/user/customer/info/',
+    updateReportDate: '/report/entity/batch/update/data/',
+    getModalList: '/report/entity/content/title/list/',
+    updateReport: '/report/entity/update/report/',
+    applyReport: '/report/entity/publish/'
 }
 
 export function dataAccredit(parameter) {
@@ -157,10 +161,43 @@ export function useReportContent(parameter) {
     })
 }
 
+// 更新报告数据文档 
+export function updateReportDate(parameter, id) {
+    return request({
+        url: reportAPI.updateReportDate + id,
+        method: 'post',
+        data: parameter
+    })
+}
+
 // 获取客户详情信息
 export function getCustomerDetail(id) {
     return request({
         url: reportAPI.getCustomerDetail + id,
+        method: 'get',
+    })
+}
+
+// 获取报告结论模板列表
+export function getModalList(id) {
+    return request({
+        url: reportAPI.getModalList + id,
+        method: 'get',
+    })
+}
+
+// 更新报告 
+export function updateReport(id) {
+    return request({
+        url: reportAPI.updateReport + id,
+        method: 'get',
+    })
+}
+
+// 发布报告
+export function applyReport(id) {
+    return request({
+        url: reportAPI.applyReport + id,
         method: 'get',
     })
 }
