@@ -97,14 +97,16 @@
           </a-form-item>
         </a-tab-pane>
       </a-tabs>
-
-      <a-form-item>
-        <a-checkbox v-decorator="['rememberMe', { valuePropName: 'checked' }]">{{
-          $t('user.login.remember-me')
-        }}</a-checkbox>
+      <a-form-item style="margin: 0">
+        <a-checkbox @change="agreennnnn">我已阅读并同意</a-checkbox>
+        <a-button type="link" style="padding: 0" @click="toAgreement('user')"
+          ><span class="agreement">《用户协议》</span></a-button
+        >
+        <a-button type="link" style="padding: 0" @click="toAgreement('privacy')"
+          ><span class="agreement">《隐私协议》</span></a-button
+        >
       </a-form-item>
-
-      <a-form-item style="margin-top: 24px">
+      <a-form-item>
         <a-button
           size="large"
           type="primary"
@@ -115,11 +117,29 @@
           >{{ $t('user.login.login') }}</a-button
         >
       </a-form-item>
-
-      <div class="user-login-other">
-        <router-link class="register" :to="{ name: 'register' }">{{ $t('user.login.signup') }}</router-link>
+      <div class="flex-row-spacebetween">
+        <a-form-item style="margin-bottom: 0">
+          <a-checkbox v-decorator="['rememberMe', { valuePropName: 'checked' }]">{{
+            $t('user.login.remember-me')
+          }}</a-checkbox>
+        </a-form-item>
+        <div class="user-login-other">
+          <router-link class="register" :to="{ name: 'register' }">{{ $t('user.login.signup') }}</router-link>
+        </div>
       </div>
     </a-form>
+    <a-modal
+      class="modal-pop-1"
+      v-model="showAgreement"
+      width="60vw"
+      :title="showAgreenmentTitle"
+      :footer="null"
+      @ok="() => (showAgreement = false)"
+    >
+      <div ref="pop" class="agreement-pop" style="height: 70vh">
+        <iframe :src="currentAgreement" width="100%" height="100%" frameborder="0"></iframe>
+      </div>
+    </a-modal>
   </div>
 </template>
 
@@ -149,10 +169,25 @@ export default {
         loginType: 0,
         smsSendBtn: false,
       },
+      agreebtn: false,
+      userAgreement: 'http://8.138.186.7:9000/report/agreement/智能助手WEB端用户协议.html',
+      privacyAgreement: 'http://8.138.186.7:9000/report/agreement/智能助手WEB端隐私协议.html',
+      showAgreement: false,
+      currentAgreement: '',
+      showAgreenmentTitle: '',
     }
   },
   methods: {
     ...mapActions(['Login', 'Logout', 'AILoginByCode']),
+    toAgreement(type) {
+      // 打开协议窗口
+      this.currentAgreement = type == 'user' ? this.userAgreement : this.privacyAgreement
+      this.showAgreenmentTitle = type == 'user' ? '智能助手用户协议' : '智能助手隐私协议'
+      this.showAgreement = true
+    },
+    agreennnnn(v) {
+      this.agreebtn = v.target.checked
+    },
     // handler
     handleUsernameOrEmail(rule, value, callback) {
       const { state } = this
@@ -176,8 +211,18 @@ export default {
         customActiveKey,
         Login,
         AILoginByCode,
+        $notification,
+        agreebtn,
       } = this
-
+      if (!agreebtn) {
+        $notification['info']({
+          message: '通知',
+          description: '请仔细阅读智能分析助手相关协议，并同意协议内容',
+          duration: 4,
+        })
+        state.loginBtn = false
+        return
+      }
       state.loginBtn = true
 
       const validateFieldsKey = customActiveKey === 'tab1' ? ['mobile', 'password'] : ['mobile', 'code']
@@ -187,7 +232,7 @@ export default {
           const loginParams = { ...values }
           if (customActiveKey === 'tab1') {
             // 账号密码登录
-            delete loginParams.code
+            if (loginParams.code) delete loginParams.code
             Login(loginParams)
               .then((res) => this.loginSuccess(res))
               .catch((err) => this.requestFailed(err))
@@ -196,7 +241,7 @@ export default {
               })
           } else if (customActiveKey === 'tab2') {
             // 短信验证码登录
-            delete loginParams.password
+            if (loginParams.password) delete loginParams.password
             AILoginByCode(loginParams)
               .then((res) => this.loginSuccess(res))
               .catch((err) => this.requestFailed(err))
@@ -314,7 +359,6 @@ export default {
 
   .user-login-other {
     text-align: left;
-    margin-top: 24px;
     line-height: 22px;
 
     .item-icon {
@@ -349,5 +393,18 @@ export default {
   font-size: 16px;
   background: #f2f7ff;
   border-radius: 21px;
+}
+.agreement {
+  color: #1890ff !important;
+  cursor: pointer;
+  text-decoration: underline;
+  &:hover {
+    font-weight: bold !important;
+  }
+}
+.modal-pop-1 {
+  /deep/ .ant-modal-body {
+    padding: 0;
+  }
 }
 </style>
