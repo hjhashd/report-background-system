@@ -26,9 +26,23 @@
 
     <div class="table-contant">
       <s-table ref="table" rowKey="key" :data="loadData" :columns="columns">
-        <template #action="{ row }">
+        <span slot="status" slot-scope="text">
+          <!-- // 0 草稿 1 已完成 2 数据未授权 3 数据已授权 -->
+          <span v-if="text == 0" :class="['table-status', 'status' + text]">草稿</span>
+          <span v-if="text == 1" :class="['table-status', 'status' + text]">已完成</span>
+          <span v-if="text == 2" :class="['table-status', 'status' + text]">数据未授权</span>
+          <span v-if="text == 3" :class="['table-status', 'status' + text]">数据已授权</span>
+        </span>
+        <span slot="reportType" slot-scope="text">
+          {{ text == 1 ? '信贷调查报告' : text == 2 ? '财务分析报告' : '能耗分析报告' }}
+        </span>
+        <span slot="avgOperationTime" slot-scope="text">
+          <span v-if="text">约{{ text | dealTime }}小时</span>
+          <span v-else>{{ text }}</span>
+        </span>
+        <template slot="action" slot-scope="text, scoped">
           <!-- 这里可以定义操作列的具体内容，例如按钮 -->
-          <button @click="handleChat(row)">查看</button>
+          <a-button type="primary" @click="handleChat(scoped)">查看</a-button>
         </template>
       </s-table>
     </div>
@@ -36,7 +50,8 @@
 </template>
 
 <script>
-import { statisticsCount, statisticsAnalyze, manufacture, complete, getReportList } from '@/api/overview'
+import { mapState } from 'vuex'
+import { statisticsAnalyze, manufacture, complete, getReportList } from '@/api/overview'
 import { EChartsComponent, STable } from '@/components'
 import { baseMixin } from '@/store/app-mixin'
 import { overviewObj, lineOptions, barOptions, columns } from './util'
@@ -51,7 +66,6 @@ export default {
   data() {
     return {
       loading: true,
-      overview: null,
       customerOptions: barOptions,
       completeOptions: barOptions,
       manufactureOptions: lineOptions,
@@ -61,7 +75,7 @@ export default {
         status: 0,
       },
       loadData: (parameter) => {
-        const requestParameters = Object.assign({}, parameter, this.queryParam)
+        const requestParameters = Object.assign({}, parameter, this.queryParam, { pageNum: parameter.pageNo })
         return new Promise((resolve, reject) => {
           getReportList(requestParameters).then((res) => {
             const reD = {
@@ -77,31 +91,25 @@ export default {
       },
     }
   },
+  filters: {
+    dealTime(v) {
+      let time = parseInt(v)
+      return Math.ceil(time / 3600)
+    },
+  },
+  computed: {
+    ...mapState({
+      overview: (state) => state.user.overview,
+    }),
+  },
   created() {
     this.initData()
   },
   methods: {
     initData() {
-      this.statisticsCount()
       this.statisticsAnalyze()
       this.complete()
       this.manufacture()
-    },
-    // 获取看板
-    statisticsCount() {
-      statisticsCount().then((res) => {
-        const reShow = []
-        for (const key in res.data) {
-          if (Object.prototype.hasOwnProperty.call(res.data, key)) {
-            const num = res.data[key]
-            reShow.push({
-              name: overviewObj[key],
-              sum: num,
-            })
-          }
-        }
-        this.overview = reShow
-      })
     },
     statisticsAnalyze() {
       statisticsAnalyze().then((res) => {
@@ -188,7 +196,8 @@ export default {
       })
     },
     handleChat(v) {
-      console.log(v)
+      const { $router } = this
+      $router.push({ path: `/homePage/viewReport/` + v.id })
     },
   },
 }
@@ -229,5 +238,21 @@ export default {
 
 .table-contant {
   background-color: #fff;
+}
+
+.table-status {
+  font-size: 12px;
+  &.status0 {
+    color: #666666;
+  }
+  &.status1 {
+    color: #25f021;
+  }
+  &.status2 {
+    color: #15dff1;
+  }
+  &.status3 {
+    color: #0a69ef;
+  }
 }
 </style>

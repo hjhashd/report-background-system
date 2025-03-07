@@ -1,11 +1,21 @@
 import storage from 'store'
 import expirePlugin from 'store/plugins/expire'
 import { AIGetInfo, AILogout, AILogin, AILoginByCode } from '@/api/login'
+import { statisticsCount } from '@/api/overview'
 import { ACCESS_TOKEN } from '@/store/mutation-types'
 import { welcome } from '@/utils/util'
 import { info } from '@/mock/services/user';
 
 storage.addPlugin(expirePlugin)
+
+const overviewObj = {
+  customerCount: '客户数',
+  authCount: '授权数据',
+  reportCount: '报告数量',
+  waitUploadCount: '待上传数据',
+  waitHandleCount: '待处理报告',
+}
+
 const user = {
   state: {
     token: '',
@@ -14,6 +24,7 @@ const user = {
     avatar: '',
     roles: [],
     info: {},
+    overview: null,
     buildQrCodePop: false,
   },
 
@@ -36,6 +47,9 @@ const user = {
     },
     SET_BUILD_QRCODE: (state, status) => {
       state.buildQrCodePop = status
+    },
+    SET_OVERVIEW: (state, info) => {
+      state.overview = info
     },
   },
 
@@ -132,6 +146,23 @@ const user = {
       return new Promise((resolve) => {
         commit('SET_BUILD_QRCODE', status)
         resolve();
+      })
+    },
+
+    // 获取数据看板
+    getOverView({ commit }) {
+      statisticsCount().then((res) => {
+        const reShow = []
+        for (const key in res.data) {
+          if (Object.prototype.hasOwnProperty.call(res.data, key)) {
+            const num = res.data[key]
+            reShow.push({
+              name: overviewObj[key],
+              sum: num,
+            })
+          }
+        }
+        commit('SET_OVERVIEW', reShow)
       })
     }
   }

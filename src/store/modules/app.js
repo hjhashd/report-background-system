@@ -1,3 +1,12 @@
+/*
+ * @Author: bekon
+ * @Date: 2022-10-10 22:31:07
+ * @LastEditors: bekon
+ * @LastEditTime: 2025-03-07 18:50:04
+ * @FilePath: /report-background-system/src/store/modules/app.js
+ * @Description: 
+ * 
+ */
 import storage from 'store'
 import {
   SIDEBAR_TYPE,
@@ -29,7 +38,7 @@ const app = {
     color: '',
     weak: false,
     multiTab: true,
-    lang: 'en-US',
+    lang: 'zh-CN',
     _antLocale: {}
   },
   mutations: {

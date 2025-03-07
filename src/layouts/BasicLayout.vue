@@ -37,17 +37,17 @@
             <img src="@/assets/images/apply-data.png" alt="点击生产二维码" style="width: 60px; height: 50px" />
           </div>
         </div>
-        <div class="user-report-info">
+        <div class="user-report-info" v-if="overview">
           <div class="report-info-item">
-            <div class="num">-</div>
+            <div class="num">{{ overview[0].sum }}</div>
             <div class="item-name">客户</div>
           </div>
           <div class="report-info-item">
-            <div class="num">-</div>
+            <div class="num">{{ overview[2].sum }}</div>
             <div class="item-name">报告</div>
           </div>
           <div class="report-info-item">
-            <div class="num">-</div>
+            <div class="num">12</div>
             <div class="item-name">草稿</div>
           </div>
         </div>
@@ -149,6 +149,7 @@ export default {
       mainMenu: (state) => state.permission.addRouters,
       userInfo: (state) => state.user.info,
       buildQrCodePop: (state) => state.user.buildQrCodePop,
+      overview: (state) => state.user.overview,
     }),
   },
   created() {
@@ -161,6 +162,7 @@ export default {
     this.$watch('isMobile', () => {
       this.$store.commit(TOGGLE_MOBILE_TYPE, this.isMobile)
     })
+    this.getOverView()
   },
   mounted() {
     const userAgent = navigator.userAgent
@@ -179,7 +181,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['changeBuildQrCodePop']),
+    ...mapActions(['changeBuildQrCodePop', 'getOverView']),
     i18nRender,
     handleMediaQuery(val) {
       this.query = val

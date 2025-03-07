@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-26 20:29:58
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-26 21:30:21
+ * @LastEditTime: 2025-03-07 18:00:18
  * @FilePath: /report-background-system/src/views/dataGo/overview/util.js
  * @Description: 
  * 
@@ -115,8 +115,9 @@ export const columns = [
     },
     {
         title: '报告进度',
-        dataIndex: 'reportProgress',
-        key: 'reportProgress',
+        dataIndex: 'status',
+        key: 'status',
+        scopedSlots: { customRender: 'status' }, 
     },
     {
         title: '描述',
@@ -135,12 +136,13 @@ export const columns = [
     },
     {
         title: '累计处理时长',
-        dataIndex: 'totalProcessingTime',
-        key: 'totalProcessingTime',
+        dataIndex: 'avgOperationTime',
+        key: 'avgOperationTime',
+        scopedSlots: { customRender: 'avgOperationTime' },
     },
-    // {
-    //     title: '操作',
-    //     key: 'action',
-    //     scopedSlots: { customRender: 'action' },
-    // },
+    {
+        title: '操作',
+        key: 'action',
+        scopedSlots: { customRender: 'action' },
+    },
 ]

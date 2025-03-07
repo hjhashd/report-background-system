@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-21 11:10:54
+ * @LastEditTime: 2025-03-07 18:28:26
  * @FilePath: /report-background-system/src/views/dataGo/anomaly/index.vue
  * @Description: 
  * 
@@ -25,15 +25,6 @@
           <a-tab-pane key="financialAbnormal" tab="财务异常指标"> </a-tab-pane>
           <a-tab-pane key="derivedAbnormal" tab="衍生异常指标"> </a-tab-pane>
         </a-tabs>
-        <div class="search-item">
-          <a-icon type="eye" theme="filled" />
-          <span>选择预览报告</span>
-          <a-select style="width: 200px" placeholder="选择报告预览" v-model="selectedReport">
-            <a-select-option v-for="(report, index) in reports" :value="report" :key="index">
-              {{ report }}
-            </a-select-option>
-          </a-select>
-        </div>
       </div>
       <a-table :columns="columns" :data-source="tableData">
         <template slot-scope="text, record, index" slot="relativeChange">
