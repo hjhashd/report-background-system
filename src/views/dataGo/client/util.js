@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 15:22:28
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-26 16:34:53
+ * @LastEditTime: 2025-03-08 12:29:29
  * @FilePath: /report-background-system/src/views/dataGo/client/util.js
  * @Description: 
  * 
@@ -89,9 +89,8 @@ export const columns = [
     {
         width: '20%',
         title: '最近操作时间',
-        dataIndex: 'fields',
-        key: 'fields',
-        scopedSlots: { customRender: 'fields' },
+        dataIndex: 'operateTime',
+        key: 'operateTime',
     },
     {
         width: '20%',

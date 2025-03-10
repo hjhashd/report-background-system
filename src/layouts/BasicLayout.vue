@@ -47,7 +47,7 @@
             <div class="item-name">报告</div>
           </div>
           <div class="report-info-item">
-            <div class="num">12</div>
+            <div class="num">{{ overview[4].sum }}</div>
             <div class="item-name">草稿</div>
           </div>
         </div>
