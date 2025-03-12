@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-06 17:43:14
+ * @LastEditTime: 2025-03-12 09:53:58
  * @FilePath: /report-background-system/src/views/dataGo/home/viewReport.vue
  * @Description: 报告预览
  * 
@@ -143,6 +143,7 @@ import {
   updateReportDate,
   updateReport,
   applyReport,
+  setDraftStatus
 } from '@/api/report'
 import { OnlyOfficeEditor } from '@/components'
 import EditModal from './editModal.vue'
@@ -242,7 +243,18 @@ export default {
         this.customerReportDetail = response.data
       })
     },
-    saveAsDraft() {},
+    saveAsDraft() {
+      const { $notification } = this
+      this.pageLoading = true
+      setDraftStatus(this.reportDetail.id).then((res) => {
+        this.pageLoading = false
+        $notification['success']({
+          message: '通知：',
+          description: `另存为草稿成功`,
+          duration: 6,
+        })
+      })
+    },
     applyReport() {
       const { $notification } = this
       this.pageLoading = true

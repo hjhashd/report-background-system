@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-26 11:22:54
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-27 17:35:21
+ * @LastEditTime: 2025-03-12 13:41:24
  * @FilePath: /report-background-system/src/views/dataGo/home/viewCustomerData.vue
  * @Description: 
  * 
@@ -88,15 +88,24 @@ export default {
       }
       this.buildLoading = true
       // 去往查看数据页面
-      buildReport(paramsRequest).then((res) => {
-        this.buildReportId = res.data
-        this.buildLoading = false
-        $notification['success']({
-          message: '通知：',
-          description: '生成报告成功',
-          duration: 8,
+      buildReport(paramsRequest)
+        .then((res) => {
+          this.buildReportId = res.data
+          this.buildLoading = false
+          $notification['success']({
+            message: '通知：',
+            description: '生成报告成功',
+            duration: 8,
+          })
         })
-      })
+        .catch((err) => {
+          this.buildLoading = false
+          $notification['error']({
+            message: '错误通知：',
+            description: '错误内容：' + JSON.stringify(err),
+            duration: 8,
+          })
+        })
     },
     reviewReport() {
       const { $router } = this

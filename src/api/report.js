@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-06 17:33:25
+ * @LastEditTime: 2025-03-12 13:53:58
  * @FilePath: /report-background-system/src/api/report.js
  * @Description: 
  * 
@@ -30,7 +30,9 @@ const reportAPI = {
     updateReportDate: '/report/entity/batch/update/data/',
     getModalList: '/report/entity/content/title/list/',
     updateReport: '/report/entity/update/report/',
-    applyReport: '/report/entity/publish/'
+    applyReport: '/report/entity/publish/',
+    setDraftStatus: '/report/entity/draft/',
+    getCustomerAbnormalList: '/report/entity/customer/abnormal/list/'
 }
 
 export function dataAccredit(parameter) {
@@ -198,6 +200,22 @@ export function updateReport(id) {
 export function applyReport(id) {
     return request({
         url: reportAPI.applyReport + id,
+        method: 'get',
+    })
+}
+
+// 将报告状态转为草稿
+export function setDraftStatus(id) {
+    return request({
+        url: reportAPI.setDraftStatus + id,
+        method: 'post',
+    })
+}
+
+// 将报告状态转为草稿
+export function getCustomerAbnormalList(id, type) {
+    return request({
+        url: `${reportAPI.getCustomerAbnormalList}${id}?firstLevel=${type}`,
         method: 'get',
     })
 }
