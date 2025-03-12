@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-12 18:31:05
+ * @LastEditTime: 2025-03-12 22:22:58
  * @FilePath: /report-background-system/src/views/dataGo/anomaly/index.vue
  * @Description: 
  * 
@@ -14,7 +14,7 @@
         <div class="search-item">
           <img style="width: 18px; height: 18px" src="@/assets/images/customer.png" alt="dark" />
           <span>选择查询客户</span>
-          <a-select style="width: 300px" placeholder="选择查询客户" v-model="selectedCustomer">
+          <a-select style="width: 300px" placeholder="选择查询客户" v-model="selectedCustomer" @change="selectCu">
             <a-select-option v-for="(customer, index) in customers" :value="customer.userId" :key="index">
               {{ customer.enterprise.enterpriseName }}
             </a-select-option>
@@ -31,6 +31,20 @@
           <div class="up" v-if="text > 0">{{ text }}</div>
           <div class="down" v-else-if="text < 0">{{ text }}</div>
           <div v-else>{{ text }}</div>
+        </template>
+        <template slot="yclevel" slot-scope="text">
+          <a-tag color="#fae450" v-if="text == '等级1'">
+            {{ text }}
+          </a-tag>
+          <a-tag color="#f3ae44" v-else-if="text == '等级2'">
+            {{ text }}
+          </a-tag>
+          <a-tag color="#f50" v-else-if="text == '等级3'">
+            {{ text }}
+          </a-tag>
+          <a-tag v-else>
+            {{ text }}
+          </a-tag>
         </template>
       </a-table>
     </div>
@@ -63,6 +77,9 @@ export default {
   methods: {
     tabsChange(tab) {
       this.tabSelected = tab
+      this.getAbnormalData()
+    },
+    selectCu(v) {
       this.getAbnormalData()
     },
     getAbnormalData() {

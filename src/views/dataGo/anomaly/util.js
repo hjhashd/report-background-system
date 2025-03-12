@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-03-12 13:54:33
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-12 18:28:49
+ * @LastEditTime: 2025-03-12 22:15:30
  * @FilePath: /report-background-system/src/views/dataGo/anomaly/util.js
  * @Description: 
  * 
@@ -145,22 +145,36 @@ export function dealColumns(data, type) {
             break;
         case '财务异常指标':
             const levelLists = {}
+            const valueList = []
             sortData = data.sort(wenzistartSort("secondLevel"));
             sortData.forEach(item => {
                 if (!yearList.includes(item.recordDate)) yearList.push(item.recordDate);
-                const fIndex = reData.findIndex((i) => i.dataItem == item.dataItem)
+                const fIndex = valueList.findIndex((i) => i.dataItem === item.dataItem)
                 if (item.dataItem.includes('异常等级')) {
-                    levelLists[item.recordDate + item.dataItem] = item
+                    levelLists[item.recordDate + item.dataItem] = item.dataValue
                 } else {
                     if (fIndex !== -1) {
                         // 已存在
-                        reData[fIndex][item.recordDate] = item.dataValue
+                        valueList[fIndex][item.recordDate] = item.dataValue
                     } else {
-                        reData.push(Object.assign(item, { [item.recordDate]: item.dataValue }))
+                        valueList.push(Object.assign(item, { [item.recordDate]: item.dataValue }))
                     }
                 }
             });
             yearList = yearList.sort((a, b) => Number(a) - Number(b));
+            reData = valueList.map((v) => {
+                let yoy = ""
+                const lastIndex = yearList.length - 1
+                const lastSecondIndex = yearList.length - 2
+                let key = levelLists[yearList[yearList.length - 1] + v.dataItem + '异常等级']
+                if (v[yearList[lastIndex]] && v[yearList[lastSecondIndex]]) {
+                    yoy = Math.round((v[yearList[lastIndex]] - v[yearList[lastSecondIndex]]) / v[yearList[lastSecondIndex]] * 10000) / 10000
+                }
+                return Object.assign(v, {
+                    level: key,
+                    yoy
+                })
+            })
             yearList.forEach((y, index) => {
                 if (index >= (yearList.length - 3)) {
                     analysis.push({
@@ -178,7 +192,7 @@ export function dealColumns(data, type) {
                 if (index == yearList.length - 1) {
                     analysis.push({
                         title: y + '增长率',
-                        dataIndex: 'compName',
+                        dataIndex: 'yoy',
                         customHeaderCell: () => {
                             return {
                                 style: {
@@ -186,10 +200,11 @@ export function dealColumns(data, type) {
                                 }
                             };
                         },
+                        scopedSlots: { customRender: 'yoy' },
                     });
                     analysis.push({
-                        title: '提示等级',
-                        dataIndex: 'dataItemId',
+                        title: yearList[yearList.length - 1] + '异常等级',
+                        dataIndex: 'level',
                         customHeaderCell: () => {
                             return {
                                 style: {
@@ -197,10 +212,11 @@ export function dealColumns(data, type) {
                                 }
                             };
                         },
+                        scopedSlots: { customRender: 'yclevel' },
                     });
                 }
             })
-            console.log(reData)
+            reData = reData.filter((inI) => inI.level && inI.level !== '正常' && inI.level !== '过滤').sort((a, b) => a.id - b.id)
             columns = [
                 {
                     title: '资产负债表重点数据',
@@ -226,35 +242,35 @@ export function dealColumns(data, type) {
                         ...analysis
                     ],
                 }]
-            console.log(columns)
             break;
         case '衍生异常指标':
             const dD = {}
             const valuelist = []
-            const levelList = {}
             sortData = data.sort(wenzistartSort("secondLevel"));
             sortData.forEach(item => {
-                if (!yearList.includes(item.recordDate)) yearList.push(item.recordDate);
-                if (item.dataItem.includes('异常等级')) {
-                    levelList[item.recordDate + item.dataItem] = item
-                } else {
-                    valuelist.push(item)
+                if (!item.dataItem.includes('异常等级')) {
+                    if (!yearList.includes(item.recordDate)) yearList.push(item.recordDate);
+                    const ycIndex = sortData.findIndex((yc) => yc.dataItem === item.dataItem + '异常等级')
+                    const level = ycIndex !== -1 ? sortData[ycIndex].dataValue : ''
+                    if (level && level !== '正常' && level !== '过滤') {
+                        valuelist.push(Object.assign(item, {
+                            level
+                        }))
+                    }
                 }
             });
             yearList = yearList.sort((a, b) => Number(a) - Number(b));
             const yearLength = yearList.length;
+            console.log(valuelist)
+            let maxL = 0
+            let maxYear = null
             yearList.forEach((y, index) => {
                 if (index >= (yearLength - 3)) {
-                    dD[y] = []
-                    // 整理数据
-                    valuelist.forEach((io) => {
-                        if (io.recordDate === y) {
-                            dD[y].push(Object.assign(io, {
-                                levelValue: levelList[io.recordDate + io.dataItem] || '',
-                                [`${y}dataItem`]: io.dataItem || ''
-                            }))
-                        }
-                    })
+                    dD[y] = valuelist.filter((vv) => vv.recordDate === y)
+                    if (maxL < dD[y].length) {
+                        maxL = dD[y].length
+                        maxYear = y
+                    }
                     analysis.push({
                         title: `${y}年衍生指标`,
                         customHeaderCell: () => {
@@ -265,7 +281,7 @@ export function dealColumns(data, type) {
                             };
                         },
                         children: [{
-                            title: '指标名称',
+                            title: `指标名称`,
                             dataIndex: `${y}dataItem`,
                             customHeaderCell: () => {
                                 return {
@@ -276,7 +292,7 @@ export function dealColumns(data, type) {
                             },
                         }, {
                             title: y,
-                            dataIndex: 'dataValue',
+                            dataIndex: `${y}dataValue`,
                             customHeaderCell: () => {
                                 return {
                                     style: {
@@ -285,8 +301,8 @@ export function dealColumns(data, type) {
                                 };
                             },
                         }, {
-                            title: '提示等级',
-                            dataIndex: 'levelValue',
+                            title: '异常等级',
+                            dataIndex: `${y}level`,
                             customHeaderCell: () => {
                                 return {
                                     style: {
@@ -294,14 +310,24 @@ export function dealColumns(data, type) {
                                     }
                                 };
                             },
+                            scopedSlots: { customRender: 'yclevel' },
                         }]
                     });
                 }
             })
-            console.log(dD)
-            console.log(reData)
+            dD[maxYear].forEach((ii, index) => {
+                let inReData = {}
+                for (const key in dD) {
+                    if (Object.prototype.hasOwnProperty.call(dD, key)) {
+                        const element = dD[key][index];
+                        inReData[`${element.recordDate}dataItem`] = element.dataItem;
+                        inReData[`${element.recordDate}dataValue`] = element.dataValue;
+                        inReData[`${element.recordDate}level`] = element.level;
+                    }
+                }
+                reData.push(inReData)
+            })
             columns = analysis
-            console.log(columns)
             break;
     }
     return { reData, columns }
@@ -311,7 +337,7 @@ function wenzistartSort(property) {
     return function (a, b) {
         var value1 = a[property];
         var value2 = b[property];
-        if (!value1 && !value2) {
+        if (!value1 || !value2) {
             return 0
         }
         return value1.localeCompare(value2)
