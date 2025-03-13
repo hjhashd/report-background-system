@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-12 09:53:58
+ * @LastEditTime: 2025-03-13 18:54:55
  * @FilePath: /report-background-system/src/views/dataGo/home/viewReport.vue
  * @Description: 报告预览
  * 
@@ -39,7 +39,7 @@
           </div>
         </div>
         <div class="flex">
-          <div ref="editorContainerRef" class="editor-container" v-if="reportId">
+          <div ref="editorContainerRef" class="editor-container">
             <OnlyOfficeEditor :reportId="reportId" :editorHeight="editorHeight" />
           </div>
           <div class="container-detail right-content" :class="{ 'list-collapsed': isListCollapsed }">
@@ -143,7 +143,7 @@ import {
   updateReportDate,
   updateReport,
   applyReport,
-  setDraftStatus
+  setDraftStatus,
 } from '@/api/report'
 import { OnlyOfficeEditor } from '@/components'
 import EditModal from './editModal.vue'
@@ -181,24 +181,26 @@ export default {
     },
   },
   watch: {
-    isListCollapsed: {
-      handler(v) {
-        if (!v && this.getChangeHeight) {
-          // 获取页面高度
-          this.$nextTick(() => {
-            const editors = this.$refs.editorContainerRef
-            this.editorHeight = editors.offsetHeight + 'px'
-            this.getChangeHeight = false
-          })
-        }
-      },
-    },
+    // isListCollapsed: {
+    //   handler(v) {
+    //     if (!v && this.getChangeHeight) {
+    //       // 获取页面高度
+    //       this.$nextTick(() => {
+    //         const editors = this.$refs.editorContainerRef
+    //         this.editorHeight = editors.offsetHeight + 'px'
+    //         this.getChangeHeight = false
+    //       })
+    //     }
+    //   },
+    // },
   },
   mounted() {
-    this.$nextTick(() => {
-      const editors = this.$refs.editorContainerRef
-      this.editorHeight = editors.offsetHeight + 'px'
-    })
+    setTimeout(() => {
+      this.$nextTick(() => {
+        const editors = this.$refs.editorContainerRef
+        this.editorHeight = editors.offsetHeight + 'px'
+      })
+    }, 1000)
   },
   methods: {
     init() {
