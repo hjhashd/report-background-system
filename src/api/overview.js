@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-26 20:18:59
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-26 21:16:55
+ * @LastEditTime: 2025-03-13 15:48:52
  * @FilePath: /report-background-system/src/api/overview.js
  * @Description: 
  * 
@@ -14,7 +14,7 @@ const overviewAPI = {
     statisticsAnalyze: '/report/statistics/customer/analyze',
     manufacture: '/report/statistics/report/manufacture',
     complete: '/report/statistics/report/complete',
-    getReportList: '/report/entity/list',
+    getReportList: '/report/entity/list'
 }
 
 export function statisticsCount() {

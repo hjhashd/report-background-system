@@ -2,39 +2,48 @@
  * @Author: bekon
  * @Date: 2025-02-18 17:57:40
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-01 08:44:12
+ * @LastEditTime: 2025-03-13 10:47:40
  * @FilePath: /report-background-system/src/components/ReportCardSlider/ReportCardSlider.vue
  * @Description: 
  * 
 -->
 <template>
-  <div class="report-card-slider">
-    <button class="arrow-button prev" @click="prevSlide" :disabled="currentIndex === 0">
-      <a-icon type="left-circle" theme="twoTone" :style="{ fontSize: '18px' }" />
-    </button>
-    <div class="slider-container" ref="slider" v-if="cards.length">
-      <div class="card-wrapper" :style="{ transform: `translateX(-${currentIndex * cardWidth}px)` }">
-        <div class="card-wrapper">
-          <div class="report-card" v-for="(card, index) in cards" :key="index" @click="toReportDetail(card)">
-            <img style="width: 100%" src="@/assets/images/report-bg.png" alt="dark" />
-            <h3 class="line2">{{ card.reportName }}</h3>
+  <a-spin :spinning="loading">
+    <empty v-if="!cards.length"></empty>
+    <div class="report-card-slider" v-else>
+      <button class="arrow-button prev" @click="prevSlide" :disabled="currentIndex === 0">
+        <a-icon type="left-circle" theme="twoTone" :style="{ fontSize: '18px' }" />
+      </button>
+      <div class="slider-container" ref="slider" v-if="cards.length">
+        <div class="card-wrapper" :style="{ transform: `translateX(-${currentIndex * cardWidth}px)` }">
+          <div class="card-wrapper">
+            <div class="report-card" v-for="(card, index) in cards" :key="index" @click="toReportDetail(card)">
+              <img style="width: 100%" src="@/assets/images/report-bg.png" alt="dark" />
+              <h3 class="line2">{{ card.reportName }}</h3>
+            </div>
           </div>
         </div>
       </div>
+      <button class="arrow-button next" @click="nextSlide" :disabled="currentIndex === cards.length - 1">
+        <a-icon type="right-circle" theme="twoTone" :style="{ fontSize: '18px' }" />
+      </button>
     </div>
-    <button class="arrow-button next" @click="nextSlide" :disabled="currentIndex === cards.length - 1">
-      <a-icon type="right-circle" theme="twoTone" :style="{ fontSize: '18px' }" />
-    </button>
-  </div>
+  </a-spin>
 </template>
 
 <script>
+import { Empty } from 'ant-design-vue'
 export default {
   name: 'ReportCardSlider',
+  components: { Empty },
   props: {
     cards: {
       type: Array,
       required: true,
+    },
+    loading: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {
@@ -58,10 +67,10 @@ export default {
         this.$emit('getNextPage')
       }
     },
-    toReportDetail(item){
+    toReportDetail(item) {
       const { $router } = this
       $router.push({ path: `/homePage/viewReport/` + item.id })
-    }
+    },
   },
 }
 </script>

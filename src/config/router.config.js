@@ -21,13 +21,13 @@ export const asyncRouterMap = [
         name: 'home',
         redirect: 'homePage/index',
         component: RouteView,
-        meta: { title: 'menu.home', keepAlive: true, icon: bxAnaalyse, permission: ['home'] },
+        meta: { title: 'menu.home', keepAlive: true, icon: 'home', permission: ['home'] },
         children: [
           {
             path: '/homePage/index',
             name: 'home',
             component: () => import('@/views/dataGo/home'),
-            meta: { title: 'menu.report', keepAlive: true, icon: bxAnaalyse, permission: ['home'] }, 
+            meta: { title: 'menu.report', keepAlive: true, icon: 'profile', permission: ['home'] },
           },
           {
             path: '/homePage/addReport/:reportType',
@@ -50,6 +50,24 @@ export const asyncRouterMap = [
             component: () => import('@/views/dataGo/home/viewCustomerData'),
             meta: { title: 'menu.uploadData', keepAlive: false, permission: ['home'] }
           },
+          {
+            path: '/homePage/reportList',
+            name: 'reportList',
+            component: () => import('@/views/dataGo/home/reportList'),
+            meta: { title: 'menu.reportList', icon: 'file-done', keepAlive: false, permission: ['home'] }
+          },
+          {
+            path: '/homePage/draftList',
+            name: 'draftList',
+            component: () => import('@/views/dataGo/home/draftList'),
+            meta: { title: 'menu.draftList', icon: 'read', keepAlive: false, permission: ['home'] }
+          },
+          {
+            path: '/homePage/qrCodeList',
+            name: 'qrCodeList',
+            component: () => import('@/views/dataGo/home/qrCodeList'),
+            meta: { title: 'menu.qrCodeList', icon: 'qrcode', keepAlive: false, permission: ['home'] }
+          },
         ]
       },
       // overview
@@ -57,21 +75,21 @@ export const asyncRouterMap = [
         path: '/overviewPage/index',
         name: 'overview',
         component: () => import('@/views/dataGo/overview'),
-        meta: { title: 'menu.overview', keepAlive: true, icon: bxAnaalyse, permission: ['overview'] }
+        meta: { title: 'menu.overview', keepAlive: true, icon: 'calculator', permission: ['overview'] }
       },
       // uploadData
       {
         path: '/uploadDataPage/index',
         name: 'uploadData',
         component: () => import('@/views/dataGo/uploadData'),
-        meta: { title: 'menu.uploadData', keepAlive: true, icon: bxAnaalyse, permission: ['uploadData'] }
+        meta: { title: 'menu.uploadData', keepAlive: true, icon: 'cloud', permission: ['uploadData'] }
       },
       // readWord
       {
         path: '/readWordPage/index',
         name: 'readWord',
         component: () => import('@/views/dataGo/readWord'),
-        meta: { title: 'menu.readWord', keepAlive: true, icon: bxAnaalyse, permission: ['readWord'] }
+        meta: { title: 'menu.readWord', keepAlive: true, icon: 'branches', permission: ['readWord'] }
       },
       // anomaly
       {
@@ -86,13 +104,13 @@ export const asyncRouterMap = [
         name: 'clientPage',
         component: RouteView,
         redirect: '/clientPage/index',
-        meta: { title: 'menu.client', keepAlive: true, icon: bxAnaalyse, permission: ['client'] },
+        meta: { title: 'menu.client', keepAlive: true, icon: 'team', permission: ['client'] },
         children: [
           {
             path: '/clientPage/index',
             name: 'client',
             component: () => import('@/views/dataGo/client'),
-            meta: { title: 'menu.client', keepAlive: false, permission: ['client'] }
+            meta: { title: 'menu.client', keepAlive: false, icon: 'team', permission: ['client'] }
           },]
       },
 

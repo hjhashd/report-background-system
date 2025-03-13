@@ -1,9 +1,18 @@
+/*
+ * @Author: bekon
+ * @Date: 2022-10-10 22:31:07
+ * @LastEditors: bekon
+ * @LastEditTime: 2025-03-13 09:54:28
+ * @FilePath: /report-background-system/src/locales/lang/zh-CN/user.js
+ * @Description: 
+ * 
+ */
 export default {
   'user.login.userName': '用户名',
   'user.login.password': '密码',
-  'user.login.username.placeholder': '账户: admin',
-  'user.login.password.placeholder': '密码: admin or ant.design',
-  'user.login.message-invalid-credentials': '账户或密码错误（admin/ant.design）',
+  'user.login.username.placeholder': '用户名',
+  'user.login.password.placeholder': '密码',
+  'user.login.message-invalid-credentials': '账户或密码错误',
   'user.login.message-invalid-verification-code': '验证码错误',
   'user.login.tab-login-credentials': '账户密码登录',
   'user.login.tab-login-mobile': '手机号登录',

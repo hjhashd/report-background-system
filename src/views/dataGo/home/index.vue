@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-25 15:31:43
+ * @LastEditTime: 2025-03-13 10:49:27
  * @FilePath: /report-background-system/src/views/dataGo/home/index.vue
  * @Description: 主页
  * 
@@ -30,7 +30,12 @@
           <div class="flex home-part-title-right flex-1">
             <div class="flex flex-center">
               <div class="right-item-title">报告类型：</div>
-              <a-select v-model="finishedReportTypeSelected" style="width: 200px" @change="finishedReportTypeChange">
+              <a-select
+                v-model="finishedReportTypeSelected"
+                style="width: 200px"
+                @change="finishedReportTypeChange"
+                :allowClear="true"
+              >
                 <a-select-option v-for="item in reportTypeList" :key="item.type" :value="item.type">
                   {{ item.name }}
                 </a-select-option>
@@ -43,11 +48,13 @@
                 style="width: 200px"
                 placeholder="输入报告名称"
                 @blur="finishedReportSearchChange"
+                @pressEnter="finishedReportSearchChange"
+                :allowClear="true"
               />
             </div>
           </div>
         </div>
-        <ReportCardSlider :cards="finishedReportList" @getNextPage="getReportFinishedList" />
+        <ReportCardSlider :cards="finishedReportList" :loading="finishedLoading" @getNextPage="getReportFinishedList" />
       </div>
       <div class="home-part-box">
         <div class="flex flex-center home-part-title">
@@ -55,7 +62,7 @@
           <div class="flex home-part-title-right flex-1">
             <div class="flex flex-center">
               <div class="right-item-title">报告类型：</div>
-              <a-select v-model="draftTypeSelected" style="width: 200px" @change="draftTypeChange">
+              <a-select v-model="draftTypeSelected" style="width: 200px" @change="draftTypeChange" :allowClear="true">
                 <a-select-option v-for="item in reportTypeList" :key="item.type" :value="item.type">
                   {{ item.name }}
                 </a-select-option>
@@ -68,11 +75,13 @@
                 style="width: 200px"
                 placeholder="输入草稿名称"
                 @blur="draftSearchChange"
+                @pressEnter="draftSearchChange"
+                :allowClear="true"
               />
             </div>
           </div>
         </div>
-        <ReportCardSlider :cards="draftList" @getNextPage="getDraftList" />
+        <ReportCardSlider :cards="draftList" :loading="draftLoading" @getNextPage="getDraftList" />
       </div>
     </div>
     <a-modal v-model="visible" title="新增报告" @ok="handleOk">
@@ -111,6 +120,8 @@ export default {
   data() {
     return {
       firstLoading: true,
+      finishedLoading: true,
+      draftLoading: true,
       reportTypeList,
       finishedReportTypeSelected: null,
       finishedReportSearch: null,
@@ -180,55 +191,73 @@ export default {
       this.visible = false
     },
     toPage(type) {
-      console.log('typeid :>> ', type)
       this.$router.push({ path: '/homePage/addReport/' + type })
     },
     // 获取已完成报告列表
-    getReportFinishedList() {
+    getReportFinishedList(status) {
+      this.finishedLoading = true
       return new Promise((resolve, reject) => {
         if (
           this.firstLoading ||
-          this.finishedRequest.total > this.finishedRequest.pageNum * this.finishedRequest.pageSize
+          this.finishedRequest.total > this.finishedRequest.pageNum * this.finishedRequest.pageSize ||
+          status == 'load'
         ) {
           reportList(this.finishedRequest)
             .then((res) => {
               this.finishedReportList = res.rows
               this.finishedRequest.total = res.total
               resolve(true)
+              this.finishedLoading = false
             })
             .catch((err) => {
+              this.finishedLoading = false
               reject(err)
             })
         }
       })
     },
     // 获取草稿箱列表
-    getDraftList() {
+    getDraftList(status) {
+      this.draftLoading = true
       return new Promise((resolve, reject) => {
-        if (this.firstLoading || this.draftRequest.total > this.draftRequest.pageNum * this.draftRequest.pageSize) {
+        if (
+          this.firstLoading ||
+          this.draftRequest.total > this.draftRequest.pageNum * this.draftRequest.pageSize ||
+          status == 'load'
+        ) {
           reportList(this.draftRequest)
             .then((res) => {
+              this.draftLoading = false
               this.draftList = res.rows
               this.draftRequest.total = res.total
               resolve(true)
             })
             .catch((err) => {
+              this.draftLoading = false
               reject(err)
             })
         }
       })
     },
     finishedReportTypeChange(v) {
-      console.log(v)
+      this.finishedRequest.reportType = v
+      this.finishedRequest.pageNum = 1
+      this.getReportFinishedList('load')
     },
     finishedReportSearchChange(v) {
-      console.log(v)
+      this.finishedRequest.reportName = this.finishedReportSearch
+      this.finishedRequest.pageNum = 1
+      this.getReportFinishedList('load')
     },
     draftTypeChange(v) {
-      console.log(v)
+      this.draftRequest.reportType = v
+      this.draftRequest.pageNum = 1
+      this.getDraftList('load')
     },
     draftSearchChange(v) {
-      console.log(v)
+      this.draftRequest.reportName = this.draftSearch
+      this.draftRequest.pageNum = 1
+      this.getDraftList('load')
     },
   },
 }

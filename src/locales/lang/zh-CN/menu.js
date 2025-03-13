@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2022-10-10 22:31:07
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-27 16:04:21
+ * @LastEditTime: 2025-03-13 15:45:38
  * @FilePath: /report-background-system/src/locales/lang/zh-CN/menu.js
  * @Description: 
  * 
@@ -57,4 +57,7 @@ export default {
     'menu.home.addReport': '新增报告',
     'menu.home.viewReport': '报告预览',
     'menu.report': '报告',
+    'menu.reportList': '已完成报告列表',
+    'menu.draftList': '草稿箱',
+    'menu.qrCodeList': '二维码列表',
 }
