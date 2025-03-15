@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-15 16:19:30
+ * @LastEditTime: 2025-03-15 16:23:51
  * @FilePath: /report-background-system/src/views/dataGo/home/addReport.vue
  * @Description: 
  * 
@@ -75,7 +75,7 @@ export default {
       chooseModal: [],
       chooseCustomer: null,
       addLoading: false,
-      addCustomerPop: true,
+      addCustomerPop: false,
     }
   },
   created() {
