@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-12 13:53:58
+ * @LastEditTime: 2025-03-15 14:24:21
  * @FilePath: /report-background-system/src/api/report.js
  * @Description: 
  * 
@@ -192,7 +192,7 @@ export function getModalList(id) {
 export function updateReport(id) {
     return request({
         url: reportAPI.updateReport + id,
-        method: 'get',
+        method: 'post',
     })
 }
 
@@ -200,7 +200,7 @@ export function updateReport(id) {
 export function applyReport(id) {
     return request({
         url: reportAPI.applyReport + id,
-        method: 'get',
+        method: 'post',
     })
 }
 

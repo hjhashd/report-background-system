@@ -113,7 +113,13 @@
       </a-form-item>
 
       <a-form-item>
-        <cascader :options="bankList" :show-search="{ filter }" placeholder="请选择所属银行" @change="onBankChoose">
+        <cascader
+          :allowClear="true"
+          :options="bankList"
+          :show-search="{ filter }"
+          placeholder="请选择所属银行"
+          @change="onBankChoose"
+        >
         </cascader>
       </a-form-item>
 
@@ -232,6 +238,15 @@ export default {
       return path.some((option) => option.label.toLowerCase().indexOf(inputValue.toLowerCase()) > -1)
     },
     onBankChoose(value, selectedOptions) {
+      if (!selectedOptions) {
+        this.selectedBank = {
+          bankName1: '',
+          bankName2: '',
+          bankId1: null,
+          bankId2: null,
+        }
+        return
+      }
       selectedOptions.forEach((item) => {
         if (!item.pid) {
           this.selectedBank.bankId1 = item.value
@@ -390,6 +405,9 @@ export default {
   .ant-input-group-addon:first-child {
     background-color: #fff;
   }
+}
+.anticon-close-circle {
+  z-index: 1000;
 }
 </style>
 <style lang="less" scoped>

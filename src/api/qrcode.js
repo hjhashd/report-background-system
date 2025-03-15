@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:03:14
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-21 14:06:29
+ * @LastEditTime: 2025-03-15 15:17:38
  * @FilePath: /report-background-system/src/api/qrcode.js
  * @Description:二维码相关接口 
  * 
@@ -15,6 +15,8 @@ const qrCodeApi = {
     getQRCodeList: '/report/agent/code/list',
     changeQRCode: '/report/agent/code/update',
     getQRCodeDetail: '/report/agent/code/info/',
+    searchCustomer: '/system/agent/user/check/customer',
+    addCustomerQ: '/system/agent/user/customer/add'
 }
 
 export function bankTree() {
@@ -52,5 +54,21 @@ export function getQRCodeDetail(id) {
     return request({
         url: qrCodeApi.getQRCodeDetail + id,
         method: 'get'
+    })
+}
+
+export function searchCustomer(query) {
+    return request({
+        url: qrCodeApi.searchCustomer,
+        method: 'post',
+        data: query
+    })
+}
+
+export function addCustomerQ(query) {
+    return request({
+        url: qrCodeApi.addCustomerQ,
+        method: 'post',
+        data: query
     })
 }

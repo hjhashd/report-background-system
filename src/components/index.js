@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2022-10-10 22:31:07
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-27 20:21:23
+ * @LastEditTime: 2025-03-15 14:54:23
  * @FilePath: /report-background-system/src/components/index.js
  * @Description: 
  * 
@@ -35,9 +35,10 @@ import TagSelect from '@/components/TagSelect'
 import StandardFormRow from '@/components/StandardFormRow'
 import ArticleListContent from '@/components/ArticleListContent'
 import ReportCardSlider from '@/components/ReportCardSlider'
-import buildQRCode from '@/components/buildQRCode/buildQRCode.vue';
+import buildQRCode from '@/components/buildQRCode/buildQRCode.vue'
 import Dialog from '@/components/Dialog'
 import OnlyOfficeEditor from '@/components/OnlyOfficeEditor/OnlyOfficeEditor.vue'
+import AddCustomer from '@/components/AddCustomer/addCustomer.vue';
 
 export {
   AvatarList,
@@ -67,5 +68,6 @@ export {
   ReportCardSlider,
   Dialog,
   buildQRCode,
-  OnlyOfficeEditor
+  OnlyOfficeEditor,
+  AddCustomer
 }

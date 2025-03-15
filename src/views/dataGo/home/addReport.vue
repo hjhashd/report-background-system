@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-27 17:19:56
+ * @LastEditTime: 2025-03-15 16:19:30
  * @FilePath: /report-background-system/src/views/dataGo/home/addReport.vue
  * @Description: 
  * 
@@ -34,7 +34,7 @@
               </a-select>
             </div>
             <h2>报告模板</h2>
-            <a-checkbox-group @change="onChange">
+            <a-checkbox-group v-model="chooseModal" @change="onChange">
               <a-row>
                 <a-col :span="24" v-for="item in modalList" :key="item.templateName" style="margin-bottom: 10px">
                   <a-checkbox :value="item.templateName">
@@ -52,23 +52,18 @@
         </a-col>
       </a-row>
     </div>
-    <a-modal v-model="addCustomerPop" title="新增客户" @ok="handleOk">
-      <div class="flex flex-center">
-        <div class="right-item-title">选择新增报告类型：</div>
-        <a-select v-model="addReportType" style="width: 200px">
-          <a-select-option v-for="item in reportTypeList" :key="item.type" :value="item.type">
-            {{ item.name }}
-          </a-select-option>
-        </a-select>
-      </div>
+    <a-modal :footer="null" v-model="addCustomerPop" title="企业信息查询" @ok="confirmCustomer" @cancel="cancelPop">
+      <AddCustomer @cancelPop="cancelPop"></AddCustomer>
     </a-modal>
   </page-header-wrapper>
 </template>
 
 <script>
+import { AddCustomer } from '@/components'
 import { getCustomerList, getReportModal, getModalInfo } from '@/api/report'
 export default {
   name: 'addReport',
+  components: { AddCustomer },
   data() {
     return {
       reportType: null,
@@ -77,10 +72,10 @@ export default {
       modalInfo: [],
       modalList: [],
       currentModalInfo: null,
-      chooseModal: null,
+      chooseModal: [],
       chooseCustomer: null,
       addLoading: false,
-      addCustomerPop: false,
+      addCustomerPop: true,
     }
   },
   created() {
@@ -95,6 +90,7 @@ export default {
       this.getModalInfo()
     },
     getCustomerList() {
+      this.customers = []
       getCustomerList({})
         .then((res) => {
           const reD = res.data
@@ -120,11 +116,22 @@ export default {
     },
     getReportModal() {
       getReportModal({ type: this.reportType }).then((res) => {
-        this.modalList = res.data
+        // 默认全选
+        this.modalList = res.data.map((v) => {
+          this.chooseModal.push(v.templateName)
+          return v
+        })
       })
     },
     onChange(v) {
       this.chooseModal = v
+    },
+    cancelPop(v) {
+      if (v == 'update') {
+        this.getCustomerList()
+      }
+      this.addCustomerPop = false
+      this.addLoading = false
     },
     customerHandle(v) {
       this.chooseCustomer = this.customers.find((item) => item.creditCode == v)
@@ -156,6 +163,7 @@ export default {
       this.addCustomerPop = true
       this.addLoading = true
     },
+    confirmCustomer() {},
   },
 }
 </script>

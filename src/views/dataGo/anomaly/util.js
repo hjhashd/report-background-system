@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-03-12 13:54:33
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-12 22:15:30
+ * @LastEditTime: 2025-03-15 14:30:34
  * @FilePath: /report-background-system/src/views/dataGo/anomaly/util.js
  * @Description: 
  * 
@@ -261,7 +261,6 @@ export function dealColumns(data, type) {
             });
             yearList = yearList.sort((a, b) => Number(a) - Number(b));
             const yearLength = yearList.length;
-            console.log(valuelist)
             let maxL = 0
             let maxYear = null
             yearList.forEach((y, index) => {
@@ -315,18 +314,20 @@ export function dealColumns(data, type) {
                     });
                 }
             })
-            dD[maxYear].forEach((ii, index) => {
-                let inReData = {}
-                for (const key in dD) {
-                    if (Object.prototype.hasOwnProperty.call(dD, key)) {
-                        const element = dD[key][index];
-                        inReData[`${element.recordDate}dataItem`] = element.dataItem;
-                        inReData[`${element.recordDate}dataValue`] = element.dataValue;
-                        inReData[`${element.recordDate}level`] = element.level;
+            if (maxYear) {
+                dD[maxYear].forEach((ii, index) => {
+                    let inReData = {}
+                    for (const key in dD) {
+                        if (Object.prototype.hasOwnProperty.call(dD, key)) {
+                            const element = dD[key][index];
+                            inReData[`${element.recordDate}dataItem`] = element.dataItem;
+                            inReData[`${element.recordDate}dataValue`] = element.dataValue;
+                            inReData[`${element.recordDate}level`] = element.level;
+                        }
                     }
-                }
-                reData.push(inReData)
-            })
+                    reData.push(inReData)
+                })
+            }
             columns = analysis
             break;
     }

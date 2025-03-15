@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-13 18:54:55
+ * @LastEditTime: 2025-03-15 14:22:11
  * @FilePath: /report-background-system/src/views/dataGo/home/viewReport.vue
  * @Description: 报告预览
  * 
@@ -225,13 +225,22 @@ export default {
         onOk: () => {
           this.pageLoading = true
           updateReport(this.reportDetail.id).then((res) => {
-            $notification['success']({
-              message: '通知：',
-              description: `更新报告数据成功`,
-              duration: 6,
-            })
-            this.pageLoading = false
-            this.init()
+            if (res.code != 200) {
+              this.pageLoading = false
+              $notification['error']({
+                message: '错误通知：',
+                description: res.msg,
+                duration: 8,
+              })
+            } else {
+              $notification['success']({
+                message: '通知：',
+                description: `更新报告数据成功`,
+                duration: 6,
+              })
+              this.pageLoading = false
+              this.init()
+            }
           })
         },
       })

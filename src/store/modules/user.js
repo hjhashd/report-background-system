@@ -58,11 +58,14 @@ const user = {
     Login({ commit }, userInfo) {
       return new Promise((resolve, reject) => {
         AILogin(userInfo).then(response => {
-          console.log(response)
-          const result = response.data
-          storage.set(ACCESS_TOKEN, result.access_token, new Date().getTime() + 7 * 24 * 60 * 60 * 1000)
-          commit('SET_TOKEN', result.access_token)
-          resolve()
+          try {
+            const result = response.data
+            storage.set(ACCESS_TOKEN, result.access_token, new Date().getTime() + 7 * 24 * 60 * 60 * 1000)
+            commit('SET_TOKEN', result.access_token)
+            resolve()
+          } catch (error) {
+            reject(response)
+          }
         }).catch(error => {
           reject(error)
         })
@@ -73,10 +76,14 @@ const user = {
     AILoginByCode({ commit }, userInfo) {
       return new Promise((resolve, reject) => {
         AILoginByCode(userInfo).then(response => {
-          const result = response.result
-          storage.set(ACCESS_TOKEN, result.token, new Date().getTime() + 7 * 24 * 60 * 60 * 1000)
-          commit('SET_TOKEN', result.token)
-          resolve()
+          try {
+            const result = response.result
+            storage.set(ACCESS_TOKEN, result.token, new Date().getTime() + 7 * 24 * 60 * 60 * 1000)
+            commit('SET_TOKEN', result.token)
+            resolve()
+          } catch (error) {
+            reject(response)
+          }
         }).catch(error => {
           reject(error)
         })
