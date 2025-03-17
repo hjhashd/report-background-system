@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-17 11:13:11
+ * @LastEditTime: 2025-03-17 13:41:07
  * @FilePath: /report-background-system/src/views/dataGo/home/viewReport.vue
  * @Description: 报告预览
  * 
@@ -128,7 +128,7 @@
           width="85vw"
           @close="onClose"
         >
-          <edit-modal :reportDetail="reportDetail"></edit-modal>
+          <edit-modal :reportDetail="reportDetail" @refreshEdit="updateEdit"></edit-modal>
         </a-drawer>
       </div>
     </a-spin>
@@ -286,6 +286,9 @@ export default {
     },
     onClose() {
       this.visible = false
+    },
+    updateEdit() {
+      this.$refs.editorR.refreshEditor()
     },
     updateTable(v) {
       // 获取a-upload组件实例

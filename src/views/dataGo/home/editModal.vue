@@ -169,13 +169,24 @@ export default {
       this.applyLoading = true
       useReportContent(query)
         .then((res) => {
-          $notification['success']({
-            message: '通知：',
-            description: '操作成功',
-            duration: 8,
-          })
-          this.applyLoading = false
-          this.getModalContent()
+          if (res.code != 200) {
+            $notification['error']({
+              message: '错误通知：',
+              description: `${res.msg}`,
+              duration: 8,
+            })
+            this.applyLoading = false
+            this.getModalContent()
+          } else {
+            this.$emit('refreshEdit')
+            $notification['success']({
+              message: '通知：',
+              description: '操作成功',
+              duration: 8,
+            })
+            this.applyLoading = false
+            this.getModalContent()
+          }
         })
         .catch((err) => {
           $notification['error']({
