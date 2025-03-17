@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-26 11:22:54
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-17 13:43:51
+ * @LastEditTime: 2025-03-17 13:46:30
  * @FilePath: /report-background-system/src/views/dataGo/home/viewCustomerData.vue
  * @Description: 
  * 
@@ -25,7 +25,9 @@
             <span>所选模板：</span>
           </div>
           <div style="flex: 1">
-            <span v-for="item in modalList" :key="item">{{ item }}、</span>
+            <span v-for="(item, index) in modalList" :key="item"
+              >{{ item }}{{ index < modalList.length - 1 ? '、' : '' }}</span
+            >
           </div>
         </div>
       </div>
