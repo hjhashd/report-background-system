@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-15 14:22:11
+ * @LastEditTime: 2025-03-17 11:13:11
  * @FilePath: /report-background-system/src/views/dataGo/home/viewReport.vue
  * @Description: 报告预览
  * 
@@ -40,7 +40,7 @@
         </div>
         <div class="flex">
           <div ref="editorContainerRef" class="editor-container">
-            <OnlyOfficeEditor :reportId="reportId" :editorHeight="editorHeight" />
+            <OnlyOfficeEditor ref="editorR" :reportId="reportId" :editorHeight="editorHeight" />
           </div>
           <div class="container-detail right-content" :class="{ 'list-collapsed': isListCollapsed }">
             <div class="flex-row-spacebetween content-item">
@@ -181,18 +181,18 @@ export default {
     },
   },
   watch: {
-    // isListCollapsed: {
-    //   handler(v) {
-    //     if (!v && this.getChangeHeight) {
-    //       // 获取页面高度
-    //       this.$nextTick(() => {
-    //         const editors = this.$refs.editorContainerRef
-    //         this.editorHeight = editors.offsetHeight + 'px'
-    //         this.getChangeHeight = false
-    //       })
-    //     }
-    //   },
-    // },
+    isListCollapsed: {
+      handler(v) {
+        if (!v && this.getChangeHeight) {
+          // 获取页面高度
+          this.$nextTick(() => {
+            const editors = this.$refs.editorContainerRef
+            this.editorHeight = editors.offsetHeight + 'px'
+            this.getChangeHeight = false
+          })
+        }
+      },
+    },
   },
   mounted() {
     setTimeout(() => {
@@ -240,6 +240,7 @@ export default {
               })
               this.pageLoading = false
               this.init()
+              this.$refs.editorR.refreshEditor()
             }
           })
         },
@@ -259,6 +260,7 @@ export default {
       this.pageLoading = true
       setDraftStatus(this.reportDetail.id).then((res) => {
         this.pageLoading = false
+        this.$refs.editorR.refreshEditor()
         $notification['success']({
           message: '通知：',
           description: `另存为草稿成功`,
@@ -271,6 +273,7 @@ export default {
       this.pageLoading = true
       applyReport(this.reportDetail.id).then((res) => {
         this.pageLoading = false
+        this.$refs.editorR.refreshEditor()
         $notification['success']({
           message: '通知：',
           description: `发布成功`,

@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-26 11:22:54
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-15 14:18:23
+ * @LastEditTime: 2025-03-17 11:00:28
  * @FilePath: /report-background-system/src/views/dataGo/home/viewCustomerData.vue
  * @Description: 
  * 
@@ -70,7 +70,12 @@ export default {
   },
   methods: {
     initData() {
-      customerData({ creditCode: this.queryParams.creditCode })
+      const query = {
+        creditCode: this.queryParams.creditCode,
+        reportType: this.$route.query && this.$route.query.reportType ? this.$route.query.reportType : null,
+        template: this.$route.query && this.$route.query.template ? JSON.parse(this.$route.query.template) : null,
+      }
+      customerData(query)
         .then((res) => {
           this.customerUploadList = classifyDataByClassName(res.data)
         })

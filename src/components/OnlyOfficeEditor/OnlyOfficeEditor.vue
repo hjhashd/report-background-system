@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-27 20:20:34
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-05 11:45:50
+ * @LastEditTime: 2025-03-17 11:09:22
  * @FilePath: /report-background-system/src/components/OnlyOfficeEditor/OnlyOfficeEditor.vue
  * @Description: 
  * 
@@ -49,13 +49,12 @@ export default {
       this.config = await wopiFile(this.reportId)
       this.editor = new DocsAPI.DocEditor('onlyoffice-container', this.config)
     },
-  },
-  beforeDestroy() {
-    if (this.editor) {
-      this.editor.destroy()
-    }
-  },
-  method: {
+    refreshEditor() {
+      if (this.editor) {
+        this.editor.destroyEditor()
+      }
+      this.initReport()
+    },
     onDocumentReady() {
       console.success('Document is loaded')
     },
@@ -74,6 +73,11 @@ export default {
           break
       }
     },
+  },
+  beforeDestroy() {
+    if (this.editor) {
+      this.editor.destroyEditor()
+    }
   },
 }
 </script>
