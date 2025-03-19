@@ -8,7 +8,7 @@
           type="text"
           placeholder="姓名"
           v-decorator="[
-            'username',
+            'userName',
             {
               rules: [{ required: true, message: $t('user.email.required') }],
               validateTrigger: ['change', 'blur'],
