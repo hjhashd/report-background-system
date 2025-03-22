@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-26 20:29:58
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-07 18:00:18
+ * @LastEditTime: 2025-03-22 21:01:23
  * @FilePath: /report-background-system/src/views/dataGo/overview/util.js
  * @Description: 
  * 
@@ -20,7 +20,12 @@ export const overviewObj = {
 export const lineOptions = {
     title: {
         text: '报告制作耗时统计',
+        textStyle: {
+            'font-size': '22px',
+            'color': '#488FD7'
+        }
     },
+    smooth: true,
     grid: {
         containLabel: true,
         bottom: 2,
@@ -57,6 +62,10 @@ export const lineOptions = {
 export const barOptions = {
     title: {
         text: '新增客户数',
+        textStyle: {
+            'font-size': '22px',
+            'color': '#488FD7'
+        }
     },
     grid: {
         containLabel: true,
@@ -82,11 +91,19 @@ export const barOptions = {
             name: '数据1',
             type: 'bar',
             data: [],
+            itemStyle: {
+                color: '#77fbf6',
+                width: '22px'
+            }
         },
         {
             name: '数据2',
             type: 'bar',
             data: [],
+            itemStyle: {
+                color: '#3467f6',
+                width: '22px'
+            }
         },
     ],
 }
@@ -98,15 +115,10 @@ export const columns = [
         key: 'id',
     },
     {
-        title: '报告名称',
-        dataIndex: 'reportName',
-        key: 'reportName',
-    },
-    {
         title: '报告类型',
         dataIndex: 'reportType',
         key: 'reportType',
-        scopedSlots: { customRender: 'reportType' }, 
+        scopedSlots: { customRender: 'reportType' },
     },
     {
         title: '企业名称',
@@ -117,12 +129,13 @@ export const columns = [
         title: '报告进度',
         dataIndex: 'status',
         key: 'status',
-        scopedSlots: { customRender: 'status' }, 
+        scopedSlots: { customRender: 'status' },
     },
     {
-        title: '描述',
-        dataIndex: 'remark',
-        key: 'remark',
+        title: '累计处理时长',
+        dataIndex: 'avgOperationTime',
+        key: 'avgOperationTime',
+        scopedSlots: { customRender: 'avgOperationTime' },
     },
     {
         title: '开始时间',
@@ -133,12 +146,6 @@ export const columns = [
         title: '最新修改时间',
         dataIndex: 'updateTime',
         key: 'updateTime',
-    },
-    {
-        title: '累计处理时长',
-        dataIndex: 'avgOperationTime',
-        key: 'avgOperationTime',
-        scopedSlots: { customRender: 'avgOperationTime' },
     },
     {
         title: '操作',

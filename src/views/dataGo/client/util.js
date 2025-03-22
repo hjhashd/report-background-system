@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 15:22:28
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-08 12:29:29
+ * @LastEditTime: 2025-03-22 16:15:42
  * @FilePath: /report-background-system/src/views/dataGo/client/util.js
  * @Description: 
  * 
@@ -47,24 +47,6 @@ export const graftFun = [
     },
 ]
 
-export const coopFun = [
-    {
-        name: '采集',
-        icon: 'redo',
-        color: '#5ec269',
-    },
-    {
-        name: '上传表',
-        icon: 'upload',
-        color: '#4e80ee',
-    },
-    {
-        name: '识别文件',
-        icon: 'file-pdf',
-        color: '#9d59ef',
-    },
-]
-
 export const columns = [
     {
         width: '20%',
@@ -97,5 +79,89 @@ export const columns = [
         title: '操作',
         dataIndex: 'tool',
         scopedSlots: { customRender: 'tool' },
+    },
+]
+
+export const newColumns = [
+    {
+        title: '序号',
+        dataIndex: 'id',
+        key: 'id',
+        customHeaderCell: () => {
+            return {
+                style: {
+                    backgroundColor: '#EFF6FF',
+                    color: '#656D92',
+                }
+            };
+        },
+    },
+    {
+        title: '文档名称',
+        dataIndex: 'tableNameZh',
+        key: 'tableNameZh',
+        customHeaderCell: () => {
+            return {
+                style: {
+                    backgroundColor: '#EFF6FF',
+                    color: '#656D92',
+                }
+            };
+        },
+    },
+    {
+        title: '数据类型',
+        dataIndex: 'className',
+        key: 'className',
+        scopedSlots: { customRender: 'className' },
+        customHeaderCell: () => {
+            return {
+                style: {
+                    backgroundColor: '#EFF6FF',
+                    color: '#656D92',
+                }
+            };
+        },
+    },
+    {
+        title: '上传状态',
+        dataIndex: 'status',
+        key: 'status',
+        scopedSlots: { customRender: 'status' },
+        customHeaderCell: () => {
+            return {
+                style: {
+                    backgroundColor: '#EFF6FF',
+                    color: '#656D92',
+                }
+            };
+        },
+    },
+    {
+        title: '最近操作时间',
+        dataIndex: 'operateTime',
+        key: 'operateTime',
+        scopedSlots: { customRender: 'operateTime' },
+        customHeaderCell: () => {
+            return {
+                style: {
+                    backgroundColor: '#EFF6FF',
+                    color: '#656D92',
+                }
+            };
+        },
+    },
+    {
+        title: '操作',
+        dataIndex: 'tool',
+        scopedSlots: { customRender: 'tool' },
+        customHeaderCell: () => {
+            return {
+                style: {
+                    backgroundColor: '#EFF6FF',
+                    color: '#656D92',
+                }
+            };
+        },
     },
 ]

@@ -165,6 +165,7 @@ const user = {
             const num = res.data[key]
             reShow.push({
               name: overviewObj[key],
+              src: require(`@/assets/images/${key}.png`),
               sum: num,
             })
           }

@@ -318,10 +318,12 @@ export default {
             })
             return
           }
+          this.registerBtn = true
           state.passwordLevelChecked = false
           let request = Object.assign(values, this.selectedBank)
           delete request.password2
           AIRegister(request).then((res) => {
+            this.registerBtn = false
             if (res.code == 200) {
               $notification['success']({
                 message: '提示',
@@ -418,7 +420,7 @@ export default {
     font-weight: bold;
   }
   .login-btn {
-    background: #1b69ff;
+    background: #1890ff;
     border-radius: 21px;
     font-family: PingFangSC-Regular;
     color: rgba(255, 255, 255, 0.98);
@@ -463,7 +465,7 @@ export default {
 .layout-input /deep/ .to-select {
   font-family: PingFangSC-Regular;
   font-size: 14px;
-  color: #1b69ff;
+  color: #1890ff;
   letter-spacing: 0;
   font-weight: 400;
   cursor: pointer;
@@ -473,11 +475,11 @@ export default {
   line-height: 1;
   .xieyi {
     font-family: PingFangSC-Regular;
-    color: #1b69ff;
+    color: #1890ff;
     font-weight: 400;
     cursor: pointer;
     &:hover {
-      border-bottom: 1px solid #1b69ff;
+      border-bottom: 1px solid #1890ff;
     }
   }
 }

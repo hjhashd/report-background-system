@@ -54,8 +54,8 @@ export default {
   .container {
     width: 100%;
     min-height: 100%;
-    background: #f0f2f5 url(~@/assets/background.svg) no-repeat 50%;
-    background-size: 100%;
+    background: #f0f2f5 url(~@/assets/images/index_bg.jpg) no-repeat;
+    background-size: 100% 100%;
     //padding: 50px 0 84px;
     position: relative;
     display: flex;
@@ -80,7 +80,7 @@ export default {
     }
 
     .user-layout-content {
-      margin-right: 200px;
+      margin-right: 191px;
       padding: 32px 24px 24px;
       background: #ffffff url(~@/assets/images/login-box-bg.png) no-repeat;
       background-size: 100% 100%;

@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-15 16:23:51
+ * @LastEditTime: 2025-03-22 16:01:20
  * @FilePath: /report-background-system/src/views/dataGo/home/addReport.vue
  * @Description: 
  * 
@@ -10,64 +10,122 @@
 <template>
   <page-header-wrapper>
     <div class="page-content">
-      <a-row>
-        <a-col :span="16">
-          <div v-if="currentModalInfo" class="modal-port">
-            <img :src="currentModalInfo.typeImage" alt="" />
-          </div>
-        </a-col>
-        <a-col :span="8">
-          <div class="model-choose">
-            <div class="flex-row-spacebetween">
-              <h2>客户</h2>
-              <a-button icon="user-add" :loading="addLoading" style="width: 120px" @click="addCustomer"
-                >新增客户</a-button
+      <data-go-tabs :tab="reportTypeList" @changeTab="changeTab">
+        <div class="flex add-report-page">
+          <div class="left-box">
+            <h1 style="text-align: center; font-size: 32px">报告目录</h1>
+            <div class="flex">
+              <div
+                class="mini-tab flex-1"
+                :class="{ active: tabA == item.type }"
+                v-for="item in tabs"
+                :key="item.type"
+                @click="tabA = item.type"
               >
+                {{ item.name }}
+              </div>
             </div>
-            <div class="search-item">
-              <img style="width: 18px; height: 18px" src="@/assets/images/customer.png" alt="dark" />
-              <span>选择客户：</span>
-              <a-select style="width: 60%" placeholder="选择查询客户" @change="customerHandle">
-                <a-select-option v-for="(cu, index) in customers" :value="cu.creditCode" :key="index">
-                  {{ cu.enterpriseName }}
-                </a-select-option>
-              </a-select>
-            </div>
-            <h2>报告模板</h2>
-            <a-checkbox-group v-model="chooseModal" @change="onChange">
-              <a-row>
-                <a-col :span="24" v-for="item in modalList" :key="item.templateName" style="margin-bottom: 10px">
-                  <a-checkbox :value="item.templateName">
-                    <span class="modal-title">{{ item.templateName }}</span>
-                  </a-checkbox>
-                </a-col>
-              </a-row>
-            </a-checkbox-group>
-            <div class="button-group">
-              <a-button :loading="applyLoading" style="width: 80%; height: 40px" @click="buildReport"
-                >新建报告</a-button
-              >
+            <div class="model-choose">
+              <div v-if="tabA == 2" style="margin-top: 20px">
+                <div class="flex-row-spacebetween">
+                  <a-input-search
+                    @change="searchCustomer"
+                    placeholder="输入统一社会信用代码/企业名称"
+                    style="width: 100%"
+                  />
+                  <a-tooltip placement="top">
+                    <template slot="title">
+                      <span>新建客户</span>
+                    </template>
+                    <a-button icon="user-add" :loading="addLoading" @click="addCustomer"></a-button>
+                  </a-tooltip>
+                </div>
+                <div style="margin-top: 20px; max-height: 360px; overflow-x: hidden; overflow-y: scroll">
+                  <a-radio-group v-model="chooseCustomer">
+                    <a-radio v-for="(cu, index) in customers" :value="cu" :key="index">
+                      <a-tooltip placement="top">
+                        <template slot="title">
+                          <span>
+                            {{ cu.enterpriseName }}
+                          </span>
+                        </template>
+                        <span class="hh single-line-text">
+                          {{ cu.enterpriseName }}
+                        </span>
+                      </a-tooltip>
+                    </a-radio>
+                  </a-radio-group>
+                </div>
+              </div>
+              <div v-else style="margin-top: 20px">
+                <a-checkbox-group v-model="chooseModal" @change="onChange">
+                  <a-row>
+                    <a-col :span="24" v-for="item in modalList" :key="item.templateName" style="margin-bottom: 10px">
+                      <a-checkbox :value="item.templateName">
+                        <span class="modal-title hh">{{ item.templateName }}</span>
+                      </a-checkbox>
+                    </a-col>
+                  </a-row>
+                </a-checkbox-group>
+              </div>
+              <div class="button-group">
+                <a-button :loading="applyLoading" style="width: 80%; height: 40px" @click="buildReport"
+                  >新建报告</a-button
+                >
+              </div>
             </div>
           </div>
-        </a-col>
-      </a-row>
+          <div class="right-box">
+            <div v-if="currentModalInfo" class="modal-port">
+              <img :src="currentModalInfo.typeImage" alt="" />
+            </div>
+          </div>
+        </div>
+      </data-go-tabs>
     </div>
-    <a-modal :footer="null" v-model="addCustomerPop" title="企业信息查询" @ok="confirmCustomer" @cancel="cancelPop">
+    <a-modal :footer="null" v-model="addCustomerPop" title="新建企业信息" @ok="confirmCustomer" @cancel="cancelPop">
       <AddCustomer @cancelPop="cancelPop"></AddCustomer>
     </a-modal>
   </page-header-wrapper>
 </template>
 
 <script>
-import { AddCustomer } from '@/components'
+const reportTypeList = [
+  {
+    type: 1,
+    icon: require('@/assets/images/sx.png'),
+    iconActive: require('@/assets/images/sx-active.png'),
+    name: '授信调查报告',
+  },
+  {
+    type: 2,
+    icon: require('@/assets/images/cw.png'),
+    iconActive: require('@/assets/images/cw-active.png'),
+    name: '财务分析报告',
+  },
+  {
+    type: 3,
+    icon: require('@/assets/images/nh.png'),
+    iconActive: require('@/assets/images/nh-active.png'),
+    name: '能耗分析报告',
+  },
+]
+import { AddCustomer, DataGoTabs } from '@/components'
 import { getCustomerList, getReportModal, getModalInfo } from '@/api/report'
 export default {
   name: 'addReport',
-  components: { AddCustomer },
+  components: { AddCustomer, DataGoTabs },
   data() {
     return {
+      tabs: [
+        { type: 1, name: '选择模板' },
+        { type: 2, name: '选择客户' },
+      ],
+      tabA: 1,
       reportType: null,
       applyLoading: false,
+      reportTypeList,
+      preCustomers: [],
       customers: [],
       modalInfo: [],
       modalList: [],
@@ -80,7 +138,7 @@ export default {
   },
   created() {
     // 获取路由参数
-    this.reportType = this.$route.params.reportType
+    this.reportType = this.$route.params.reportType || 1
     this.initData()
   },
   methods: {
@@ -88,6 +146,12 @@ export default {
       this.getReportModal()
       this.getCustomerList()
       this.getModalInfo()
+    },
+    changeTab(v) {
+      this.chooseModal = []
+      this.reportType = v
+      this.getReportModal()
+      this.currentModalInfo = this.modalInfo.find((v) => v.typeEnum == this.reportType)
     },
     getCustomerList() {
       this.customers = []
@@ -103,6 +167,7 @@ export default {
               appUserId: userId,
             }
           })
+          this.preCustomers = JSON.parse(JSON.stringify(this.customers))
         })
         .catch((err) => {
           this.$message.error('获取客户列表失败:' + err)
@@ -123,6 +188,15 @@ export default {
         })
       })
     },
+    searchCustomer(v) {
+      const s = v.target.value
+      const preList = JSON.parse(JSON.stringify(this.preCustomers))
+      if (s) {
+        this.customers = preList.filter((v) => v.enterpriseName.includes(s))
+      } else {
+        this.customers = JSON.parse(JSON.stringify(this.preCustomers))
+      }
+    },
     onChange(v) {
       this.chooseModal = v
     },
@@ -133,13 +207,10 @@ export default {
       this.addCustomerPop = false
       this.addLoading = false
     },
-    customerHandle(v) {
-      this.chooseCustomer = this.customers.find((item) => item.creditCode == v)
-    },
     buildReport() {
       const { $notification, $router } = this
       // 生产报告
-      if (!this.chooseModal || !this.chooseCustomer) {
+      if (!this.chooseModal || !this.chooseModal.length || !this.chooseCustomer) {
         $notification['warning']({
           message: '提醒：',
           description: '请选择生产报告客户及报告模板信息',
@@ -168,9 +239,14 @@ export default {
 }
 </script>
 
+<style>
+::-webkit-scrollbar {
+  width: 4px;
+}
+</style>
 <style lang="less" scoped>
 .model-choose {
-  padding-left: 20px;
+  padding: 0 20px;
   h2 {
     margin-top: 20px;
   }
@@ -196,10 +272,53 @@ export default {
   color: #000;
 }
 .modal-port {
-  border-right: 1px solid #000;
   width: 100%;
   img {
     width: 100%;
   }
+}
+.add-report-page {
+  justify-content: space-around;
+  padding: 20px 0;
+}
+.left-box {
+  padding-top: 20px;
+  width: 23vw;
+  background: #ffffff;
+  border: 2px solid rgba(177, 188, 199, 0.59);
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
+  border-radius: 15px;
+}
+.right-box {
+  width: 42.8vw;
+  background: #ffffff;
+  border: 2px solid rgba(177, 188, 199, 0.59);
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
+  border-radius: 15px;
+}
+.mini-tab {
+  font-family: PingFangSC-Semibold;
+  font-size: 20px;
+  color: rgba(0, 0, 0, 0.25);
+  letter-spacing: 0;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  &:first-of-type {
+    border-right: 1px solid #bbc0d5;
+  }
+  &.active {
+    color: #6cbdf6;
+  }
+}
+.hh {
+  width: 100%;
+  font-family: PingFangSC-Semibold;
+  font-size: 18px;
+  color: #3d4566;
+  letter-spacing: 0;
+  line-height: 30px;
+  font-weight: 600;
+  white-space: pre-wrap;
 }
 </style>

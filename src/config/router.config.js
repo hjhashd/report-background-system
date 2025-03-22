@@ -75,43 +75,35 @@ export const asyncRouterMap = [
         path: '/overviewPage/index',
         name: 'overview',
         component: () => import('@/views/dataGo/overview'),
-        meta: { title: 'menu.overview', keepAlive: true, icon: 'calculator', permission: ['overview'] }
+        meta: { title: 'menu.overview', keepAlive: true, icon: 'bar-chart', permission: ['overview'] }
       },
       // uploadData
       {
         path: '/uploadDataPage/index',
         name: 'uploadData',
         component: () => import('@/views/dataGo/uploadData'),
-        meta: { title: 'menu.uploadData', keepAlive: true, icon: 'cloud', permission: ['uploadData'] }
+        meta: { title: 'menu.uploadData', keepAlive: true, icon: 'cloud-upload', permission: ['uploadData'] }
       },
       // readWord
       {
         path: '/readWordPage/index',
         name: 'readWord',
         component: () => import('@/views/dataGo/readWord'),
-        meta: { title: 'menu.readWord', keepAlive: true, icon: 'branches', permission: ['readWord'] }
+        meta: { title: 'menu.readWord', keepAlive: true, icon: 'container', permission: ['readWord'] }
       },
       // anomaly
       {
         path: '/anomalyPage/index',
         name: 'anomaly',
         component: () => import('@/views/dataGo/anomaly'),
-        meta: { title: 'menu.anomaly', keepAlive: true, icon: bxAnaalyse, permission: ['anomaly'] }
+        meta: { title: 'menu.anomaly', keepAlive: true, icon: "file-exclamation", permission: ['anomaly'] }
       },
       // client
       {
-        path: '/clientPage',
+        path: '/clientPage/index',
         name: 'clientPage',
-        component: RouteView,
-        redirect: '/clientPage/index',
-        meta: { title: 'menu.client', keepAlive: true, icon: 'team', permission: ['client'] },
-        children: [
-          {
-            path: '/clientPage/index',
-            name: 'client',
-            component: () => import('@/views/dataGo/client'),
-            meta: { title: 'menu.client', keepAlive: false, icon: 'team', permission: ['client'] }
-          },]
+        component: () => import('@/views/dataGo/client'),
+        meta: { title: 'menu.client', keepAlive: false, icon: 'team', permission: ['client'] }
       },
 
       //   // dashboard

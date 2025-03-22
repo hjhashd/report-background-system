@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2022-10-10 22:31:07
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-15 14:54:23
+ * @LastEditTime: 2025-03-21 22:38:27
  * @FilePath: /report-background-system/src/components/index.js
  * @Description: 
  * 
@@ -39,6 +39,7 @@ import buildQRCode from '@/components/buildQRCode/buildQRCode.vue'
 import Dialog from '@/components/Dialog'
 import OnlyOfficeEditor from '@/components/OnlyOfficeEditor/OnlyOfficeEditor.vue'
 import AddCustomer from '@/components/AddCustomer/addCustomer.vue';
+import DataGoTabs from '@/components/DataGoTabs/DataGoTabs.vue';
 
 export {
   AvatarList,
@@ -69,5 +70,6 @@ export {
   Dialog,
   buildQRCode,
   OnlyOfficeEditor,
-  AddCustomer
+  AddCustomer,
+  DataGoTabs
 }

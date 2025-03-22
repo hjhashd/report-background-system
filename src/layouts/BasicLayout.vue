@@ -9,16 +9,6 @@
     :i18nRender="i18nRender"
     v-bind="settings"
   >
-    <!-- Ads begin
-      广告代码 真实项目中请移除
-      production remove this Ads
-    -->
-    <!-- <ads v-if="isProPreviewSite && !collapsed"/> -->
-    <!-- Ads end -->
-
-    <!-- 1.0.0+ 版本 pro-layout 提供 API，
-          我们推荐使用这种方式进行 LOGO 和 title 自定义
-    -->
     <template v-slot:menuHeaderRender>
       <div v-if="collapsed">
         <img src="@/assets/logo.png" />
@@ -30,11 +20,24 @@
         </div>
         <div class="user-box flex-row-spacearound">
           <div class="user-ava">
-            <a-avatar :src="userInfo.avatar" style="width: 50px; height: 50px" />
-            <div class="user-name">{{ userInfo.userName }}</div>
+            <a-avatar :src="userInfo.avatar" style="width: 48px; height: 48px" />
+            <a-button style="margin-top: 20px" type="link" size="small" @click="logout"> 退出 </a-button>
           </div>
-          <div @click="buildQRcode">
-            <img src="@/assets/images/apply-data.png" alt="点击生产二维码" style="width: 60px; height: 50px" />
+          <div style="text-align: center">
+            <a-tooltip placement="right">
+              <template slot="title">
+                <div class="user-name">{{ userInfo.userName }}</div>
+              </template>
+              <div class="user-name single-line-text">{{ userInfo.userName }}</div>
+            </a-tooltip>
+            <div @click="buildQRcode">
+              <img
+                class="code-img"
+                src="@/assets/images/apply-data.png"
+                alt="点击生产二维码"
+                style="width: 52px; height: 52px"
+              />
+            </div>
           </div>
         </div>
         <div class="user-report-info" v-if="overview">
@@ -43,38 +46,19 @@
             <div class="item-name">客户</div>
           </div>
           <div class="report-info-item">
-            <div class="num">{{ overview[2].sum }}</div>
+            <div class="num num1">{{ overview[2].sum }}</div>
             <div class="item-name">报告</div>
           </div>
           <div class="report-info-item">
-            <div class="num">{{ overview[4].sum }}</div>
+            <div class="num num2">{{ overview[4].sum }}</div>
             <div class="item-name">草稿</div>
           </div>
         </div>
       </div>
     </template>
-    <!-- 1.0.0+ 版本 pro-layout 提供 API,
-          增加 Header 左侧内容区自定义
-    -->
-    <!-- <template v-slot:headerContentRender>
-      <div>
-        <a-tooltip title="刷新页面">
-          <a-icon type="reload" style="font-size: 18px;cursor: pointer;" @click="() => { $message.info('只是一个DEMO') }" />
-        </a-tooltip>
-      </div>
-    </template> -->
-    <!-- <setting-drawer v-if="isDev" :settings="settings" @change="handleSettingChange">
-      <div style="margin: 12px 0;">
-        This is SettingDrawer custom footer content.
-      </div>
-    </setting-drawer> -->
     <template v-slot:rightContentRender>
       <right-content :top-menu="settings.layout === 'topmenu'" :is-mobile="isMobile" :theme="settings.theme" />
     </template>
-    <!-- custom footer / 自定义Footer -->
-    <!-- <template v-slot:footerRender>
-      <global-footer />
-    </template> -->
     <router-view />
 
     <!-- 全局弹窗-生产二维码 -->
@@ -223,9 +207,12 @@ export default {
       this.changeBuildQrCodePop(true)
     },
     toClosePop(event) {
-      event.preventDefault()
+      if (event) {
+        event.preventDefault()
+      }
       this.changeBuildQrCodePop(false)
     },
+    logout() {},
   },
 }
 </script>
@@ -234,6 +221,15 @@ export default {
 @import './BasicLayout.less';
 .ant-pro-sider-menu-logo {
   height: auto;
+}
+.ant-layout-header,
+.ant-pro-global-header,
+.ant-pro-global-header-trigger {
+  height: 48px !important;
+  line-height: 48px !important;
+}
+.ant-pro-global-header-index-right .ant-pro-account-avatar .antd-pro-global-header-index-avatar {
+  margin: calc((48px - 24px) / 2) 10px;
 }
 .user-box {
   display: flex;
@@ -246,12 +242,17 @@ export default {
     align-items: center;
   }
   .user-name {
-    margin-top: 8px;
-    font-size: 18px;
-    color: #000;
+    max-width: 80px;
+    text-align: center;
+    margin-bottom: 15px;
+    font-family: PingFangSC-Regular;
+    font-size: 21px;
+    color: #afabc2;
+    font-weight: 400;
   }
 }
 .user-report-info {
+  margin-top: 20px;
   margin-left: -24px;
   display: flex;
   justify-content: space-around;
@@ -263,18 +264,32 @@ export default {
     .num {
       font-size: 16px;
       font-weight: bold;
-      color: #f4d4ad;
+      color: #1789ff;
+      &.num1 {
+        color: #10884b;
+      }
+      &.num2 {
+        color: #fa8306;
+      }
     }
     .item-name {
-      color: #000;
+      color: #afabc2;
     }
   }
 }
 .qr-modal {
   .ant-modal-content {
-    background: #ffffff url(~@/assets/images/login-box-bg.png) no-repeat;
+    background: #ffffff url(~@/assets/images/pop-header-bg.png) no-repeat;
     background-size: 100% 100%;
     border-radius: 20px;
   }
+}
+.ant-layout-content {
+  opacity: 0.8;
+  background: #f2f2f7;
+}
+.code-img {
+  border-radius: 50%;
+  box-shadow: 0px 4px 11px 3px rgba(27, 104, 255, 1);
 }
 </style>

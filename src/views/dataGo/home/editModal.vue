@@ -1,53 +1,102 @@
 <template>
   <div class="edit-modal-body">
     <div class="drawer-container">
-      <div class="select-item">
-        选择模块<a-select v-model="currentModalSelect" style="width: 250px; margin-left: 20px" @change="changModalShow">
-          <a-select-option v-for="(i, index) in modalList" :key="index" :value="i">
-            {{ i }}
-          </a-select-option>
-        </a-select>
+      <div class="select-item flex-row-spacebetween">
+        <div>
+          选择模块<a-select
+            v-model="currentModalSelect"
+            style="width: 250px; margin-left: 20px"
+            @change="changModalShow"
+          >
+            <a-select-option v-for="(i, index) in modalList" :key="index" :value="i">
+              {{ i }}
+            </a-select-option>
+          </a-select>
+          历史版本<a-select v-model="selectModalId" style="width: 250px; margin-left: 20px" @change="changeSelect">
+            <a-select-option v-for="(i, index) in modalContentList" :key="index" :value="i.id">
+              版本{{ i.version }}-{{ i.updateTime.split(' ')[0] }}
+            </a-select-option>
+          </a-select>
+        </div>
+        <div>
+          <a-tooltip placement="top">
+            <template slot="title">
+              <span>AI优化</span>
+            </template>
+            <a-popconfirm placement="left" ok-text="AI优化" cancel-text="取消" @confirm="toAI">
+              <template slot="title">
+                <div>是否通过AI对模板结论进行优化?</div>
+                <div>注意：进行AI优化会修改当前编辑框内容。</div>
+              </template>
+              <img class="ai-png" src="@/assets/images/ai.png" alt="dark" />
+            </a-popconfirm>
+          </a-tooltip>
+          <a-tooltip placement="top">
+            <template slot="title">
+              <span>新增结论</span>
+            </template>
+            <a-popconfirm placement="left" ok-text="新增结论" cancel-text="取消" @confirm="addModalResult">
+              <template slot="title">
+                <div>是否新增模板结论?</div>
+                <div>注意：进行新增模板结论会清空当前编辑框内容。</div>
+              </template>
+              <a-button style="color: #6cbdf6; border: none; background-color: transparent" icon="plus" />
+            </a-popconfirm>
+          </a-tooltip>
+          <a-tooltip placement="top">
+            <template slot="title">
+              <span>另存为</span>
+            </template>
+            <a-popconfirm placement="left" ok-text="新增结论" cancel-text="取消" @confirm="saveAs">
+              <template slot="title">
+                <div>是否另存结论?</div>
+              </template>
+              <a-button
+                :loading="saveLoading"
+                style="color: #6cbdf6; border: none; background-color: transparent"
+                icon="save"
+              />
+            </a-popconfirm>
+          </a-tooltip>
+          <a-tooltip placement="top">
+            <template slot="title">
+              <span>应用</span>
+            </template>
+            <a-popconfirm placement="left" ok-text="应用结论" cancel-text="取消" @confirm="applyChanges">
+              <template slot="title">
+                <div>是否应用?</div>
+              </template>
+              <a-button
+                style="color: #6cbdf6; border: none; background-color: transparent"
+                icon="check-circle"
+                :loading="applyLoading"
+              />
+            </a-popconfirm>
+          </a-tooltip>
+        </div>
       </div>
     </div>
     <div class="report-container">
       <a-row class="grid-box">
-        <a-col :span="9">
+        <a-col :span="11">
           <div class="flex-row-spacebetween cant-edit-box">
             <span class="red-dot status-tag">原报告内容</span>
             <span>不可编辑</span>
           </div>
         </a-col>
-        <a-col :span="9">
+        <a-col :span="11">
           <span class="status-tag green-tag">修改编辑</span>
         </a-col>
-        <a-col :span="6" class="flex flex-end">
-          <a-button
-            style="color: #fff; background-color: #4e80ee"
-            size="small"
-            icon="check"
-            type="primary"
-            :loading="applyLoading"
-            @click="applyChanges"
-            >应用</a-button
-          >
-          <a-button
-            :loading="saveLoading"
-            style="color: #fff; background-color: #5ec269"
-            size="small"
-            icon="save"
-            @click="saveAs"
-            >另存</a-button
-          >
-        </a-col>
+        <!-- <a-col :span="6" class="flex flex-end"> </a-col> -->
       </a-row>
       <a-row :gutter="[10]" v-if="modalContentList">
-        <a-col :span="9">
+        <a-col :span="11">
           <a-textarea v-model="useContent.content" :auto-size="true" :disabled="true" />
         </a-col>
-        <a-col :span="9">
+        <a-col :span="11">
           <a-textarea v-model="changeContent" :auto-size="true" />
         </a-col>
-        <a-col :span="6" class="history-box">
+        <!-- <a-col :span="6" class="history-box">
           <div class="history-title">历史版本</div>
           <div
             v-for="(version, index) in modalContentList"
@@ -68,7 +117,7 @@
               <a-button style="color: #ec6342" type="link" size="small" icon="delete"></a-button>
             </a-popconfirm>
           </div>
-        </a-col>
+        </a-col> -->
       </a-row>
     </div>
   </div>
@@ -93,6 +142,7 @@ export default {
       currentModalSelect: null,
       modalContentList: [],
       selectModal: null,
+      selectModalId: null,
       useContent: {
         content: '',
       },
@@ -124,6 +174,13 @@ export default {
     },
   },
   methods: {
+    toAI() {
+      // ai
+      this.useContent.content = ''
+    },
+    addModalResult() {
+      this.useContent.content = ''
+    },
     changModalShow(v) {
       this.currentModalSelect = v
       this.getModalContent()
@@ -143,11 +200,13 @@ export default {
           }
         })
         this.selectModal = this.useContent
+        this.selectModalId = this.useContent.id
       })
     },
     changeSelect(version) {
-      if (version.id == this.selectModal.id) return
-      this.selectModal = version
+      if (version == this.selectModal.id) return
+      this.selectModalId = version
+      this.selectModal = this.modalContentList.filter((v) => v.id == version)[0]
     },
     applyChanges() {
       // 应用修改的逻辑，例如发送请求到后端保存修改
@@ -273,14 +332,12 @@ export default {
 .drawer-container {
   padding-left: 4px;
   margin-bottom: 20px;
-  background-color: #4e80ee;
-  border-radius: 10px;
   .select-item {
-    background-color: #fff;
-    padding: 14px 0 14px 18px;
-    border-radius: 10px;
-    font-size: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #979797;
+    font-size: 16px;
     font-weight: bold;
+    color: #1789ff;
   }
 }
 .edit-modal-body {
@@ -377,5 +434,10 @@ export default {
 }
 .version-active {
   background-color: #f9f5fe;
+}
+.ai-png {
+  width: 17px;
+  height: 20px;
+  cursor: pointer;
 }
 </style>

@@ -23,6 +23,16 @@
     </div>
     <div class="table-contant">
       <s-table ref="table" rowKey="key" :data="loadData" :columns="columns">
+        <div slot="reportName" slot-scope="text, scoped">
+          <span>{{ text }}</span>
+          <a-tooltip placement="right" v-if="scoped.status != 1">
+            <template slot="title">
+              <span v-if="scoped.dataStatus == 2">未完成数据授权，数据上传</span>
+              <span v-else-if="scoped.dataStatus == 3">已完成数据授权，数据上传，正在制作报告</span>
+            </template>
+            <a-icon type="bell" theme="filled" style="color: #c92c1f" />
+          </a-tooltip>
+        </div>
         <span slot="status" slot-scope="text">
           <!-- // 0 草稿 1 已完成 2 数据未授权 3 数据已授权 -->
           <span v-if="text == 0" :class="['table-status', 'status' + text]">草稿</span>
@@ -62,7 +72,7 @@ const reportTypeList = [
   },
 ]
 import { mapState } from 'vuex'
-import { getReportList } from '@/api/overview'
+import { reportList } from '@/api/report'
 import { STable } from '@/components'
 import { baseMixin } from '@/store/app-mixin'
 import { columns } from './util'
@@ -91,7 +101,7 @@ export default {
           reportType: this.draftTypeSelected,
         })
         return new Promise((resolve, reject) => {
-          getReportList(requestParameters).then((res) => {
+          reportList(requestParameters).then((res) => {
             const reD = {
               pageSize: requestParameters.pageSize,
               pageNo: requestParameters.pageNo,

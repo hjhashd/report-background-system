@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-13 16:01:48
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-28 18:10:25
+ * @LastEditTime: 2025-03-22 12:00:58
  * @FilePath: /report-background-system/src/config/defaultSettings.js
  * @Description: 
  * 
@@ -32,7 +32,7 @@ export default {
   menu: {
     locale: true
   },
-  title: '智能分析助手',
+  title: '信安数据',
   pwa: false,
   iconfontUrl: '',
   production: process.env.NODE_ENV === 'production' && process.env.VUE_APP_PREVIEW !== 'true'

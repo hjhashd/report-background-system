@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-03-15 14:52:33
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-15 16:17:33
+ * @LastEditTime: 2025-03-22 14:42:10
  * @FilePath: /report-background-system/src/components/AddCustomer/addCustomer.vue
  * @Description: 
  * 
@@ -11,32 +11,26 @@
   <div class="add-customer-container">
     <div class="flex top-search-box">
       <div class="flex-1" style="margin-right: 5px">
-        <div class="search-title">
-          <a-icon style="color: #68a4f8; margin-right: 5px" size="16" type="credit-card" />统一社会信用代码
-        </div>
+        <div class="search-title">统一社会信用代码</div>
         <a-input
           @blur="searchCustomer"
           v-model="creditCode"
           placeholder="输入统一社会信用代码"
-          style="width: 100%; margin-top: 8px"
+          style="width: 100%; margin-top: 8px; background-color: #f7f7fa"
         />
       </div>
       <div class="flex-1" style="margin-left: 5px">
-        <div class="search-title">
-          <a-icon size="16" type="bank" style="margin-right: 5px; color: #86d6d3" />企业名称
-        </div>
+        <div class="search-title">企业名称</div>
         <a-input
           @blur="searchCustomer"
           v-model="enterpriseName"
           placeholder="输入企业名称"
-          style="width: 100%; margin-top: 8px"
+          style="width: 100%; margin-top: 8px; background-color: #f7f7fa"
         />
       </div>
     </div>
+    <div class="search-title">企业查询</div>
     <div class="customer-info-line">
-      <div class="search-title">
-        <a-icon style="color: #875ad4; margin-right: 5px" size="16" type="project" />查询结果
-      </div>
       <empty v-if="!loadingList && !resultList.length"></empty>
       <a-radio-group v-else v-model="selectedItem" @change="onChange">
         <a-radio class="company" v-for="(item, index) in resultList" :key="index" :value="item">
@@ -46,7 +40,7 @@
     </div>
     <div style="text-align: center; margin-top: 16px">
       <a-button style="margin-right: 20px" @click="handleCancel">取消</a-button>
-      <a-button type="primary" @click="handleConfirm">新增客户</a-button>
+      <a-button style="background-color: #64b5f6; color: #fff" @click="handleConfirm">新增客户</a-button>
     </div>
   </div>
 </template>
@@ -120,14 +114,14 @@ export default {
   
 <style lang="less" scoped>
 .top-search-box {
-  padding: 20px 12px;
-  border-radius: 8px;
-  border: 1px solid #e9eef2;
-  background-color: #fbfcfe;
+  padding: 20px 0;
 }
 .search-title {
-  font-size: 16px;
-  font-weight: bold;
+  font-family: PingFangSC-Semibold;
+  font-size: 20px;
+  color: #64b5f6;
+  letter-spacing: 0;
+  font-weight: 600;
 }
 .customer-info-line {
   margin-top: 16px;

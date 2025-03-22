@@ -2,88 +2,47 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-13 10:49:27
+ * @LastEditTime: 2025-03-22 12:14:13
  * @FilePath: /report-background-system/src/views/dataGo/home/index.vue
  * @Description: 主页
  * 
 -->
 <template>
-  <page-header-wrapper>
-    <div class="page-content">
-      <div class="home-part-box">
-        <h1>新建报告</h1>
-        <div class="flex-row-spacearound">
-          <div class="card" v-for="item in newAddReport" :key="item.type" @click="addReport(item)">
-            <div class="add-card" v-if="!item.src">
-              <img class="plus-icon" src="@/assets/images/plus.png" alt="dark" />
-            </div>
-            <div class="add-card" v-else>
-              <img class="repoert-image" :src="item.src" alt="dark" />
-            </div>
-            <div class="add-name">{{ item.name }}</div>
+  <!-- <page-header-wrapper> -->
+  <div>
+    <div class="page-title">报告管理系统</div>
+    <div class="home-part-box">
+      <h1 class="mini-title">新建</h1>
+      <div class="flex-row-spacearound">
+        <div class="card" v-for="item in newAddReport" :key="item.type" @click="addReport(item)">
+          <div :class="{ 'add-card': true, bz: item.type == 'addReport' }">
+            <img class="plus-icon repoert-image" :src="item.src" alt="dark" />
           </div>
+          <div class="add-name">{{ item.name }}</div>
         </div>
-      </div>
-      <div class="home-part-box">
-        <div class="flex flex-center home-part-title">
-          <h1>已完成报告</h1>
-          <div class="flex home-part-title-right flex-1">
-            <div class="flex flex-center">
-              <div class="right-item-title">报告类型：</div>
-              <a-select
-                v-model="finishedReportTypeSelected"
-                style="width: 200px"
-                @change="finishedReportTypeChange"
-                :allowClear="true"
-              >
-                <a-select-option v-for="item in reportTypeList" :key="item.type" :value="item.type">
-                  {{ item.name }}
-                </a-select-option>
-              </a-select>
-            </div>
-            <div class="flex flex-center">
-              <div class="right-item-title">报告查询：</div>
-              <a-input
-                v-model="finishedReportSearch"
-                style="width: 200px"
-                placeholder="输入报告名称"
-                @blur="finishedReportSearchChange"
-                @pressEnter="finishedReportSearchChange"
-                :allowClear="true"
-              />
-            </div>
-          </div>
-        </div>
-        <ReportCardSlider :cards="finishedReportList" :loading="finishedLoading" @getNextPage="getReportFinishedList" />
-      </div>
-      <div class="home-part-box">
-        <div class="flex flex-center home-part-title">
-          <h1>草稿箱</h1>
-          <div class="flex home-part-title-right flex-1">
-            <div class="flex flex-center">
-              <div class="right-item-title">报告类型：</div>
-              <a-select v-model="draftTypeSelected" style="width: 200px" @change="draftTypeChange" :allowClear="true">
-                <a-select-option v-for="item in reportTypeList" :key="item.type" :value="item.type">
-                  {{ item.name }}
-                </a-select-option>
-              </a-select>
-            </div>
-            <div class="flex flex-center">
-              <div class="right-item-title">草稿箱查询：</div>
-              <a-input
-                v-model="draftSearch"
-                style="width: 200px"
-                placeholder="输入草稿名称"
-                @blur="draftSearchChange"
-                @pressEnter="draftSearchChange"
-                :allowClear="true"
-              />
-            </div>
-          </div>
-        </div>
-        <ReportCardSlider :cards="draftList" :loading="draftLoading" @getNextPage="getDraftList" />
       </div>
     </div>
+    <data-go-tabs :tab="reportTypeList" @changeTab="changeTab">
+      <div class="p-20">
+        <s-table ref="table" rowKey="key" :data="loadData" :columns="tabColumns">
+          <div slot="reportName" slot-scope="text, scoped">
+            <span>{{ text }}</span>
+            <a-tooltip placement="right" v-if="scoped.status != 1">
+              <template slot="title">
+                <span v-if="scoped.dataStatus == 2">未完成数据授权，数据上传</span>
+                <span v-else-if="scoped.dataStatus == 3">已完成数据授权，数据上传，正在制作报告</span>
+              </template>
+              <a-icon type="bell" theme="filled" style="color: #c92c1f" />
+            </a-tooltip>
+          </div>
+          <span slot="status" slot-scope="text">
+            <!-- // 0 草稿 1 已完成 2 数据未授权 3 数据已授权 -->
+            <span v-if="text == 1" :class="['table-status', 'status' + text]">已完成</span>
+            <span v-else class="table-status status0">草稿</span>
+          </span>
+        </s-table>
+      </div>
+    </data-go-tabs>
     <a-modal v-model="visible" title="新增报告" @ok="handleOk">
       <div class="flex flex-center">
         <div class="right-item-title">选择新增报告类型：</div>
@@ -94,7 +53,8 @@
         </a-select>
       </div>
     </a-modal>
-  </page-header-wrapper>
+  </div>
+  <!-- </page-header-wrapper> -->
 </template>
 
 <script>
@@ -113,26 +73,23 @@ const reportTypeList = [
   },
 ]
 
-import { ReportCardSlider } from '@/components'
+import { DataGoTabs, STable } from '@/components'
 import { reportList } from '@/api/report'
+import { tabColumns } from './util'
 export default {
-  components: { ReportCardSlider },
+  components: { DataGoTabs, STable },
   data() {
     return {
-      firstLoading: true,
-      finishedLoading: true,
-      draftLoading: true,
       reportTypeList,
-      finishedReportTypeSelected: null,
-      finishedReportSearch: null,
-      draftTypeSelected: null,
-      draftSearch: null,
       addReportType: null,
       visible: false,
+      activeNow: reportTypeList[0].type,
+      tabChangeStatuas: true,
       newAddReport: [
         {
           name: '标准化报告',
           type: 'addReport',
+          src: require('@/assets/images/bz-report.png'),
         },
         {
           name: '授信调查报告',
@@ -150,41 +107,64 @@ export default {
           src: require('@/assets/images/energy.png'),
         },
       ],
-      finishedRequest: {
-        status: 1,
-        pageNum: 1,
-        pageSize: 10,
-        total: 0,
+      tabColumns,
+      // 查询参数
+      queryParam: {
+        pageSize: 6,
       },
-      draftRequest: {
-        status: 0,
-        pageNum: 1,
-        pageSize: 10,
-        total: 0,
+      loadData: (parameter) => {
+        const requestParameters = Object.assign({}, parameter, this.queryParam, {
+          pageNum: this.tabChangeStatuas ? 1 : parameter.pageNo,
+          reportType: this.activeNow,
+        })
+        return new Promise((resolve, reject) => {
+          reportList(requestParameters).then((res) => {
+            this.tabChangeStatuas = false
+            const reD = {
+              pageSize: requestParameters.pageSize,
+              pageNo: requestParameters.pageNo,
+              totalCount: res.total,
+              totalPage: Math.ceil(res.total / requestParameters.pageSize),
+              data: res.rows,
+            }
+            resolve(reD)
+          })
+        })
       },
-      finishedReportList: [],
-      draftList: [],
     }
   },
-  created() {
-    this.initData()
+  filters: {
+    dealTime(v) {
+      let time = parseInt(v)
+      return Math.ceil(time / 3600)
+    },
   },
   methods: {
-    initData() {
-      Promise.all([this.getReportFinishedList(), this.getDraftList()]).then((res) => {
-        // 完成初始化请求
-        this.firstLoading = false
-      })
+    changeTab(type) {
+      this.tabChangeStatuas = true
+      this.activeNow = type
+      this.queryParam = {
+        pageSize: 6,
+      }
+      this.selectChange()
+    },
+    handleChat(v) {
+      const { $router } = this
+      $router.push({ path: `/homePage/viewReport/` + v.id })
+    },
+    selectChange() {
+      this.$refs.table.refresh()
     },
     addReport(v) {
-      if (v.type == 'addReport') {
-        // 弹窗选择模板类型
-        this.visible = true
-      } else {
-        // 前往新建模板内页
-        let typeid = v.type == 'addCreditReport' ? 1 : v.type == 'addFinanceReport' ? 2 : 3
-        this.toPage(typeid)
-      }
+      // if (v.type == 'addReport') {
+      //   // 弹窗选择模板类型
+      //   this.visible = true
+      // } else {
+      // 前往新建模板内页
+      let typeid =
+        v.type == 'addCreditReport' ? 1 : v.type == 'addFinanceReport' ? 2 : v.type == 'addEnergyReport' ? 3 : 1
+      this.toPage(typeid)
+      // }
     },
     handleOk() {
       this.toPage(this.addReportType)
@@ -193,79 +173,12 @@ export default {
     toPage(type) {
       this.$router.push({ path: '/homePage/addReport/' + type })
     },
-    // 获取已完成报告列表
-    getReportFinishedList(status) {
-      this.finishedLoading = true
-      return new Promise((resolve, reject) => {
-        if (
-          this.firstLoading ||
-          this.finishedRequest.total > this.finishedRequest.pageNum * this.finishedRequest.pageSize ||
-          status == 'load'
-        ) {
-          reportList(this.finishedRequest)
-            .then((res) => {
-              this.finishedReportList = res.rows
-              this.finishedRequest.total = res.total
-              resolve(true)
-              this.finishedLoading = false
-            })
-            .catch((err) => {
-              this.finishedLoading = false
-              reject(err)
-            })
-        }
-      })
-    },
-    // 获取草稿箱列表
-    getDraftList(status) {
-      this.draftLoading = true
-      return new Promise((resolve, reject) => {
-        if (
-          this.firstLoading ||
-          this.draftRequest.total > this.draftRequest.pageNum * this.draftRequest.pageSize ||
-          status == 'load'
-        ) {
-          reportList(this.draftRequest)
-            .then((res) => {
-              this.draftLoading = false
-              this.draftList = res.rows
-              this.draftRequest.total = res.total
-              resolve(true)
-            })
-            .catch((err) => {
-              this.draftLoading = false
-              reject(err)
-            })
-        }
-      })
-    },
-    finishedReportTypeChange(v) {
-      this.finishedRequest.reportType = v
-      this.finishedRequest.pageNum = 1
-      this.getReportFinishedList('load')
-    },
-    finishedReportSearchChange(v) {
-      this.finishedRequest.reportName = this.finishedReportSearch
-      this.finishedRequest.pageNum = 1
-      this.getReportFinishedList('load')
-    },
-    draftTypeChange(v) {
-      this.draftRequest.reportType = v
-      this.draftRequest.pageNum = 1
-      this.getDraftList('load')
-    },
-    draftSearchChange(v) {
-      this.draftRequest.reportName = this.draftSearch
-      this.draftRequest.pageNum = 1
-      this.getDraftList('load')
-    },
   },
 }
 </script>
 
 <style lang="less" scoped>
 .page-content {
-  background-color: #fff;
   padding: 20px;
 }
 .home-part-box {
@@ -280,13 +193,14 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 150px;
-  height: 180px;
+  width: 15.5vw;
+  height: 225px;
   margin-bottom: 4px;
-  border: 1px solid #015dea;
   border-radius: 5px;
   cursor: pointer;
   overflow: hidden;
+  background-color: #fff;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
   .plus-icon {
     width: 24px;
   }
@@ -298,6 +212,13 @@ export default {
     border: 2px solid #015dea;
   }
 }
+.add-name {
+  font-family: PingFangSC-Regular;
+  font-size: 18px;
+  color: #000000;
+  text-align: center;
+  font-weight: 400;
+}
 .home-part-title {
   justify-content: space-between;
   margin-bottom: 20px;
@@ -305,5 +226,46 @@ export default {
 .right-item-title {
   white-space: nowrap;
   margin-left: 10px;
+}
+.page-title {
+  opacity: 0.8;
+  font-family: PingFangSC-Medium;
+  font-size: 32px;
+  color: #154291;
+  letter-spacing: 0;
+  line-height: 61.83px;
+  font-weight: 500;
+}
+.mini-title {
+  font-family: PingFangSC-Semibold;
+  font-size: 22px;
+  color: rgba(0, 0, 0, 0.7);
+  font-weight: 600;
+  border-bottom: 1px solid #d6e1e5;
+}
+.bz {
+  width: 8.8vw;
+  .plus-icon {
+    width: 60px;
+    height: 67px;
+  }
+}
+.table-status {
+  font-size: 12px;
+  &.status0 {
+    color: #666666;
+  }
+  &.status1 {
+    color: #25f021;
+  }
+  &.status2 {
+    color: #15dff1;
+  }
+  &.status3 {
+    color: #0a69ef;
+  }
+}
+.p-20 {
+  padding: 20px;
 }
 </style>

@@ -83,6 +83,68 @@ export const barOptions = {
     ],
 }
 
+export const tabColumns = [
+    {
+        title: '文档名称',
+        dataIndex: 'reportName',
+        key: 'reportName',
+        scopedSlots: { customRender: 'reportName' },
+        customHeaderCell: () => {
+            return {
+                style: {
+                    backgroundColor: '#d2d8dd',
+                    padding: '5px',
+                    color: '#000',
+                }
+            };
+        },
+    },
+    {
+        title: '文档状态',
+        dataIndex: 'status',
+        key: 'status',
+        width: '120px',
+        scopedSlots: { customRender: 'status' },
+        customHeaderCell: () => {
+            return {
+                style: {
+                    backgroundColor: '#d2d8dd',
+                    padding: '5px',
+                    color: '#000',
+                }
+            };
+        },
+    },
+    {
+        title: '关联企业',
+        dataIndex: 'enterpriseName',
+        key: 'enterpriseName',
+        customHeaderCell: () => {
+            return {
+                style: {
+                    backgroundColor: '#d2d8dd',
+                    padding: '5px',
+                    color: '#000',
+                }
+            };
+        },
+    },
+    {
+        title: '最近操作时间',
+        dataIndex: 'updateTime',
+        key: 'updateTime',
+        customHeaderCell: () => {
+            return {
+                style: {
+                    backgroundColor: '#d2d8dd',
+                    padding: '5px',
+                    color: '#000',
+                }
+            };
+        },
+    },
+]
+
 export const columns = [
     {
         title: '序号',
@@ -94,25 +156,19 @@ export const columns = [
         title: '报告名称',
         dataIndex: 'reportName',
         key: 'reportName',
+        scopedSlots: { customRender: 'reportName' },
     },
     {
         title: '报告类型',
         dataIndex: 'reportType',
         key: 'reportType',
         width: '140px',
-        scopedSlots: { customRender: 'reportType' }, 
+        scopedSlots: { customRender: 'reportType' },
     },
     {
         title: '企业名称',
         dataIndex: 'enterpriseName',
         key: 'enterpriseName',
-    },
-    {
-        title: '报告进度',
-        dataIndex: 'status',
-        key: 'status',
-        width: '100px',
-        scopedSlots: { customRender: 'status' }, 
     },
     {
         title: '最后更新时间',
@@ -144,13 +200,13 @@ export const qrColumns = [
         title: '二维码类型',
         dataIndex: 'codeType',
         key: 'codeType',
-        scopedSlots: { customRender: 'codeType' }, 
+        scopedSlots: { customRender: 'codeType' },
     },
     {
         title: '二维码状态',
         dataIndex: 'status',
         key: 'status',
-        scopedSlots: { customRender: 'status' }, 
+        scopedSlots: { customRender: 'status' },
     },
     // {
     //     title: '授权银行信息',
