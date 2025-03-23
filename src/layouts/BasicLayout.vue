@@ -85,7 +85,7 @@ import defaultSettings from '@/config/defaultSettings'
 import RightContent from '@/components/GlobalHeader/RightContent'
 import GlobalFooter from '@/components/GlobalFooter'
 import Ads from '@/components/Other/CarbonAds'
-
+import { Modal } from 'ant-design-vue'
 export default {
   name: 'BasicLayout',
   components: {
@@ -212,7 +212,21 @@ export default {
       }
       this.changeBuildQrCodePop(false)
     },
-    logout() {},
+    logout() {
+      Modal.confirm({
+        title: this.$t('layouts.usermenu.dialog.title'),
+        content: this.$t('layouts.usermenu.dialog.content'),
+        onOk: () => {
+          // return new Promise((resolve, reject) => {
+          //   setTimeout(Math.random() > 0.5 ? resolve : reject, 1500)
+          // }).catch(() => console.log('Oops errors!'))
+          return this.$store.dispatch('Logout').then(() => {
+            this.$router.push({ name: 'login' })
+          })
+        },
+        onCancel() {},
+      })
+    },
   },
 }
 </script>
