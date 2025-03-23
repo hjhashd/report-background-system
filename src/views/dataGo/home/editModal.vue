@@ -23,7 +23,7 @@
             <template slot="title">
               <span>AI优化</span>
             </template>
-            <a-popconfirm placement="left" ok-text="AI优化" cancel-text="取消" @confirm="toAI">
+            <a-popconfirm :disabled="editLoading" placement="left" ok-text="AI优化" cancel-text="取消" @confirm="toAI">
               <template slot="title">
                 <div>是否通过AI对模板结论进行优化?</div>
                 <div>注意：进行AI优化会修改当前编辑框内容。</div>
@@ -35,7 +35,13 @@
             <template slot="title">
               <span>新增结论</span>
             </template>
-            <a-popconfirm placement="left" ok-text="新增结论" cancel-text="取消" @confirm="addModalResult">
+            <a-popconfirm
+              :disabled="editLoading"
+              placement="left"
+              ok-text="新增结论"
+              cancel-text="取消"
+              @confirm="addModalResult"
+            >
               <template slot="title">
                 <div>是否新增模板结论?</div>
                 <div>注意：进行新增模板结论会清空当前编辑框内容。</div>
@@ -47,7 +53,7 @@
             <template slot="title">
               <span>另存为</span>
             </template>
-            <a-popconfirm placement="left" ok-text="保存" cancel-text="取消" @confirm="saveAs">
+            <a-popconfirm :disabled="editLoading" placement="left" ok-text="保存" cancel-text="取消" @confirm="saveAs">
               <template slot="title">
                 <div>是否另存结论?</div>
               </template>
@@ -62,7 +68,13 @@
             <template slot="title">
               <span>应用</span>
             </template>
-            <a-popconfirm placement="left" ok-text="应用结论" cancel-text="取消" @confirm="applyChanges">
+            <a-popconfirm
+              :disabled="editLoading"
+              placement="left"
+              ok-text="应用结论"
+              cancel-text="取消"
+              @confirm="applyChanges"
+            >
               <template slot="title">
                 <div>是否应用?</div>
               </template>
@@ -95,7 +107,7 @@
         </a-col>
         <a-col :span="11">
           <a-spin :spinning="editLoading">
-            <a-textarea style="min-height: 300px;" v-model="changeContent" :auto-size="true" />
+            <a-textarea style="min-height: 300px" v-model="changeContent" :auto-size="true" />
           </a-spin>
         </a-col>
         <!-- <a-col :span="6" class="history-box">

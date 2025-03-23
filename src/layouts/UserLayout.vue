@@ -1,6 +1,6 @@
 <template>
   <div id="userLayout" :class="['user-layout-wrapper', isMobile && 'mobile']">
-    <div class="container">
+    <div class="container" :class="{ zezhao: currentPage == 'register' }">
       <div class="user-layout-content">
         <div class="top">
           <div class="header">
@@ -28,8 +28,22 @@ export default {
   components: {
     SelectLang,
   },
+  data() {
+    return {
+      currentPage: '',
+    }
+  },
   mixins: [deviceMixin],
+  watch: {
+    $route: {
+      handler(newRoute, oldRoute) {
+        this.currentPage = this.$route.name
+      },
+      deep: true,
+    },
+  },
   mounted() {
+    this.currentPage = this.$route.name
     document.body.classList.add('userLayout')
   },
   beforeDestroy() {
@@ -41,7 +55,9 @@ export default {
 <style lang="less" scoped>
 #userLayout.user-layout-wrapper {
   height: 100%;
-
+  position: relative;
+  background: #f0f2f5 url(~@/assets/images/index_bg.jpg) no-repeat;
+  background-size: 100% 100%;
   &.mobile {
     .container {
       .main {
@@ -54,13 +70,13 @@ export default {
   .container {
     width: 100%;
     min-height: 100%;
-    background: #f0f2f5 url(~@/assets/images/index_bg.jpg) no-repeat;
-    background-size: 100% 100%;
-    //padding: 50px 0 84px;
-    position: relative;
     display: flex;
     align-items: center;
     justify-content: flex-end;
+    &.zezhao {
+      background-color: rgba(0, 0, 0, 0.45);
+      z-index: 1000;
+    }
     .user-layout-lang {
       width: 100%;
       height: 40px;
