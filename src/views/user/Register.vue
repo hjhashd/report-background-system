@@ -152,16 +152,28 @@
         </a-button>
         <router-link class="login" :to="{ name: 'login' }">{{ $t('user.register.sign-in') }}</router-link>
       </a-form-item>
-      <a-form-item>
-        <a-checkbox v-model="checkNick" class="flex xieyi-box">
-          <div class="flex">
-            我已阅读并同意
-            <div class="xieyi" @click="toXieYiPop('user')">《用户协议》</div>
-            <div class="xieyi" @click="toXieYiPop('yinsi')">《隐私权政策》</div>
-          </div>
-        </a-checkbox>
+      <a-form-item style="margin: 0">
+        <a-checkbox @change="agreennnnn">我已阅读并同意</a-checkbox>
+        <a-button type="link" style="padding: 0" @click="toAgreement('user')"
+          ><span class="agreement">《用户协议》</span></a-button
+        >
+        <a-button type="link" style="padding: 0" @click="toAgreement('privacy')"
+          ><span class="agreement">《隐私协议》</span></a-button
+        >
       </a-form-item>
     </a-form>
+    <a-modal
+      class="modal-pop-1"
+      v-model="showAgreement"
+      width="60vw"
+      :title="showAgreenmentTitle"
+      :footer="null"
+      @ok="() => (showAgreement = false)"
+    >
+      <div ref="pop" class="agreement-pop" style="height: 70vh">
+        <iframe :src="currentAgreement" width="100%" height="100%" frameborder="0"></iframe>
+      </div>
+    </a-modal>
   </div>
 </template>
 
@@ -206,6 +218,12 @@ export default {
         percent: 10,
         progressColor: '#FF0000',
       },
+      agreebtn: false,
+      showAgreement: false,
+      currentAgreement: '',
+      showAgreenmentTitle: '',
+      userAgreement: 'http://8.138.186.7:9000/report/agreement/智能助手WEB端用户协议.html',
+      privacyAgreement: 'http://8.138.186.7:9000/report/agreement/智能助手WEB端隐私协议.html',
       registerBtn: false,
       bankList: [],
       selectedBank: {
@@ -236,6 +254,9 @@ export default {
     // 企业选择
     filter(inputValue, path) {
       return path.some((option) => option.label.toLowerCase().indexOf(inputValue.toLowerCase()) > -1)
+    },
+    agreennnnn(v) {
+      this.agreebtn = v.target.checked
     },
     onBankChoose(value, selectedOptions) {
       if (!selectedOptions) {
@@ -281,7 +302,10 @@ export default {
       callback()
     },
     toXieYiPop(type) {
-      console.log('打开协议', type)
+      // 打开协议窗口
+      this.currentAgreement = type == 'user' ? this.userAgreement : this.privacyAgreement
+      this.showAgreenmentTitle = type == 'user' ? '智能助手用户协议' : '智能助手隐私协议'
+      this.showAgreement = true
     },
     handlePasswordCheck(rule, value, callback) {
       const password = this.form.getFieldValue('password')
@@ -307,17 +331,18 @@ export default {
         state,
         $router,
         $notification,
+        agreebtn,
       } = this
+      if (!agreebtn) {
+        $notification['info']({
+          message: '通知',
+          description: '请您仔细阅读并勾选用户协议与隐私政策，这是完成注册的必要步骤，以确保您的权益得到充分保障。',
+          duration: 4,
+        })
+        return
+      }
       validateFields({ force: true }, (err, values) => {
         if (!err) {
-          if (!this.checkNick) {
-            $notification['info']({
-              message: '提示',
-              description: '请您仔细阅读并勾选用户协议与隐私政策，这是完成注册的必要步骤，以确保您的权益得到充分保障。',
-              duration: 8,
-            })
-            return
-          }
           this.registerBtn = true
           state.passwordLevelChecked = false
           let request = Object.assign(values, this.selectedBank)
@@ -481,6 +506,14 @@ export default {
     &:hover {
       border-bottom: 1px solid #1890ff;
     }
+  }
+}
+.agreement {
+  color: #1890ff !important;
+  cursor: pointer;
+  text-decoration: underline;
+  &:hover {
+    font-weight: bold !important;
   }
 }
 </style>
