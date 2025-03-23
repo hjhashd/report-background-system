@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-23 09:26:50
+ * @LastEditTime: 2025-03-23 16:32:14
  * @FilePath: /report-background-system/src/api/report.js
  * @Description: 
  * 
@@ -33,7 +33,9 @@ const reportAPI = {
     applyReport: '/report/entity/publish/',
     setDraftStatus: '/report/entity/draft/',
     getCustomerAbnormalList: '/report/entity/customer/abnormal/list/',
-    AI: '/report/entity/content/optimize'
+    AI: '/report/entity/content/optimize',
+    viewReportTable: '/report/entity/preview/data',
+    appUploadFile: '/report/data/accredit/lately/detail',
 }
 
 export function dataAccredit(parameter) {
@@ -217,6 +219,22 @@ export function setDraftStatus(id) {
 export function toAi(parameter) {
     return request({
         url: reportAPI.AI,
+        method: 'post',
+        data: parameter
+    })
+}
+
+export function viewReportTable(parameter) {
+    return request({
+        url: reportAPI.viewReportTable,
+        method: 'post',
+        data: parameter
+    })
+}
+
+export function appUploadFile(parameter) {
+    return request({
+        url: reportAPI.appUploadFile,
         method: 'post',
         data: parameter
     })

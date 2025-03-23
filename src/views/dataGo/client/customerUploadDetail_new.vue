@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 16:45:11
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-23 09:24:57
+ * @LastEditTime: 2025-03-23 16:32:21
  * @FilePath: /report-background-system/src/views/dataGo/client/customerUploadDetail_new.vue
  * @Description: 
  * 
@@ -19,7 +19,7 @@
           <img style="width: 18px; height: 20px; margin-left: 15px" src="@/assets/images/mutil-upload.png" alt="dark" />
           批量上传
         </div>
-        <div class="icon-btn flex">
+        <div class="icon-btn flex" @click="mutilDownLoadModalPop = true">
           <img
             style="width: 18px; height: 20px; margin-left: 15px"
             src="@/assets/images/download-modal.png"
@@ -27,7 +27,7 @@
           />
           下载模板
         </div>
-        <div class="icon-btn flex">
+        <div class="icon-btn flex" @click="appDownloadPop = true">
           <img
             style="width: 100px; height: 20px; margin-left: 15px"
             src="@/assets/images/download-app-data.png"
@@ -83,6 +83,14 @@
                 <img style="width: 25px; height: 22px" src="@/assets/images/caiji.png" alt="dark" />
               </a-button>
             </a-tooltip>
+            <a-tooltip style="margin-right: 10px">
+              <template slot="title">
+                <span>下载模板</span>
+              </template>
+              <a-button @click="downloadModal(scope)" :style="{ color: '#7fbbf1', border: 'none', padding: 0 }">
+                <img style="width: 20px; height: 22px" src="@/assets/images/download-modal.png" alt="dark" />
+              </a-button>
+            </a-tooltip>
             <a-tooltip>
               <template slot="title">
                 <span>查看</span>
@@ -95,15 +103,54 @@
         </div>
       </a-table>
     </div>
+
+    <!-- 查看数据 -->
+    <a-modal v-model="dataSeeStatus" width="80vw" :title="'<<' + chooseTableName + '>>数据查看'" :footer="null">
+      <data-go-table :seeQuery="seeQuery"></data-go-table>
+    </a-modal>
+    <!-- 批量上传 -->
+    <a-modal :dialogStyle="{ top: '5vh' }" v-model="mutilUploading" width="85vw" title="批量上传" :footer="null">
+      <mutil-upload
+        :customerInfo="customerInfo"
+        :customerUploadList="uploadMutilData"
+        @cancelPop="mutilUploading = false"
+      ></mutil-upload>
+    </a-modal>
+    <!-- 批量下载模板 -->
+    <a-modal
+      :dialogStyle="{ top: '5vh' }"
+      v-model="mutilDownLoadModalPop"
+      width="50vw"
+      title="批量下载模板"
+      :footer="null"
+    >
+      <mutil-download-modal
+        :customerInfo="customerInfo"
+        :customerUploadList="uploadMutilData"
+        @cancelPop="mutilDownLoadModalPop = false"
+      ></mutil-download-modal>
+    </a-modal>
+    <!-- app数据下载 -->
+    <a-modal :dialogStyle="{ top: '5vh' }" v-model="appDownloadPop" width="50vw" title="app上传数据下载" :footer="null">
+      <app-data-download
+        :customerInfo="customerInfo"
+        @cancelPop="appDownloadPop = false"
+      ></app-data-download>
+    </a-modal>
   </a-spin>
 </template>
 
 <script>
+import MutilUpload from '../client/mutilUpload.vue'
+import MutilDownloadModal from '../client/mutilDownloadModal.vue'
+import AppDataDownload from '../client/appDataDownload.vue'
+import { DataGoTable } from '@/components'
 import { uploadFile } from '@/api/report'
-import { graftFun, newColumns } from './util'
+import { graftFun, newColumns, classifyDataByClassName } from './util'
 import { mapActions } from 'vuex'
 export default {
   name: 'CustomerUploadDetailNew',
+  components: { DataGoTable, MutilUpload, MutilDownloadModal, AppDataDownload },
   props: {
     customerInfo: {
       type: Object,
@@ -120,13 +167,35 @@ export default {
       newColumns,
       clickItem: null,
       uploading: false,
+      mutilUploading: false,
+      mutilDownLoadModalPop: false,
+      appDownloadPop: false,
+      dataSeeStatus: false,
       disabledList: [],
+      uploadMutilData: [],
+      seeQuery: {},
+      chooseTableName: null,
     }
+  },
+  mounted() {
+    this.uploadMutilData = classifyDataByClassName(this.customerUploadList)
   },
   methods: {
     ...mapActions(['changeBuildQrCodePop']),
-    mutilUploads(){
+    mutilUploads() {
       // 批量上传
+      this.mutilUploading = true
+    },
+    toSeeTable(item) {
+      this.seeQuery = {
+        id: item.id,
+        tableName: item.tableName,
+        creditCode: this.customerInfo.creditCode,
+        pageNum: 1,
+        pageSize: 10,
+      }
+      this.chooseTableName = item.tableNameZh
+      this.dataSeeStatus = true
     },
     toDealFun(icon) {
       switch (icon) {
@@ -142,6 +211,25 @@ export default {
           this.$router.push({ path: '/readWordPage/index' })
           break
       }
+    },
+    downloadModal(v) {
+      const url = v.templateUrl
+      const filename = `${v.tableNameZh}模板`
+      const xhr = new XMLHttpRequest()
+      xhr.open('GET', url, true)
+      xhr.responseType = 'blob'
+      xhr.onload = function () {
+        if (xhr.status === 200) {
+          const blob = xhr.response
+          const urlObject = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = urlObject
+          a.download = filename
+          a.click()
+          URL.revokeObjectURL(urlObject)
+        }
+      }
+      xhr.send()
     },
     uploadFile(options) {
       const { $notification } = this

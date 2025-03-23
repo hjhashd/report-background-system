@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-22 21:18:36
+ * @LastEditTime: 2025-03-23 12:29:27
  * @FilePath: /report-background-system/src/views/dataGo/uploadData/index.vue
  * @Description: 数据上传
  * 
@@ -16,7 +16,7 @@
         <img style="width: 22px; height: 22px" src="@/assets/images/customers.png" alt="dark" />
         <span>选择查询企业</span>
         <a-select style="width: 200px" placeholder="选择查询企业" @change="customerHandle">
-          <a-select-option v-for="(cu, index) in customers" :value="cu.creditCode" :key="index">
+          <a-select-option v-for="(cu, index) in customers" :value="index" :key="index">
             {{ cu.enterpriseName }}
           </a-select-option>
         </a-select>
@@ -40,7 +40,6 @@
 
 <script>
 import { getCustomerList, customerData } from '@/api/report'
-import { classifyDataByClassName } from '../client/util'
 import { mapActions } from 'vuex'
 import CustomerUploadDetailNew from '../client/customerUploadDetail_new.vue'
 export default {
@@ -78,8 +77,8 @@ export default {
         })
     },
     customerHandle(v) {
-      this.customerInfo = this.customers.find((iu) => iu.creditCode == v)
-      customerData({ creditCode: v })
+      this.customerInfo = this.customers[v]
+      customerData({ creditCode: this.customerInfo.creditCode })
         .then((res) => {
           this.pageLoading = false
           this.customerUploadList = res.data
