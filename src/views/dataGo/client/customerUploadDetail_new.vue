@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 16:45:11
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-22 16:29:31
+ * @LastEditTime: 2025-03-23 09:24:57
  * @FilePath: /report-background-system/src/views/dataGo/client/customerUploadDetail_new.vue
  * @Description: 
  * 
@@ -15,7 +15,7 @@
           <img style="width: 18px; height: 20px" src="@/assets/images/dun.jpg" alt="dark" />
           批量授权
         </div>
-        <div class="icon-btn flex">
+        <div class="icon-btn flex" @click="mutilUploads">
           <img style="width: 18px; height: 20px; margin-left: 15px" src="@/assets/images/mutil-upload.png" alt="dark" />
           批量上传
         </div>
@@ -125,6 +125,9 @@ export default {
   },
   methods: {
     ...mapActions(['changeBuildQrCodePop']),
+    mutilUploads(){
+      // 批量上传
+    },
     toDealFun(icon) {
       switch (icon) {
         case 'redo':

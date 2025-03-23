@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-15 14:24:21
+ * @LastEditTime: 2025-03-23 09:26:50
  * @FilePath: /report-background-system/src/api/report.js
  * @Description: 
  * 
@@ -32,7 +32,8 @@ const reportAPI = {
     updateReport: '/report/entity/update/report/',
     applyReport: '/report/entity/publish/',
     setDraftStatus: '/report/entity/draft/',
-    getCustomerAbnormalList: '/report/entity/customer/abnormal/list/'
+    getCustomerAbnormalList: '/report/entity/customer/abnormal/list/',
+    AI: '/report/entity/content/optimize'
 }
 
 export function dataAccredit(parameter) {
@@ -209,6 +210,15 @@ export function setDraftStatus(id) {
     return request({
         url: reportAPI.setDraftStatus + id,
         method: 'post',
+    })
+}
+
+// AI优化
+export function toAi(parameter) {
+    return request({
+        url: reportAPI.AI,
+        method: 'post',
+        data: parameter
     })
 }
 

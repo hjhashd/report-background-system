@@ -2,14 +2,15 @@
  * @Author: bekon
  * @Date: 2025-03-21 22:37:18
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-22 13:15:09
+ * @LastEditTime: 2025-03-23 08:58:06
  * @FilePath: /report-background-system/src/components/DataGoTabs/DataGoTabs.vue
  * @Description: 
  * 
 -->
 <template>
   <div class="tab-box">
-    <div class="flex">
+    <div class="flex tab-center">
+      <slot name="leftContant" v-if="hasLeftContant"></slot>
       <div
         v-for="(item, index) in tab"
         :key="index"
@@ -24,6 +25,7 @@
           {{ item.name }}
         </div>
       </div>
+      <slot name="rightContant" v-if="hasRightContant"></slot>
     </div>
     <slot></slot>
   </div>
@@ -36,6 +38,14 @@ export default {
     tab: {
       type: Array,
       required: true,
+    },
+    hasRightContant: {
+      type: Boolean,
+      default: false,
+    },
+    hasLeftContant: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {
@@ -57,9 +67,14 @@ export default {
 
 <style scoped lang="less">
 .tab-box {
+  width: 100%;
   background: #ffffff;
   box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.5);
   border-radius: 5px 5px 0 0;
+}
+.tab-center {
+  background-color: #d3e3f8;
+  align-items: center;
 }
 .item {
   display: flex;
@@ -69,14 +84,13 @@ export default {
   font-weight: 400;
   line-height: 2;
   cursor: pointer;
-  background-color: #d6e3f6;
   .son-item {
     display: flex;
     align-items: center;
     text-align: center;
     justify-content: center;
-    padding: 5px 0 ;
-    img{
+    padding: 5px 0;
+    img {
       margin-right: 10px;
     }
   }

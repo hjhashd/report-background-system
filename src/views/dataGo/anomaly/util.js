@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-03-12 13:54:33
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-15 14:30:34
+ * @LastEditTime: 2025-03-23 09:03:15
  * @FilePath: /report-background-system/src/views/dataGo/anomaly/util.js
  * @Description: 
  * 
@@ -60,7 +60,7 @@ export function dealColumns(data, type) {
                         customHeaderCell: () => {
                             return {
                                 style: {
-                                    backgroundColor: '#ccdcfc',
+                                    backgroundColor: '#E5EDF9'
                                 }
                             };
                         },
@@ -72,7 +72,7 @@ export function dealColumns(data, type) {
                             customHeaderCell: () => {
                                 return {
                                     style: {
-                                        backgroundColor: '#ccdcfc',
+                                        backgroundColor: '#E5EDF9'
                                     }
                                 };
                             },

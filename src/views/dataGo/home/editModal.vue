@@ -47,7 +47,7 @@
             <template slot="title">
               <span>另存为</span>
             </template>
-            <a-popconfirm placement="left" ok-text="新增结论" cancel-text="取消" @confirm="saveAs">
+            <a-popconfirm placement="left" ok-text="保存" cancel-text="取消" @confirm="saveAs">
               <template slot="title">
                 <div>是否另存结论?</div>
               </template>
@@ -94,7 +94,9 @@
           <a-textarea v-model="useContent.content" :auto-size="true" :disabled="true" />
         </a-col>
         <a-col :span="11">
-          <a-textarea v-model="changeContent" :auto-size="true" />
+          <a-spin :spinning="editLoading">
+            <a-textarea style="min-height: 300px;" v-model="changeContent" :auto-size="true" />
+          </a-spin>
         </a-col>
         <!-- <a-col :span="6" class="history-box">
           <div class="history-title">历史版本</div>
@@ -124,7 +126,14 @@
 </template>
   
 <script>
-import { reportContentList, deleteReportContent, saveReportContent, useReportContent, getModalList } from '@/api/report'
+import {
+  reportContentList,
+  deleteReportContent,
+  saveReportContent,
+  useReportContent,
+  getModalList,
+  toAi,
+} from '@/api/report'
 import { colorList } from '@/config/constants'
 export default {
   props: {
@@ -137,6 +146,7 @@ export default {
     return {
       applyLoading: false,
       saveLoading: false,
+      editLoading: false,
       modalList: [],
       colorList,
       currentModalSelect: null,
@@ -175,11 +185,25 @@ export default {
   },
   methods: {
     toAI() {
+      const { $notification } = this
       // ai
-      this.useContent.content = ''
+      this.editLoading = true
+      toAi({ content: this.changeContent }).then((result) => {
+        this.editLoading = false
+        if (result.code != 200) {
+          $notification['error']({
+            message: '错误通知：',
+            description: `${result.msg}`,
+            duration: 8,
+          })
+          return
+        } else {
+          this.changeContent = result.data
+        }
+      })
     },
     addModalResult() {
-      this.useContent.content = ''
+      this.changeContent = ''
     },
     changModalShow(v) {
       this.currentModalSelect = v

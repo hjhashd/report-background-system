@@ -102,7 +102,8 @@ export const asyncRouterMap = [
       {
         path: '/clientPage/index',
         name: 'clientPage',
-        component: () => import('@/views/dataGo/client'),
+        component: () => import('@/views/dataGo/uploadData'),
+        // component: () => import('@/views/dataGo/client'),
         meta: { title: 'menu.client', keepAlive: false, icon: 'team', permission: ['client'] }
       },
 
