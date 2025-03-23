@@ -222,8 +222,8 @@ export default {
       showAgreement: false,
       currentAgreement: '',
       showAgreenmentTitle: '',
-      userAgreement: 'http://8.138.186.7:9000/report/agreement/智能助手WEB端用户协议.html',
-      privacyAgreement: 'http://8.138.186.7:9000/report/agreement/智能助手WEB端隐私协议.html',
+      userAgreement: '/files/report/agreement/智能助手WEB端用户协议.html',
+      privacyAgreement: '/files/report/agreement/智能助手WEB端隐私协议.html',
       registerBtn: false,
       bankList: [],
       selectedBank: {
@@ -301,7 +301,7 @@ export default {
 
       callback()
     },
-    toXieYiPop(type) {
+    toAgreement(type) {
       // 打开协议窗口
       this.currentAgreement = type == 'user' ? this.userAgreement : this.privacyAgreement
       this.showAgreenmentTitle = type == 'user' ? '智能助手用户协议' : '智能助手隐私协议'
