@@ -21,15 +21,14 @@
         <div class="user-box flex-row-spacearound">
           <div class="user-ava">
             <a-avatar :src="userInfo.avatar" style="width: 48px; height: 48px" />
-            <a-button style="margin-top: 20px" type="link" size="small" @click="logout"> 退出 </a-button>
-          </div>
-          <div style="text-align: center">
             <a-tooltip placement="right">
               <template slot="title">
                 <div class="user-name">{{ userInfo.userName }}</div>
               </template>
               <div class="user-name single-line-text">{{ userInfo.userName }}</div>
             </a-tooltip>
+          </div>
+          <div style="text-align: center">
             <div @click="buildQRcode">
               <img
                 class="code-img"
@@ -38,6 +37,7 @@
                 style="width: 52px; height: 52px"
               />
             </div>
+            <a-button style="margin-top: 20px" type="link" size="small" @click="logout"> 退出 </a-button>
           </div>
         </div>
         <div class="user-report-info" v-if="overview">
@@ -258,7 +258,7 @@ export default {
   .user-name {
     max-width: 80px;
     text-align: center;
-    margin-bottom: 15px;
+    margin-top: 15px;
     font-family: PingFangSC-Regular;
     font-size: 21px;
     color: #afabc2;
@@ -272,6 +272,7 @@ export default {
   justify-content: space-around;
   align-items: center;
   margin-bottom: 10px;
+  cursor: default;
   .report-info-item {
     text-align: center;
     line-height: 1.5;

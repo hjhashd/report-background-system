@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 16:45:11
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-23 16:22:53
+ * @LastEditTime: 2025-03-24 15:13:10
  * @FilePath: /report-background-system/src/views/dataGo/client/mutilUpload.vue
  * @Description: 
  * 
@@ -81,7 +81,6 @@
 
 <script>
 import { uploadFile } from '@/api/report'
-import { graftFun, coopFun, columns } from './util'
 import { mapActions } from 'vuex'
 export default {
   name: 'CustomerUploadDetail',
@@ -97,9 +96,6 @@ export default {
   },
   data() {
     return {
-      graftFun,
-      coopFun,
-      columns,
       clickItem: null,
       uploading: false,
       disabledList: [],

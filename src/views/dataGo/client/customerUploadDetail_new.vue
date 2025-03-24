@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 16:45:11
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-23 16:32:21
+ * @LastEditTime: 2025-03-24 15:36:16
  * @FilePath: /report-background-system/src/views/dataGo/client/customerUploadDetail_new.vue
  * @Description: 
  * 
@@ -27,7 +27,7 @@
           />
           下载模板
         </div>
-        <div class="icon-btn flex" @click="appDownloadPop = true">
+        <div class="icon-btn flex" @click="openAppPop">
           <img
             style="width: 100px; height: 20px; margin-left: 15px"
             src="@/assets/images/download-app-data.png"
@@ -133,6 +133,7 @@
     <!-- app数据下载 -->
     <a-modal :dialogStyle="{ top: '5vh' }" v-model="appDownloadPop" width="50vw" title="app上传数据下载" :footer="null">
       <app-data-download
+        ref="appD"
         :customerInfo="customerInfo"
         @cancelPop="appDownloadPop = false"
       ></app-data-download>
@@ -169,6 +170,7 @@ export default {
       uploading: false,
       mutilUploading: false,
       mutilDownLoadModalPop: false,
+      appFirstLoad: true,
       appDownloadPop: false,
       dataSeeStatus: false,
       disabledList: [],
@@ -185,6 +187,13 @@ export default {
     mutilUploads() {
       // 批量上传
       this.mutilUploading = true
+    },
+    openAppPop() {
+      this.appDownloadPop = true
+      if (!this.appFirstLoad) {
+        this.$refs.appD.initData()
+      }
+      this.appFirstLoad = false
     },
     toSeeTable(item) {
       this.seeQuery = {

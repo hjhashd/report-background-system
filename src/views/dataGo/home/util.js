@@ -150,7 +150,8 @@ export const columns = [
         title: '序号',
         dataIndex: 'id',
         key: 'id',
-        width: '80px'
+        width: '80px',
+        scopedSlots: { customRender: 'id' },
     },
     {
         title: '报告名称',
@@ -195,6 +196,8 @@ export const qrColumns = [
         title: '序号',
         dataIndex: 'id',
         key: 'id',
+        width: '80px',
+        scopedSlots: { customRender: 'id' },
     },
     {
         title: '二维码类型',

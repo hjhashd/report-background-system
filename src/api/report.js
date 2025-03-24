@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-23 16:32:14
+ * @LastEditTime: 2025-03-24 18:05:59
  * @FilePath: /report-background-system/src/api/report.js
  * @Description: 
  * 
@@ -15,7 +15,7 @@ const reportAPI = {
     accreditUploadList: '/report/data/accredit/finance/files/',
     customerData: '/report/entity/data/table/config',
     buildReport: '/report/entity/save/report',
-    wopiFile: '/report/onlyoffice/config/',
+    wopiFile: '/report/office/config/',
     abnormalReport: '/report/entity/abnormal/report',
     reportList: '/report/entity/list',
     getReportModal: '/report/entity/template/list',

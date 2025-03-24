@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-26 20:29:58
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-22 21:01:23
+ * @LastEditTime: 2025-03-24 17:57:06
  * @FilePath: /report-background-system/src/views/dataGo/overview/util.js
  * @Description: 
  * 
@@ -113,6 +113,8 @@ export const columns = [
         title: '序号',
         dataIndex: 'id',
         key: 'id',
+        width: '80px',
+        scopedSlots: { customRender: 'id' },
     },
     {
         title: '报告类型',

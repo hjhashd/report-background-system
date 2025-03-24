@@ -2,14 +2,14 @@
  * @Author: bekon
  * @Date: 2025-02-21 16:45:11
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-23 16:52:12
+ * @LastEditTime: 2025-03-24 15:42:01
  * @FilePath: /report-background-system/src/views/dataGo/client/appDataDownload.vue
  * @Description: 
  * 
 -->
 <template>
   <a-spin :spinning="uploading">
-    <div class="mutil-box">
+    <div class="mutil-box" v-if="showAppList.length">
       <a-checkbox-group v-model="checklist" style="width: 100%" @change="onChange">
         <div v-for="item in showAppList" :key="item.name" class="item-content">
           <div v-if="item.data && item.data.length">
@@ -25,25 +25,37 @@
         </div>
       </a-checkbox-group>
     </div>
-    <div class="flex-row-spacebetween extra-line">
+    <div v-else>
+      <Empty />
+    </div>
+    <div class="flex-row-spacebetween extra-line" v-if="showAppList.length">
       <a-checkbox @change="allCheck" :indeterminate="indeterminate" :checked="checkAll" class="table-name-zh">
         全选
       </a-checkbox>
     </div>
     <div class="flex">
-      <a-button :disabled="!checklist.length" class="flex-1 upload-btn" @click="mutilDownload"> 下载数据 </a-button>
+      <a-button
+        v-if="showAppList.length"
+        :disabled="!checklist.length"
+        class="flex-1 upload-btn"
+        @click="mutilDownload"
+      >
+        下载数据
+      </a-button>
       <a-button class="flex-1 upload-btn" @click="cancelPop"> 取消 </a-button>
     </div>
   </a-spin>
 </template>
 
 <script>
+import { Empty } from 'ant-design-vue'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
 import { mapActions, mapState } from 'vuex'
 import { appUploadFile } from '@/api/report'
 export default {
   name: 'mutilDownloadModal',
+  components: { Empty },
   props: {
     customerInfo: {
       type: Object,
@@ -79,7 +91,7 @@ export default {
       })
         .then((result) => {
           if (result.code == 200) {
-            if (result.data.reportDataAccreditFile && result.data.reportDataAccreditFile.length) {
+            if (result.data && result.data.reportDataAccreditFile && result.data.reportDataAccreditFile.length) {
               const type1 = {
                 name: '利润表数据',
                 data: result.data.reportDataAccreditFile.filter((v) => v.fileType == 1),
@@ -105,6 +117,9 @@ export default {
                 })
               })
               this.plaintOptions = options
+            } else {
+              this.showAppList = []
+              this.plaintOptions = []
             }
           } else {
             $notification['error']({

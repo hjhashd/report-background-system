@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-23 12:29:27
+ * @LastEditTime: 2025-03-24 18:27:10
  * @FilePath: /report-background-system/src/views/dataGo/uploadData/index.vue
  * @Description: 数据上传
  * 
@@ -15,7 +15,7 @@
       <div>
         <img style="width: 22px; height: 22px" src="@/assets/images/customers.png" alt="dark" />
         <span>选择查询企业</span>
-        <a-select style="width: 200px" placeholder="选择查询企业" @change="customerHandle">
+        <a-select style="width: 300px" placeholder="选择查询企业" @change="customerHandle">
           <a-select-option v-for="(cu, index) in customers" :value="index" :key="index">
             {{ cu.enterpriseName }}
           </a-select-option>

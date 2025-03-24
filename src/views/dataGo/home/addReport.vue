@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-22 16:01:20
+ * @LastEditTime: 2025-03-24 18:15:10
  * @FilePath: /report-background-system/src/views/dataGo/home/addReport.vue
  * @Description: 
  * 
@@ -10,7 +10,7 @@
 <template>
   <page-header-wrapper>
     <div class="page-content">
-      <data-go-tabs :tab="reportTypeList" @changeTab="changeTab">
+      <data-go-tabs :tab="reportTypeList" :activeTab="reportType" @changeTab="changeTab">
         <div class="flex add-report-page">
           <div class="left-box">
             <h1 style="text-align: center; font-size: 32px">报告目录</h1>

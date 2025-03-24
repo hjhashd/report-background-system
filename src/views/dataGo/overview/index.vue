@@ -31,6 +31,9 @@
 
     <div class="table-contant">
       <s-table ref="table" rowKey="key" :data="loadData" :columns="columns">
+        <template slot="id" slot-scope="txt, scoped, index">{{
+          (queryParam.pageNum - 1) * queryParam.pageSize + index + 1
+        }}</template>
         <span slot="status" slot-scope="text">
           <!-- // 0 草稿 1 已完成 2 数据未授权 3 数据已授权 -->
           <span v-if="text == 1" :class="['table-status', 'status' + text]">已完成</span>
@@ -84,9 +87,18 @@ export default {
       // 查询参数
       queryParam: {
         status: 0,
+        pageSize: 10,
+        status: 0,
       },
       loadData: (parameter) => {
-        const requestParameters = Object.assign({}, parameter, this.queryParam, { pageNum: parameter.pageNo })
+        let requestParameters = Object.assign({}, this.queryParam, parameter, {
+          pageNum: parameter.pageNo,
+        })
+        if (parameter.pageSize !== this.queryParam.pageSize) {
+          requestParameters.pageNo = 1
+          requestParameters.pageNum = 1
+        }
+        this.queryParam = JSON.parse(JSON.stringify(requestParameters))
         return new Promise((resolve, reject) => {
           getReportList(requestParameters).then((res) => {
             const reD = {

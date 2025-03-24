@@ -23,6 +23,9 @@
     </div>
     <div class="table-contant">
       <s-table ref="table" rowKey="key" :data="loadData" :columns="columns">
+        <template slot="id" slot-scope="txt, scoped, index">{{
+          (queryParam.pageNum - 1) * queryParam.pageSize + index + 1
+        }}</template>
         <div slot="reportName" slot-scope="text, scoped">
           <span>{{ text }}</span>
           <a-tooltip placement="right" v-if="scoped.status != 1">
@@ -92,14 +95,21 @@ export default {
       reportTypeList,
       // 查询参数
       queryParam: {
+        pageNum: 1,
+        pageSize: 10,
         status: 0,
       },
       loadData: (parameter) => {
-        const requestParameters = Object.assign({}, parameter, this.queryParam, {
+        let requestParameters = Object.assign({}, this.queryParam, parameter, {
           pageNum: parameter.pageNo,
           reportName: this.search,
           reportType: this.draftTypeSelected,
         })
+        if (parameter.pageSize !== this.queryParam.pageSize) {
+          requestParameters.pageNo = 1
+          requestParameters.pageNum = 1
+        }
+        this.queryParam = JSON.parse(JSON.stringify(requestParameters))
         return new Promise((resolve, reject) => {
           reportList(requestParameters).then((res) => {
             const reD = {

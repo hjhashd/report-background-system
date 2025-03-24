@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-19 16:51:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-22 11:56:12
+ * @LastEditTime: 2025-03-24 16:31:02
  * @FilePath: /report-background-system/src/components/buildQRCode/buildQRCode.vue
  * @Description: 
  * 
@@ -67,11 +67,14 @@
             <div
               class="qr-line"
               :class="{ active: item.id == activeQr }"
-              v-for="item in qrList"
+              v-for="(item, index) in qrList"
               :key="item.id"
               @click="qrlinkClick(item)"
             >
-              <div class="title single-line-text">{{ item | dealQrCodeTitle }}</div>
+              <div class="title single-line-text">
+                <span>{{ index + 1 }}</span
+                >{{ item | dealQrCodeTitle }}
+              </div>
               <div class="time">{{ item.createTime.split(' ')[0].replaceAll('-', '/') }}</div>
             </div>
             <a-button type="link" @click="toQrList">前往查看完成列表></a-button>
@@ -174,7 +177,7 @@ export default {
     dealQrCodeTitle(v) {
       let usea = v.useRemark == 1 ? '信贷调查报告' : v.useRemark == 2 ? '财务分析报告' : '能耗分析报告'
       let qrcodeType = v.codeType == 1 ? '数据申请' : '上传数据'
-      return `${v.id}.${usea}-${qrcodeType}`
+      return `.${usea}-${qrcodeType}`
     },
   },
   created() {

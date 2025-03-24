@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 16:45:11
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-23 16:20:46
+ * @LastEditTime: 2025-03-24 15:12:54
  * @FilePath: /report-background-system/src/views/dataGo/client/mutilDownloadModal.vue
  * @Description: 
  * 
@@ -37,7 +37,6 @@
 </template>
 
 <script>
-import { graftFun, coopFun, columns } from './util'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
 import { mapActions } from 'vuex'
@@ -55,9 +54,6 @@ export default {
   },
   data() {
     return {
-      graftFun,
-      coopFun,
-      columns,
       clickItem: null,
       uploading: false,
       disabledList: [],

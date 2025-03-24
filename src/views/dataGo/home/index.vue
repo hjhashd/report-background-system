@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-22 12:14:13
+ * @LastEditTime: 2025-03-24 15:50:06
  * @FilePath: /report-background-system/src/views/dataGo/home/index.vue
  * @Description: 主页
  * 
@@ -26,7 +26,7 @@
       <div class="p-20">
         <s-table ref="table" rowKey="key" :data="loadData" :columns="tabColumns">
           <div slot="reportName" slot-scope="text, scoped">
-            <span>{{ text }}</span>
+            <span class="report-name" @click="handleChat(scoped)">{{ text }}</span>
             <a-tooltip placement="right" v-if="scoped.status != 1">
               <template slot="title">
                 <span v-if="scoped.dataStatus == 2">未完成数据授权，数据上传</span>
@@ -194,7 +194,7 @@ export default {
   align-items: center;
   justify-content: center;
   width: 15.5vw;
-  height: 225px;
+  height: 20vh;
   margin-bottom: 4px;
   border-radius: 5px;
   cursor: pointer;
@@ -267,5 +267,12 @@ export default {
 }
 .p-20 {
   padding: 20px;
+}
+.report-name {
+  cursor: pointer;
+  &:hover {
+    color: #0a69ef;
+    border-bottom: 1px solid #0a69ef;
+  }
 }
 </style>
