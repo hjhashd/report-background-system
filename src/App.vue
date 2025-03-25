@@ -1,7 +1,16 @@
+<!--
+ * @Author: bekon
+ * @Date: 2022-10-10 22:31:07
+ * @LastEditors: bekon
+ * @LastEditTime: 2025-03-25 11:51:46
+ * @FilePath: /report-background-system/src/App.vue
+ * @Description: 
+ * 
+-->
 <template>
   <a-config-provider :locale="locale">
     <div id="app">
-      <router-view/>
+      <router-view />
     </div>
   </a-config-provider>
 </template>
@@ -11,18 +20,21 @@ import { domTitle, setDocumentTitle } from '@/utils/domUtil'
 import { i18nRender } from '@/locales'
 
 export default {
-  data () {
-    return {
-    }
+  data() {
+    return {}
   },
   computed: {
-    locale () {
+    locale() {
       // 只是为了切换语言时，更新标题
       const { title } = this.$route.meta
-      title && (setDocumentTitle(`${i18nRender(title)} - ${domTitle}`))
+      title && setDocumentTitle(`${i18nRender(title)} - ${domTitle}`)
 
       return this.$i18n.getLocaleMessage(this.$store.getters.lang).antLocale
-    }
-  }
+    },
+  },
 }
 </script>
+
+<style>
+@import './assets/iconfont.css';
+</style>

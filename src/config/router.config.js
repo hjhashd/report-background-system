@@ -75,6 +75,7 @@ export const asyncRouterMap = [
         path: '/overviewPage/index',
         name: 'overview',
         component: () => import('@/views/dataGo/overview'),
+        // meta: { title: 'menu.overview', keepAlive: true, icon: 'a-bianzu9', permission: ['overview'] }
         meta: { title: 'menu.overview', keepAlive: true, icon: 'bar-chart', permission: ['overview'] }
       },
       // uploadData

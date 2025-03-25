@@ -299,11 +299,11 @@ export default {
     }
     &:nth-of-type(3) img {
       width: 86px;
-      margin-top: -45px;
+      margin-top: -55px;
     }
     &:nth-of-type(4) img {
       width: 89px;
-      margin-top: -48px;
+      margin-top: -55px;
     }
     &:nth-of-type(5) img {
       width: 79px;
