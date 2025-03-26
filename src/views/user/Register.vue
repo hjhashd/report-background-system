@@ -114,6 +114,7 @@
 
       <a-form-item>
         <cascader
+          class="cascader-line-box"
           :allowClear="true"
           :options="bankList"
           :show-search="{ filter }"
@@ -127,6 +128,7 @@
         <a-input
           size="large"
           type="text"
+          :style="{ background: '#f2f7ff !important' }"
           placeholder="岗位工号"
           v-decorator="[
             'jobNumber',
@@ -153,13 +155,15 @@
         <router-link class="login" :to="{ name: 'login' }">{{ $t('user.register.sign-in') }}</router-link>
       </a-form-item>
       <a-form-item style="margin: 0">
-        <a-checkbox @change="agreennnnn">我已阅读并同意</a-checkbox>
-        <a-button type="link" style="padding: 0" @click="toAgreement('user')"
-          ><span class="agreement">《用户协议》</span></a-button
-        >
-        <a-button type="link" style="padding: 0" @click="toAgreement('privacy')"
-          ><span class="agreement">《隐私协议》</span></a-button
-        >
+        <div class="form-item-speical">
+          <a-checkbox @change="agreennnnn">我已阅读并同意</a-checkbox>
+          <a-button type="link" style="padding: 0" @click="toAgreement('user')"
+            ><span class="agreement">《用户协议》</span></a-button
+          >
+          <a-button type="link" style="padding: 0" @click="toAgreement('privacy')"
+            ><span class="agreement">《隐私协议》</span></a-button
+          >
+        </div>
       </a-form-item>
     </a-form>
     <a-modal
@@ -462,6 +466,7 @@ export default {
     width: 50%;
     & /deep/ span {
       color: #fff !important;
+      background-color: transparent !important;
     }
   }
 
@@ -474,16 +479,21 @@ export default {
   font-family: PingFangSC-Regular;
   font-size: 16px;
   color: rgba(0, 0, 0, 0.5);
+  background: #f2f7ff !important;
   letter-spacing: 0;
   font-weight: 400;
-  z-index: 1000;
+  // z-index: 1000;
+  border-radius: 21px;
+}
+.form-item-speical /deep/ .layout-input /deep/ span {
+  background-color: transparent !important;
 }
 .layout-input .phone-input/deep/ .ant-input {
   padding-left: 55px;
 }
 .layout-input /deep/ .ant-input {
   font-size: 16px;
-  background: #f2f7ff !important;
+  background: transparent !important;
   border-radius: 21px;
   border: none;
 }

@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-03-15 14:52:33
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-22 14:42:10
+ * @LastEditTime: 2025-03-26 16:44:04
  * @FilePath: /report-background-system/src/components/AddCustomer/addCustomer.vue
  * @Description: 
  * 
@@ -40,7 +40,7 @@
     </div>
     <div style="text-align: center; margin-top: 16px">
       <a-button style="margin-right: 20px" @click="handleCancel">取消</a-button>
-      <a-button style="background-color: #64b5f6; color: #fff" @click="handleConfirm">新增客户</a-button>
+      <a-button :disabled="!queryItem.creditCode" style="background-color: #64b5f6; color: #fff" @click="handleConfirm">新增客户</a-button>
     </div>
   </div>
 </template>
@@ -90,7 +90,6 @@ export default {
     },
     handleConfirm() {
       const { $notification } = this
-      console.log(this.queryItem)
       addCustomerQ(this.queryItem).then((result) => {
         if (result.code == 200) {
           $notification['success']({
