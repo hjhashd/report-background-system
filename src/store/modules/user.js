@@ -26,9 +26,17 @@ const user = {
     info: {},
     overview: null,
     buildQrCodePop: false,
+    collapsed: false,
+    fullScreen: false,
   },
 
   mutations: {
+    SET_COLLAPSED: (state, collapsed) => {
+      state.collapsed = collapsed
+    },
+    SET_FULLSCREEN: (state, fullScreen) => {
+      state.fullScreen = fullScreen
+    },
     SET_TOKEN: (state, token) => {
       state.token = token
     },
@@ -152,6 +160,20 @@ const user = {
     changeBuildQrCodePop({ commit }, status) {
       return new Promise((resolve) => {
         commit('SET_BUILD_QRCODE', status)
+        resolve();
+      })
+    },
+
+    setCollapsed({ commit }, status) {
+      return new Promise((resolve) => {
+        commit('SET_COLLAPSED', status)
+        resolve();
+      })
+    },
+
+    setFullScreen({ commit }, status) {
+      return new Promise((resolve) => {
+        commit('SET_FULLSCREEN', status)
         resolve();
       })
     },

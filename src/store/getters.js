@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2022-10-10 22:31:07
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-07 18:09:49
+ * @LastEditTime: 2025-03-26 22:22:18
  * @FilePath: /report-background-system/src/store/getters.js
  * @Description: 
  * 
@@ -22,6 +22,7 @@ const getters = {
   multiTab: state => state.app.multiTab,
   buildQrCodePop: state => state.app.buildQrCodePop,
   overview: state => state.user.overview,
+  collapsed: state => state.user.collapsed,
 }
 
 export default getters

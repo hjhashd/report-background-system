@@ -312,7 +312,7 @@ export default {
   }
   .title,
   .sum {
-    font-size: 20px;
+    font-size: 1.4em;
     color: #222222;
     letter-spacing: 0;
     text-align: center;

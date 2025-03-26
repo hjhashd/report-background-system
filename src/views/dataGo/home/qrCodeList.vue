@@ -28,7 +28,7 @@
           <span v-else>{{ text }}</span>
         </span>
         <span slot="bankNameInfo" slot-scope="text, scoped">
-          <span>{{ scoped.bankName1 }}-{{ scoped.bankName2 }}</span>
+          <span>{{ scoped | showCompany }}</span>
         </span>
         <template slot="codeUrl" slot-scope="text">
           <div class="pointer" @click="showImg(text)">
@@ -112,6 +112,14 @@ export default {
     dealTime(v) {
       let time = parseInt(v)
       return Math.ceil(time / 3600)
+    },
+    showCompany(v) {
+      if (v.appUser && v.appUser.enterprise) {
+        let enter = v.appUser.enterprise
+        return enter.enterpriseName
+      } else {
+        return ''
+      }
     },
   },
   computed: {

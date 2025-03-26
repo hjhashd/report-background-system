@@ -79,12 +79,12 @@ export const asyncRouterMap = [
         meta: { title: 'menu.overview', keepAlive: true, icon: 'bar-chart', permission: ['overview'] }
       },
       // uploadData
-      {
-        path: '/uploadDataPage/index',
-        name: 'uploadData',
-        component: () => import('@/views/dataGo/uploadData'),
-        meta: { title: 'menu.uploadData', keepAlive: true, icon: 'cloud-upload', permission: ['uploadData'] }
-      },
+      // {
+      //   path: '/uploadDataPage/index',
+      //   name: 'uploadData',
+      //   component: () => import('@/views/dataGo/uploadData'),
+      //   meta: { title: 'menu.uploadData', keepAlive: true, icon: 'cloud-upload', permission: ['uploadData'] }
+      // },
       // readWord
       {
         path: '/readWordPage/index',

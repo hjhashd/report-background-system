@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-24 18:15:10
+ * @LastEditTime: 2025-03-26 21:23:54
  * @FilePath: /report-background-system/src/views/dataGo/home/addReport.vue
  * @Description: 
  * 
@@ -209,11 +209,11 @@ export default {
     },
     buildReport() {
       const { $notification, $router } = this
-      // 生产报告
+      //生成报告
       if (!this.chooseModal || !this.chooseModal.length || !this.chooseCustomer) {
         $notification['warning']({
           message: '提醒：',
-          description: '请选择生产报告客户及报告模板信息',
+          description: '请选择生成报告客户及报告模板信息',
           duration: 8,
         })
         return

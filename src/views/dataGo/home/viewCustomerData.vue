@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-26 11:22:54
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-22 16:02:35
+ * @LastEditTime: 2025-03-26 21:57:55
  * @FilePath: /report-background-system/src/views/dataGo/home/viewCustomerData.vue
  * @Description: 
  * 
@@ -42,7 +42,7 @@
     </div>
     <div class="button-group">
       <a-button v-if="!buildReportId" :loading="buildLoading" style="width: 25%; height: 40px" @click="buildReport"
-        >生产报告</a-button
+        >生成报告</a-button
       >
       <a-button v-if="buildReportId" style="width: 25%; height: 40px" @click="reviewReport">报告预览</a-button>
     </div>
@@ -95,6 +95,11 @@ export default {
         enterpriseName: this.queryParams.enterpriseName,
         template: this.queryParams.template,
       }
+      $notification['info']({
+        message: '消息提示：',
+        description: '正在用行业小模型生成报告，需要等待几分钟',
+        duration: 20,
+      })
       this.buildLoading = true
       // 去往查看数据页面
       buildReport(paramsRequest)

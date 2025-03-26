@@ -211,12 +211,12 @@ export const qrColumns = [
         key: 'status',
         scopedSlots: { customRender: 'status' },
     },
-    // {
-    //     title: '授权银行信息',
-    //     dataIndex: 'bankName1',
-    //     key: 'bankName1',
-    //     scopedSlots: { customRender: 'bankNameInfo' }, 
-    // },
+    {
+        title: '授权企业名称',
+        dataIndex: 'appUser',
+        key: 'appUser',
+        scopedSlots: { customRender: 'bankNameInfo' }, 
+    },
     {
         title: '生成时间',
         dataIndex: 'createTime',

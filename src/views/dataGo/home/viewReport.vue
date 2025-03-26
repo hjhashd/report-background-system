@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-22 23:27:40
+ * @LastEditTime: 2025-03-26 23:13:13
  * @FilePath: /report-background-system/src/views/dataGo/home/viewReport.vue
  * @Description: 报告预览
  * 
@@ -13,8 +13,29 @@
     <div class="page-content flex-col" style="padding: 0; width: 100%">
       <div class="report-view">
         <div class="flex-row-spacebetween tools">
-          <div class="sys-title">企业信息查询系统</div>
+          <a-tooltip>
+            <template slot="title">
+              <span>{{ reportDetail.reportName }}</span>
+            </template>
+            <div class="sys-title single-line-text">{{ reportDetail.reportName }}</div>
+          </a-tooltip>
           <div class="flex">
+            <a-tooltip v-if="!fullView">
+              <template slot="title">
+                <span>全屏</span>
+              </template>
+              <div class="btn-item" @click="allViewPort">
+                <div class="icon-box"><a-icon style="color: rgb(87, 135, 238)" type="fullscreen" /></div>
+              </div>
+            </a-tooltip>
+            <a-tooltip v-else>
+              <template slot="title">
+                <span>退出全屏</span>
+              </template>
+              <div class="btn-item" @click="closeViewPort">
+                <div class="icon-box"><a-icon style="color: rgb(87, 135, 238)" type="fullscreen-exit" /></div>
+              </div>
+            </a-tooltip>
             <a-tooltip>
               <template slot="title">
                 <span>更新数据</span>
@@ -60,7 +81,7 @@
           </div>
         </div>
       </div>
-      <div class="flex">
+      <div class="flex flex-1">
         <div ref="editorContainerRef" class="editor-container">
           <OnlyOfficeEditor ref="editorR" :reportId="reportId" :editorHeight="editorHeight" />
         </div>
@@ -172,6 +193,7 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
 import {
   getReportDetail,
   customerData,
@@ -203,11 +225,13 @@ export default {
       clickItem: null,
       disabledList: [],
       openFileDialogOnClick: false,
+      fullView: false,
     }
   },
   created() {
     this.reportId = this.$route.params.reportId
     this.init()
+    this.setCollapsed(true)
   },
   filters: {
     dealCreateTime(v) {
@@ -225,6 +249,7 @@ export default {
     })
   },
   methods: {
+    ...mapActions(['setCollapsed', 'setFullScreen']),
     init() {
       getReportDetail(this.reportId).then((res) => {
         this.reportDetail = res.data
@@ -234,6 +259,24 @@ export default {
           })
           this.getData()
         })
+      })
+    },
+    allViewPort() {
+      // 打开全屏
+      this.fullView = true
+      this.setFullScreen(this.fullView)
+      this.$nextTick(() => {
+        const editors = this.$refs.editorContainerRef
+        this.editorHeight = editors.offsetHeight + 'px'
+      })
+    },
+    closeViewPort() {
+      // 关闭全屏
+      this.fullView = false
+      this.setFullScreen(this.fullView)
+      this.$nextTick(() => {
+        const editors = this.$refs.editorContainerRef
+        this.editorHeight = editors.offsetHeight + 'px'
       })
     },
     updateReportData() {
@@ -389,7 +432,7 @@ export default {
 </script>
 
 <style>
-.ant-drawer-header{
+.ant-drawer-header {
   background-color: transparent;
 }
 .ant-drawer .ant-drawer-content {

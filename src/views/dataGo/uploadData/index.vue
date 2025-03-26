@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-24 18:27:10
+ * @LastEditTime: 2025-03-26 21:55:59
  * @FilePath: /report-background-system/src/views/dataGo/uploadData/index.vue
  * @Description: 数据上传
  * 
@@ -15,12 +15,35 @@
       <div>
         <img style="width: 22px; height: 22px" src="@/assets/images/customers.png" alt="dark" />
         <span>选择查询企业</span>
-        <a-select style="width: 300px" placeholder="选择查询企业" @change="customerHandle">
+        <a-select
+          show-search
+          style="width: 250px"
+          placeholder="选择查询企业"
+          @change="customerHandle"
+          :filter-option="filterOption"
+          option-filter-prop="children"
+        >
           <a-select-option v-for="(cu, index) in customers" :value="index" :key="index">
             {{ cu.enterpriseName }}
           </a-select-option>
         </a-select>
       </div>
+      <div style="margin-left: 20px" v-if="customerInfo">
+        <img style="width: 22px; height: 22px" src="@/assets/images/customers.png" alt="dark" />
+        <span>数据采集类型</span>
+        <a-select
+          style="width: 200px"
+          v-model="selectTab"
+          placeholder="选择采集类型"
+          :allowClear="true"
+          @change="getCustomerData"
+        >
+          <a-select-option v-for="(table, index) in tableType" :value="table.value" :key="index">
+            {{ table.name }}
+          </a-select-option>
+        </a-select>
+      </div>
+
       <!-- <div v-if="customerInfo">
         <a-button style="margin-right: 20px" type="primary" @click="refreshPage">
           <a-icon type="redo" />刷新页面</a-button
@@ -42,10 +65,23 @@
 import { getCustomerList, customerData } from '@/api/report'
 import { mapActions } from 'vuex'
 import CustomerUploadDetailNew from '../client/customerUploadDetail_new.vue'
+const tableType = [
+  {
+    name: '数据采集',
+    value: 'crawl',
+  },
+  {
+    name: '数据上传',
+    value: 'upload',
+  },
+]
+
 export default {
   components: { CustomerUploadDetailNew },
   data() {
     return {
+      tableType,
+      selectTab: null,
       customers: [],
       customerUploadList: null,
       customerInfo: null,
@@ -78,13 +114,25 @@ export default {
     },
     customerHandle(v) {
       this.customerInfo = this.customers[v]
-      customerData({ creditCode: this.customerInfo.creditCode })
+      this.getCustomerData()
+    },
+    filterOption(input, option) {
+      return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
+    },
+    getCustomerData() {
+      this.pageLoading = true
+      customerData({ creditCode: this.customerInfo.creditCode, type: this.selectTab })
         .then((res) => {
-          this.pageLoading = false
+          setTimeout(() => {
+            this.pageLoading = false
+          }, 200)
           this.customerUploadList = res.data
           // this.customerUploadList = classifyDataByClassName(res.data)
         })
         .catch((err) => {
+          setTimeout(() => {
+            this.pageLoading = false
+          }, 200)
           this.$message.error('获取客户数据:' + err)
         })
     },
@@ -109,7 +157,6 @@ export default {
 .search-item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   span {
     margin: 0 10px 0 5px;
     font-size: 16px;

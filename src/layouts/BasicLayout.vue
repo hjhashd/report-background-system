@@ -104,7 +104,7 @@ export default {
       // base
       menus: [],
       // 侧栏收起状态
-      collapsed: false,
+      // collapsed: false,
       title: defaultSettings.title,
       settings: {
         // 布局类型
@@ -134,6 +134,7 @@ export default {
       userInfo: (state) => state.user.info,
       buildQrCodePop: (state) => state.user.buildQrCodePop,
       overview: (state) => state.user.overview,
+      collapsed: (state) => state.user.collapsed,
     }),
   },
   created() {
@@ -165,7 +166,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['changeBuildQrCodePop', 'getOverView']),
+    ...mapActions(['changeBuildQrCodePop', 'getOverView', 'setCollapsed']),
     i18nRender,
     handleMediaQuery(val) {
       this.query = val
@@ -181,7 +182,9 @@ export default {
       }
     },
     handleCollapse(val) {
-      this.collapsed = val
+      this.setCollapsed(val)
+      // this.$store.commit(SET_COLLAPSED, val)
+      // this.collapsed = val
     },
     handleSettingChange({ type, value }) {
       type && (this.settings[type] = value)
@@ -258,7 +261,7 @@ export default {
   .user-name {
     max-width: 80px;
     text-align: center;
-    margin-top: 15px;
+    margin-bottom: 15px;
     font-family: PingFangSC-Regular;
     font-size: 21px;
     color: #afabc2;
