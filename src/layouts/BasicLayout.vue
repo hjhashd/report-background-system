@@ -41,15 +41,15 @@
           </div>
         </div>
         <div class="user-report-info" v-if="overview">
-          <div class="report-info-item">
+          <div class="report-info-item" @click="turnToUrl('customer')">
             <div class="num">{{ overview[0].sum }}</div>
             <div class="item-name">客户</div>
           </div>
-          <div class="report-info-item">
+          <div class="report-info-item" @click="turnToUrl('report')">
             <div class="num num1">{{ overview[2].sum }}</div>
             <div class="item-name">报告</div>
           </div>
-          <div class="report-info-item">
+          <div class="report-info-item" @click="turnToUrl('draft')">
             <div class="num num2">{{ overview[4].sum }}</div>
             <div class="item-name">草稿</div>
           </div>
@@ -209,6 +209,19 @@ export default {
       event.preventDefault()
       this.changeBuildQrCodePop(true)
     },
+    turnToUrl(type) {
+      switch (type) {
+        case 'customer':
+          this.$router.push({ name: 'clientPage' })
+          break
+        case 'report':
+          this.$router.push({ name: 'reportList' })
+          break
+        case 'draft':
+          this.$router.push({ name: 'draftList' })
+          break
+      }
+    },
     toClosePop(event) {
       if (event) {
         event.preventDefault()
@@ -275,7 +288,6 @@ export default {
   justify-content: space-around;
   align-items: center;
   margin-bottom: 10px;
-  cursor: default;
   .report-info-item {
     text-align: center;
     line-height: 1.5;

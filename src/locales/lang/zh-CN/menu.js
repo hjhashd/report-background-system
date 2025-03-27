@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2022-10-10 22:31:07
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-22 17:06:43
+ * @LastEditTime: 2025-03-27 22:37:54
  * @FilePath: /report-background-system/src/locales/lang/zh-CN/menu.js
  * @Description: 
  * 
@@ -60,4 +60,5 @@ export default {
     'menu.reportList': '已完成报告列表',
     'menu.draftList': '草稿箱',
     'menu.qrCodeList': '二维码列表',
+    'menu.industryReport': '行业报告',
 }

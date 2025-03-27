@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-24 15:50:06
+ * @LastEditTime: 2025-03-27 22:25:54
  * @FilePath: /report-background-system/src/views/dataGo/home/index.vue
  * @Description: 主页
  * 
@@ -111,11 +111,22 @@ export default {
       // 查询参数
       queryParam: {
         pageSize: 6,
+        status: '',
       },
       loadData: (parameter) => {
+        if (parameter.sortOrder && this.queryParam.status != parameter.sortOrder) {
+          this.queryParam.status = parameter.sortOrder
+          this.tabChangeStatuas = true
+        }
         const requestParameters = Object.assign({}, parameter, this.queryParam, {
           pageNum: this.tabChangeStatuas ? 1 : parameter.pageNo,
           reportType: this.activeNow,
+          status:
+            parameter.sortOrder && parameter.sortOrder == 'ascend'
+              ? 1
+              : parameter.sortOrder && parameter.sortOrder == 'descend'
+              ? 0
+              : '',
         })
         return new Promise((resolve, reject) => {
           reportList(requestParameters).then((res) => {
@@ -145,6 +156,7 @@ export default {
       this.activeNow = type
       this.queryParam = {
         pageSize: 6,
+        status: '',
       }
       this.selectChange()
     },

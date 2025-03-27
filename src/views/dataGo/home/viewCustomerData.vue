@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-26 11:22:54
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-26 21:57:55
+ * @LastEditTime: 2025-03-27 22:30:29
  * @FilePath: /report-background-system/src/views/dataGo/home/viewCustomerData.vue
  * @Description: 
  * 
@@ -98,13 +98,15 @@ export default {
       $notification['info']({
         message: '消息提示：',
         description: '正在用行业小模型生成报告，需要等待几分钟',
-        duration: 20,
+        duration: 0,
+        key: 'addReportNotification'
       })
       this.buildLoading = true
       // 去往查看数据页面
       buildReport(paramsRequest)
-        .then((res) => {
-          if (res.code != 200) {
+      .then((res) => {
+        $notification.close('addReportNotification')
+        if (res.code != 200) {
             this.buildLoading = false
             $notification['error']({
               message: '错误通知：',
@@ -122,6 +124,7 @@ export default {
           }
         })
         .catch((err) => {
+          $notification.close('addReportNotification')
           this.buildLoading = false
           $notification['error']({
             message: '错误通知：',

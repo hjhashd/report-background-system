@@ -105,6 +105,7 @@ export const tabColumns = [
         key: 'status',
         width: '120px',
         scopedSlots: { customRender: 'status' },
+        sorter: true,
         customHeaderCell: () => {
             return {
                 style: {
@@ -190,6 +191,37 @@ export const columns = [
     },
 ]
 
+export const industryColumns = [
+    {
+        title: '序号',
+        dataIndex: 'id',
+        key: 'id',
+        width: '80px',
+        scopedSlots: { customRender: 'id' },
+    },
+    {
+        title: '报告名称',
+        dataIndex: 'reportName',
+        key: 'reportName',
+        scopedSlots: { customRender: 'reportName' },
+    },
+    {
+        title: '行业类型',
+        dataIndex: 'industry',
+        key: 'industry',
+    },
+    {
+        title: '最后更新时间',
+        dataIndex: 'updateTime',
+        key: 'updateTime',
+    },
+    {
+        title: '操作',
+        key: 'action',
+        scopedSlots: { customRender: 'action' },
+    },
+]
+
 
 export const qrColumns = [
     {
@@ -215,7 +247,7 @@ export const qrColumns = [
         title: '授权企业名称',
         dataIndex: 'appUser',
         key: 'appUser',
-        scopedSlots: { customRender: 'bankNameInfo' }, 
+        scopedSlots: { customRender: 'bankNameInfo' },
     },
     {
         title: '生成时间',

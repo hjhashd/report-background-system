@@ -17,7 +17,7 @@ export const asyncRouterMap = [
     children: [
       // home
       {
-        path: '/homePage',
+        path: '/homePage/index',
         name: 'home',
         redirect: 'homePage/index',
         component: RouteView,
@@ -49,6 +49,12 @@ export const asyncRouterMap = [
             hidden: true,
             component: () => import('@/views/dataGo/home/viewCustomerData'),
             meta: { title: 'menu.uploadData', keepAlive: false, permission: ['home'] }
+          },
+          {
+            path: '/homePage/industryReport',
+            name: 'industryReport',
+            component: () => import('@/views/dataGo/home/industryReport'),
+            meta: { title: 'menu.industryReport', icon: 'file-word', keepAlive: false, permission: ['home'] }
           },
           {
             path: '/homePage/reportList',

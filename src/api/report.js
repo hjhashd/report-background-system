@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-24 18:05:59
+ * @LastEditTime: 2025-03-27 22:40:50
  * @FilePath: /report-background-system/src/api/report.js
  * @Description: 
  * 
@@ -36,6 +36,23 @@ const reportAPI = {
     AI: '/report/entity/content/optimize',
     viewReportTable: '/report/entity/preview/data',
     appUploadFile: '/report/data/accredit/lately/detail',
+    industryReportList: '/report/industry/list',
+    getIndustryClassify: '/report/industry/classify'
+}
+
+export function getIndustryClassify() {
+    return request({
+        url: reportAPI.getIndustryClassify,
+        method: 'get',
+    })
+}
+
+export function industryReportList(parameter) {
+    return request({
+        url: reportAPI.industryReportList,
+        method: 'post',
+        data: parameter
+    })
 }
 
 export function dataAccredit(parameter) {

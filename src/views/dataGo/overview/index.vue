@@ -1,7 +1,7 @@
 <template>
-  <!-- <page-header-wrapper> -->
-  <div>
-    <div class="page-title">数据看板</div>
+  <page-header-wrapper>
+    <!-- <div>
+    <div class="page-title">数据看板</div> -->
     <div class="flex top-card-content">
       <div v-for="item in overview" :key="item.name" class="overview-card-item">
         <img :src="item.src" alt="dark" />
@@ -59,8 +59,8 @@
         </template>
       </s-table>
     </div>
-  </div>
-  <!-- </page-header-wrapper> -->
+    <!-- </div> -->
+  </page-header-wrapper>
 </template>
 
 <script>
