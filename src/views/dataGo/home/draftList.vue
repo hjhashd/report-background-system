@@ -43,6 +43,10 @@
           <span v-if="text == 2" :class="['table-status', 'status' + text]">数据未授权</span>
           <span v-if="text == 3" :class="['table-status', 'status' + text]">数据已授权</span>
         </span>
+        <template slot="process" slot-scope="text">
+          <span v-if="parseInt(text) >= 100" class="table-status status1">已完成</span>
+          <span v-else>生成中，进度{{ text }}%</span>
+        </template>
         <span slot="reportType" slot-scope="text">
           {{ text == 1 ? '信贷调查报告' : text == 2 ? '财务分析报告' : '能耗分析报告' }}
         </span>
@@ -52,7 +56,7 @@
         </span>
         <template slot="action" slot-scope="text, scoped">
           <!-- 这里可以定义操作列的具体内容，例如按钮 -->
-          <a-button type="primary" @click="handleChat(scoped)">查看</a-button>
+          <a-button v-if="scoped.fileUrl" type="primary" @click="handleChat(scoped)">查看</a-button>
         </template>
       </s-table>
     </div>

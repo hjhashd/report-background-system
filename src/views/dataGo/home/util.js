@@ -173,6 +173,13 @@ export const columns = [
         key: 'enterpriseName',
     },
     {
+        title: '智能生产状态',
+        dataIndex: 'process',
+        key: 'process',
+        width: '180px',
+        scopedSlots: { customRender: 'process' },
+    },
+    {
         title: '最后更新时间',
         dataIndex: 'updateTime',
         key: 'updateTime',

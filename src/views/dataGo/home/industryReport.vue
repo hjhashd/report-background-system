@@ -46,6 +46,14 @@
               <img style="width: 20px; height: 22px" src="@/assets/images/download-modal.png" alt="dark" />
             </a-button>
           </a-tooltip>
+          <a-tooltip>
+            <template slot="title">
+              <span>查看</span>
+            </template>
+            <a-button @click="handleChat(scoped)" :style="{ color: '#7fbbf1', border: 'none', padding: 0 }">
+              <img style="width: 28px; height: 14px" src="@/assets/images/see.png" alt="dark" />
+            </a-button>
+          </a-tooltip>
         </template>
       </s-table>
     </div>
@@ -130,7 +138,7 @@ export default {
   methods: {
     handleChat(v) {
       const { $router } = this
-      $router.push({ path: `/homePage/viewReport/` + v.id })
+      $router.push({ path: `/homePage/viewReport/${v.id}?typeFrom=industryReport&reportName=${v.reportName}` })
     },
     selectChange() {
       this.$refs.table.refresh()

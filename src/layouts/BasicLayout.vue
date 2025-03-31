@@ -37,7 +37,7 @@
                 style="width: 52px; height: 52px"
               />
             </div>
-            <a-button style="margin-top: 20px" type="link" size="small" @click="logout"> 退出 </a-button>
+            <a-button style="margin-top: 20px" type="link" size="small" @click="buildQRcode"> 数据申请 </a-button>
           </div>
         </div>
         <div class="user-report-info" v-if="overview">
@@ -274,7 +274,7 @@ export default {
   .user-name {
     max-width: 80px;
     text-align: center;
-    margin-bottom: 15px;
+    margin-top: 15px;
     font-family: PingFangSC-Regular;
     font-size: 21px;
     color: #afabc2;

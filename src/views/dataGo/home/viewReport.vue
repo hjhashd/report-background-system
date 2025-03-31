@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-26 23:13:13
+ * @LastEditTime: 2025-03-31 20:56:29
  * @FilePath: /report-background-system/src/views/dataGo/home/viewReport.vue
  * @Description: 报告预览
  * 
@@ -13,13 +13,19 @@
     <div class="page-content flex-col" style="padding: 0; width: 100%">
       <div class="report-view">
         <div class="flex-row-spacebetween tools">
-          <a-tooltip>
+          <a-tooltip v-if="typeFrom !== 'industryReport'">
             <template slot="title">
               <span>{{ reportDetail.reportName }}</span>
             </template>
             <div class="sys-title single-line-text">{{ reportDetail.reportName }}</div>
           </a-tooltip>
-          <div class="flex">
+          <a-tooltip v-else>
+            <template slot="title">
+              <span>{{ reportName }}</span>
+            </template>
+            <div class="sys-title single-line-text">{{ reportName }}</div>
+          </a-tooltip>
+          <div class="flex" v-if="typeFrom !== 'industryReport'">
             <a-tooltip v-if="!fullView">
               <template slot="title">
                 <span>全屏</span>
@@ -83,9 +89,14 @@
       </div>
       <div class="flex flex-1">
         <div ref="editorContainerRef" class="editor-container">
-          <OnlyOfficeEditor ref="editorR" :reportId="reportId" :editorHeight="editorHeight" />
+          <OnlyOfficeEditor ref="editorR" :typeFrom="typeFrom" :reportId="reportId" :editorHeight="editorHeight" />
         </div>
-        <div class="right-content" :style="{ height: editorHeight }" :class="{ 'list-collapsed': isListCollapsed }">
+        <div
+          class="right-content"
+          :style="{ height: editorHeight }"
+          :class="{ 'list-collapsed': isListCollapsed }"
+          v-if="typeFrom !== 'industryReport'"
+        >
           <div v-if="!isListCollapsed" class="container-detail">
             <div class="close-item">
               <a-icon
@@ -170,6 +181,7 @@
         </div>
       </div>
       <a-upload
+        v-if="typeFrom !== 'industryReport'"
         ref="uploadRef"
         name="tableUpload"
         :customRequest="uploadFile"
@@ -177,6 +189,7 @@
         :openFileDialogOnClick="openFileDialogOnClick"
       ></a-upload>
       <a-drawer
+        v-if="typeFrom !== 'industryReport'"
         title="报告结论编辑"
         placement="right"
         :closable="true"
@@ -226,9 +239,13 @@ export default {
       disabledList: [],
       openFileDialogOnClick: false,
       fullView: false,
+      typeFrom: null,
+      reportName: null,
     }
   },
   created() {
+    this.typeFrom = this.$route.query.typeFrom || ''
+    this.reportName = this.$route.query.reportName || ''
     this.reportId = this.$route.params.reportId
     this.init()
     this.setCollapsed(true)
@@ -251,15 +268,19 @@ export default {
   methods: {
     ...mapActions(['setCollapsed', 'setFullScreen']),
     init() {
-      getReportDetail(this.reportId).then((res) => {
-        this.reportDetail = res.data
-        getCustomerDetail(res.data.appUserId).then((result) => {
-          this.customerDetail = Object.assign(result.data, {
-            logoName: result.data.enterpriseName.substring(0, 1),
+      if (this.typeFrom && this.typeFrom === 'industryReport') {
+        return
+      } else {
+        getReportDetail(this.reportId).then((res) => {
+          this.reportDetail = res.data
+          getCustomerDetail(res.data.appUserId).then((result) => {
+            this.customerDetail = Object.assign(result.data, {
+              logoName: result.data.enterpriseName.substring(0, 1),
+            })
+            this.getData()
           })
-          this.getData()
         })
-      })
+      }
     },
     allViewPort() {
       // 打开全屏

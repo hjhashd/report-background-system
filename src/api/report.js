@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-27 22:40:50
+ * @LastEditTime: 2025-03-31 20:45:50
  * @FilePath: /report-background-system/src/api/report.js
  * @Description: 
  * 
@@ -37,7 +37,8 @@ const reportAPI = {
     viewReportTable: '/report/entity/preview/data',
     appUploadFile: '/report/data/accredit/lately/detail',
     industryReportList: '/report/industry/list',
-    getIndustryClassify: '/report/industry/classify'
+    getIndustryClassify: '/report/industry/classify',
+    getIndustryReportConfig: '/report/office/industry/config/'
 }
 
 export function getIndustryClassify() {
@@ -261,6 +262,14 @@ export function appUploadFile(parameter) {
 export function getCustomerAbnormalList(id, type) {
     return request({
         url: `${reportAPI.getCustomerAbnormalList}${id}?firstLevel=${type}`,
+        method: 'get',
+    })
+}
+
+// 获取报告的config
+export function getIndustryReportConfig(id) {
+    return request({
+        url: `${reportAPI.getIndustryReportConfig}${id}`,
         method: 'get',
     })
 }

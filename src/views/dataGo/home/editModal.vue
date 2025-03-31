@@ -103,11 +103,11 @@
       </a-row>
       <a-row :gutter="[10]" v-if="modalContentList">
         <a-col :span="11">
-          <a-textarea v-model="useContent.content" :auto-size="true" :disabled="true" />
+          <a-textarea style="height: 70vh" v-model="useContent.content" :auto-size="true" :disabled="true" />
         </a-col>
         <a-col :span="11">
           <a-spin :spinning="editLoading">
-            <a-textarea style="min-height: 300px" v-model="changeContent" :auto-size="true" />
+            <a-textarea style="height: 70vh" v-model="changeContent" :auto-size="true" />
           </a-spin>
         </a-col>
         <!-- <a-col :span="6" class="history-box">

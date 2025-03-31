@@ -2,63 +2,63 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-26 21:55:59
+ * @LastEditTime: 2025-03-31 19:44:02
  * @FilePath: /report-background-system/src/views/dataGo/uploadData/index.vue
  * @Description: 数据上传
  * 
 -->
 <template>
-  <!-- <page-header-wrapper> -->
-  <a-spin :spinning="pageLoading">
-    <div class="page-title">客户数据详情</div>
-    <div class="item-content search-item">
-      <div>
-        <img style="width: 22px; height: 22px" src="@/assets/images/customers.png" alt="dark" />
-        <span>选择查询企业</span>
-        <a-select
-          show-search
-          style="width: 250px"
-          placeholder="选择查询企业"
-          @change="customerHandle"
-          :filter-option="filterOption"
-          option-filter-prop="children"
-        >
-          <a-select-option v-for="(cu, index) in customers" :value="index" :key="index">
-            {{ cu.enterpriseName }}
-          </a-select-option>
-        </a-select>
-      </div>
-      <div style="margin-left: 20px" v-if="customerInfo">
-        <img style="width: 22px; height: 22px" src="@/assets/images/customers.png" alt="dark" />
-        <span>数据采集类型</span>
-        <a-select
-          style="width: 200px"
-          v-model="selectTab"
-          placeholder="选择采集类型"
-          :allowClear="true"
-          @change="getCustomerData"
-        >
-          <a-select-option v-for="(table, index) in tableType" :value="table.value" :key="index">
-            {{ table.name }}
-          </a-select-option>
-        </a-select>
-      </div>
+  <page-header-wrapper>
+    <a-spin :spinning="pageLoading">
+      <!-- <div class="page-title">客户数据详情</div> -->
+      <div class="item-content search-item">
+        <div>
+          <img style="width: 22px; height: 22px" src="@/assets/images/customers.png" alt="dark" />
+          <span>选择查询企业</span>
+          <a-select
+            show-search
+            style="width: 250px"
+            placeholder="选择查询企业"
+            @change="customerHandle"
+            :filter-option="filterOption"
+            option-filter-prop="children"
+          >
+            <a-select-option v-for="(cu, index) in customers" :value="index" :key="index">
+              {{ cu.enterpriseName }}
+            </a-select-option>
+          </a-select>
+        </div>
+        <div style="margin-left: 20px" v-if="customerInfo">
+          <img style="width: 22px; height: 22px" src="@/assets/images/customers.png" alt="dark" />
+          <span>数据采集类型</span>
+          <a-select
+            style="width: 200px"
+            v-model="selectTab"
+            placeholder="选择采集类型"
+            :allowClear="true"
+            @change="getCustomerData"
+          >
+            <a-select-option v-for="(table, index) in tableType" :value="table.value" :key="index">
+              {{ table.name }}
+            </a-select-option>
+          </a-select>
+        </div>
 
-      <!-- <div v-if="customerInfo">
+        <!-- <div v-if="customerInfo">
         <a-button style="margin-right: 20px" type="primary" @click="refreshPage">
           <a-icon type="redo" />刷新页面</a-button
         >
         <a-button type="primary" @click="authData"> <a-icon type="audit" />批量数据授权</a-button>
       </div> -->
-    </div>
-    <div class="upload-data-box" v-if="customerUploadList">
-      <customer-upload-detail-new
-        :customerUploadList="customerUploadList"
-        :customerInfo="customerInfo"
-      ></customer-upload-detail-new>
-    </div>
-  </a-spin>
-  <!-- </page-header-wrapper> -->
+      </div>
+      <div class="upload-data-box" v-if="customerUploadList">
+        <customer-upload-detail-new
+          :customerUploadList="customerUploadList"
+          :customerInfo="customerInfo"
+        ></customer-upload-detail-new>
+      </div>
+    </a-spin>
+  </page-header-wrapper>
 </template>
 
 <script>

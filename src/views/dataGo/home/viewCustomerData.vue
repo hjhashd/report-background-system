@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-26 11:22:54
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-27 22:30:29
+ * @LastEditTime: 2025-03-31 21:07:33
  * @FilePath: /report-background-system/src/views/dataGo/home/viewCustomerData.vue
  * @Description: 
  * 
@@ -34,7 +34,7 @@
         </div>
       </div>
     </div>
-    <div class="upload-data-box" v-if="customerUploadList">
+    <div class="upload-data-box" :style="{ height: '60vh' }" v-if="customerUploadList">
       <customer-upload-detail-new
         :customerUploadList="customerUploadList"
         :customerInfo="queryParams"
@@ -99,14 +99,14 @@ export default {
         message: '消息提示：',
         description: '正在用行业小模型生成报告，需要等待几分钟',
         duration: 0,
-        key: 'addReportNotification'
+        key: 'addReportNotification',
       })
       this.buildLoading = true
       // 去往查看数据页面
       buildReport(paramsRequest)
-      .then((res) => {
-        $notification.close('addReportNotification')
-        if (res.code != 200) {
+        .then((res) => {
+          $notification.close('addReportNotification')
+          if (res.code != 200) {
             this.buildLoading = false
             $notification['error']({
               message: '错误通知：',
@@ -114,13 +114,10 @@ export default {
               duration: 8,
             })
           } else {
+            const { $router } = this
+            $router.push({ path: `/homePage/draftList` })
             this.buildReportId = res.data
             this.buildLoading = false
-            $notification['success']({
-              message: '通知：',
-              description: '生成报告成功',
-              duration: 8,
-            })
           }
         })
         .catch((err) => {
@@ -160,7 +157,7 @@ export default {
   }
 }
 .button-group {
-  margin-top: 40px;
+  margin-top: 20px;
   text-align: center;
 }
 .button-group button {
@@ -181,5 +178,9 @@ export default {
   letter-spacing: 0;
   line-height: 61.83px;
   font-weight: 500;
+}
+.upload-data-box {
+  overflow-x: hidden;
+  overflow-y: scroll;
 }
 </style>

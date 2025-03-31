@@ -2,59 +2,59 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-27 22:25:54
+ * @LastEditTime: 2025-03-31 19:42:57
  * @FilePath: /report-background-system/src/views/dataGo/home/index.vue
  * @Description: 主页
  * 
 -->
 <template>
-  <!-- <page-header-wrapper> -->
-  <div>
-    <div class="page-title">报告管理系统</div>
-    <div class="home-part-box">
-      <h1 class="mini-title">新建</h1>
-      <div class="flex-row-spacearound">
-        <div class="card" v-for="item in newAddReport" :key="item.type" @click="addReport(item)">
-          <div :class="{ 'add-card': true, bz: item.type == 'addReport' }">
-            <img class="plus-icon repoert-image" :src="item.src" alt="dark" />
+  <page-header-wrapper>
+    <div>
+      <!-- <div class="page-title">报告管理系统</div> -->
+      <div class="home-part-box">
+        <h1 class="mini-title">新建</h1>
+        <div class="flex-row-spacearound">
+          <div class="card" v-for="item in newAddReport" :key="item.type" @click="addReport(item)">
+            <div :class="{ 'add-card': true, bz: item.type == 'addReport' }">
+              <img class="plus-icon repoert-image" :src="item.src" alt="dark" />
+            </div>
+            <div class="add-name">{{ item.name }}</div>
           </div>
-          <div class="add-name">{{ item.name }}</div>
         </div>
       </div>
+      <data-go-tabs :tab="reportTypeList" @changeTab="changeTab">
+        <div class="p-20">
+          <s-table ref="table" rowKey="key" :data="loadData" :columns="tabColumns">
+            <div slot="reportName" slot-scope="text, scoped">
+              <span class="report-name" @click="handleChat(scoped)">{{ text }}</span>
+              <a-tooltip placement="right" v-if="scoped.status != 1">
+                <template slot="title">
+                  <span v-if="scoped.dataStatus == 2">未完成数据授权，数据上传</span>
+                  <span v-else-if="scoped.dataStatus == 3">已完成数据授权，数据上传，正在制作报告</span>
+                </template>
+                <a-icon type="bell" theme="filled" style="color: #c92c1f" />
+              </a-tooltip>
+            </div>
+            <span slot="status" slot-scope="text">
+              <!-- // 0 草稿 1 已完成 2 数据未授权 3 数据已授权 -->
+              <span v-if="text == 1" :class="['table-status', 'status' + text]">已完成</span>
+              <span v-else class="table-status status0">草稿</span>
+            </span>
+          </s-table>
+        </div>
+      </data-go-tabs>
+      <a-modal v-model="visible" title="新增报告" @ok="handleOk">
+        <div class="flex flex-center">
+          <div class="right-item-title">选择新增报告类型：</div>
+          <a-select v-model="addReportType" style="width: 200px">
+            <a-select-option v-for="item in reportTypeList" :key="item.type" :value="item.type">
+              {{ item.name }}
+            </a-select-option>
+          </a-select>
+        </div>
+      </a-modal>
     </div>
-    <data-go-tabs :tab="reportTypeList" @changeTab="changeTab">
-      <div class="p-20">
-        <s-table ref="table" rowKey="key" :data="loadData" :columns="tabColumns">
-          <div slot="reportName" slot-scope="text, scoped">
-            <span class="report-name" @click="handleChat(scoped)">{{ text }}</span>
-            <a-tooltip placement="right" v-if="scoped.status != 1">
-              <template slot="title">
-                <span v-if="scoped.dataStatus == 2">未完成数据授权，数据上传</span>
-                <span v-else-if="scoped.dataStatus == 3">已完成数据授权，数据上传，正在制作报告</span>
-              </template>
-              <a-icon type="bell" theme="filled" style="color: #c92c1f" />
-            </a-tooltip>
-          </div>
-          <span slot="status" slot-scope="text">
-            <!-- // 0 草稿 1 已完成 2 数据未授权 3 数据已授权 -->
-            <span v-if="text == 1" :class="['table-status', 'status' + text]">已完成</span>
-            <span v-else class="table-status status0">草稿</span>
-          </span>
-        </s-table>
-      </div>
-    </data-go-tabs>
-    <a-modal v-model="visible" title="新增报告" @ok="handleOk">
-      <div class="flex flex-center">
-        <div class="right-item-title">选择新增报告类型：</div>
-        <a-select v-model="addReportType" style="width: 200px">
-          <a-select-option v-for="item in reportTypeList" :key="item.type" :value="item.type">
-            {{ item.name }}
-          </a-select-option>
-        </a-select>
-      </div>
-    </a-modal>
-  </div>
-  <!-- </page-header-wrapper> -->
+  </page-header-wrapper>
 </template>
 
 <script>

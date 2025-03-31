@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-27 20:20:34
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-17 11:09:22
+ * @LastEditTime: 2025-03-31 20:51:36
  * @FilePath: /report-background-system/src/components/OnlyOfficeEditor/OnlyOfficeEditor.vue
  * @Description: 
  * 
@@ -14,7 +14,7 @@
 </template>
   
   <script>
-import { wopiFile } from '@/api/report'
+import { wopiFile, getIndustryReportConfig } from '@/api/report'
 export default {
   name: 'OnlyOfficeEditor',
   props: {
@@ -25,6 +25,10 @@ export default {
     editorHeight: {
       type: String,
       default: '78vh',
+    },
+    typeFrom: {
+      type: String,
+      default: '',
     },
   },
   data() {
@@ -46,7 +50,11 @@ export default {
   },
   methods: {
     async initReport() {
-      this.config = await wopiFile(this.reportId)
+      if (this.typeFrom === 'industryReport') {
+        this.config = await getIndustryReportConfig(this.reportId)
+      } else {
+        this.config = await wopiFile(this.reportId)
+      }
       this.editor = new DocsAPI.DocEditor('onlyoffice-container', this.config)
     },
     refreshEditor() {
