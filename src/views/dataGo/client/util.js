@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 15:22:28
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-22 16:15:42
+ * @LastEditTime: 2025-04-01 18:26:38
  * @FilePath: /report-background-system/src/views/dataGo/client/util.js
  * @Description: 
  * 
@@ -87,6 +87,7 @@ export const newColumns = [
         title: '序号',
         dataIndex: 'id',
         key: 'id',
+        scopedSlots: { customRender: 'id' },
         customHeaderCell: () => {
             return {
                 style: {

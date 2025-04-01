@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 16:45:11
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-24 15:36:16
+ * @LastEditTime: 2025-04-01 18:27:17
  * @FilePath: /report-background-system/src/views/dataGo/client/customerUploadDetail_new.vue
  * @Description: 
  * 
@@ -42,6 +42,7 @@
         :pagination="false"
         size="small"
       >
+        <div slot="id" slot-scope="i, scoped, index">{{ index + 1 }}</div>
         <div slot="operateTime" slot-scope="i">{{ i ? i.split(' ')[0] : '' }}</div>
         <div slot="status" slot-scope="i, scoped">
           <div v-if="scoped.type === 'crawl'" :class="'type' + i">
