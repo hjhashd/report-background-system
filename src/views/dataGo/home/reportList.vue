@@ -52,7 +52,14 @@
         </span>
         <template slot="action" slot-scope="text, scoped">
           <!-- 这里可以定义操作列的具体内容，例如按钮 -->
-          <a-button type="primary" @click="handleChat(scoped)">查看</a-button>
+          <a-tooltip>
+            <template slot="title">
+              <span>查看</span>
+            </template>
+            <a-button @click="handleChat(scoped)" :style="{ color: '#7fbbf1', border: 'none', padding: 0 }">
+              <img style="width: 28px; height: 14px" src="@/assets/images/see.png" alt="dark" />
+            </a-button>
+          </a-tooltip>
         </template>
       </s-table>
     </div>

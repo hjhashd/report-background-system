@@ -52,7 +52,11 @@
             <template slot="title">
               <span>查看</span>
             </template>
-            <a-button @click="handleChat(scoped)" :style="{ color: '#7fbbf1', border: 'none', padding: 0 }">
+            <a-button
+              :disabled="scoped.status == 2"
+              @click="handleChat(scoped)"
+              :style="{ color: '#7fbbf1', border: 'none', padding: 0 }"
+            >
               <img style="width: 28px; height: 14px" src="@/assets/images/see.png" alt="dark" />
             </a-button>
           </a-tooltip>

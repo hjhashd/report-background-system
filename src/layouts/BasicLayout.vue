@@ -10,13 +10,13 @@
     v-bind="settings"
   >
     <template v-slot:menuHeaderRender>
-      <div v-if="collapsed">
-        <img src="@/assets/logo.png" />
+      <div class="logo-top mini-logo" style="margin-bottom: 0" v-if="collapsed">
+        <img src="@/assets/logow.png" />
       </div>
       <div style="z-index: 1000" @click="preventStop" v-if="!collapsed">
-        <div>
-          <img src="@/assets/logo.png" />
-          <h1>{{ title }}</h1>
+        <div class="logo-top">
+          <img src="@/assets/logow.png" />
+          <!-- <h1>{{ title }}</h1> -->
         </div>
         <div class="user-box flex-row-spacearound">
           <div class="user-ava">
@@ -252,14 +252,37 @@ export default {
 .ant-pro-sider-menu-logo {
   height: auto;
 }
+.ant-pro-sider-menu-logo img {
+  width: auto;
+}
+.ant-pro-global-header {
+  background-color: #528bfb;
+}
+.ant-pro-global-header-trigger {
+  color: #ffffff;
+}
+.ant-pro-sider-menu-logo {
+  padding-left: 0 !important;
+}
 .ant-layout-header,
 .ant-pro-global-header,
 .ant-pro-global-header-trigger {
-  height: 48px !important;
-  line-height: 48px !important;
+  // height: 48px !important;
+  // line-height: 48px !important;
 }
 .ant-pro-global-header-index-right .ant-pro-account-avatar .antd-pro-global-header-index-avatar {
-  margin: calc((48px - 24px) / 2) 10px;
+  // margin: calc((48px - 24px) / 2) 10px;
+}
+.logo-top {
+  margin-bottom: 20px;
+  text-align: center;
+  background-color: #528bfb;
+}
+.mini-logo img {
+  width: 32px;
+  height: 32px;
+  object-fit: none;
+  object-position: left;
 }
 .user-box {
   display: flex;
@@ -283,7 +306,6 @@ export default {
 }
 .user-report-info {
   margin-top: 20px;
-  margin-left: -24px;
   display: flex;
   justify-content: space-around;
   align-items: center;

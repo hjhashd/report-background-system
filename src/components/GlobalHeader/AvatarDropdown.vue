@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2022-10-10 22:31:07
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-25 11:57:15
+ * @LastEditTime: 2025-04-06 02:12:06
  * @FilePath: /report-background-system/src/components/GlobalHeader/AvatarDropdown.vue
  * @Description: 
  * 
@@ -10,8 +10,12 @@
 <template>
   <a-dropdown v-if="currentUser && currentUser.name" placement="bottomRight">
     <span class="ant-pro-account-avatar">
-      <a-avatar size="small" src="https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png" class="antd-pro-global-header-index-avatar" />
-      <span>{{ currentUser.userName || currentUser.name }}</span>
+      <a-avatar
+        size="small"
+        src="https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png"
+        class="antd-pro-global-header-index-avatar"
+      />
+      <span style="color: #fff">{{ currentUser.userName || currentUser.name }}</span>
     </span>
     <template v-slot:overlay>
       <a-menu class="ant-pro-drop-down menu" :selected-keys="[]">
@@ -44,21 +48,21 @@ export default {
   props: {
     currentUser: {
       type: Object,
-      default: () => null
+      default: () => null,
     },
     menu: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
   methods: {
-    handleToCenter () {
+    handleToCenter() {
       this.$router.push({ path: '/account/center' })
     },
-    handleToSettings () {
+    handleToSettings() {
       this.$router.push({ path: '/account/settings' })
     },
-    handleLogout (e) {
+    handleLogout(e) {
       Modal.confirm({
         title: this.$t('layouts.usermenu.dialog.title'),
         content: this.$t('layouts.usermenu.dialog.content'),
@@ -70,10 +74,10 @@ export default {
             this.$router.push({ name: 'login' })
           })
         },
-        onCancel () {}
+        onCancel() {},
       })
-    }
-  }
+    },
+  },
 }
 </script>
 

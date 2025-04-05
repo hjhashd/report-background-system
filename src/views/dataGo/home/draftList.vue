@@ -28,13 +28,13 @@
         }}</template>
         <div slot="reportName" slot-scope="text, scoped">
           <span>{{ text }}</span>
-          <a-tooltip placement="right" v-if="scoped.status != 1">
+          <!-- <a-tooltip placement="right" v-if="scoped.status != 1">
             <template slot="title">
               <span v-if="scoped.dataStatus == 2">未完成数据授权，数据上传</span>
               <span v-else-if="scoped.dataStatus == 3">已完成数据授权，数据上传，正在制作报告</span>
             </template>
             <a-icon type="bell" theme="filled" style="color: #c92c1f" />
-          </a-tooltip>
+          </a-tooltip> -->
         </div>
         <span slot="status" slot-scope="text">
           <!-- // 0 草稿 1 已完成 2 数据未授权 3 数据已授权 -->
@@ -43,9 +43,10 @@
           <span v-if="text == 2" :class="['table-status', 'status' + text]">数据未授权</span>
           <span v-if="text == 3" :class="['table-status', 'status' + text]">数据已授权</span>
         </span>
-        <template slot="process" slot-scope="text">
-          <span v-if="parseInt(text) >= 100" class="table-status status1">已完成</span>
-          <span v-else>生成中，进度{{ text }}%</span>
+        <template slot="genStatus" slot-scope="text">
+          <span v-if="text == 1" class="table-status status1">已完成</span>
+          <span v-else-if="text == 0">生成中</span>
+          <span class="table-status status4" v-else>生成失败</span>
         </template>
         <span slot="reportType" slot-scope="text">
           {{ text == 1 ? '信贷调查报告' : text == 2 ? '财务分析报告' : '能耗分析报告' }}
@@ -56,7 +57,14 @@
         </span>
         <template slot="action" slot-scope="text, scoped">
           <!-- 这里可以定义操作列的具体内容，例如按钮 -->
-          <a-button v-if="scoped.fileUrl" type="primary" @click="handleChat(scoped)">查看</a-button>
+          <a-tooltip>
+            <template slot="title">
+              <span>查看</span>
+            </template>
+            <a-button @click="handleChat(scoped)" :style="{ color: '#7fbbf1', border: 'none', padding: 0 }">
+              <img style="width: 28px; height: 14px" src="@/assets/images/see.png" alt="dark" />
+            </a-button>
+          </a-tooltip>
         </template>
       </s-table>
     </div>
@@ -202,6 +210,9 @@ export default {
   }
   &.status3 {
     color: #0a69ef;
+  }
+  &.status4 {
+    color: #ea2222;
   }
 }
 .home-part-title-right {

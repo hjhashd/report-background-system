@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-31 19:42:57
+ * @LastEditTime: 2025-04-06 02:44:22
  * @FilePath: /report-background-system/src/views/dataGo/home/index.vue
  * @Description: 主页
  * 
@@ -205,8 +205,8 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 15.5vw;
-  height: 20vh;
+  width: 12.8vw;
+  height: 25vh;
   margin-bottom: 4px;
   border-radius: 5px;
   cursor: pointer;
@@ -256,7 +256,6 @@ export default {
   border-bottom: 1px solid #d6e1e5;
 }
 .bz {
-  width: 8.8vw;
   .plus-icon {
     width: 60px;
     height: 67px;
