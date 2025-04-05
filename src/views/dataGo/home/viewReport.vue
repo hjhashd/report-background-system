@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-31 20:56:29
+ * @LastEditTime: 2025-04-06 03:22:56
  * @FilePath: /report-background-system/src/views/dataGo/home/viewReport.vue
  * @Description: 报告预览
  * 
@@ -10,7 +10,7 @@
 <template>
   <!-- <page-header-wrapper> -->
   <a-spin :spinning="pageLoading">
-    <div class="page-content flex-col" style="padding: 0; width: 100%">
+    <div ref="reportViewDetail" class="page-content flex-col" style="padding: 0; width: 100%">
       <div class="report-view">
         <div class="flex-row-spacebetween tools">
           <a-tooltip v-if="typeFrom !== 'industryReport'">
@@ -288,7 +288,17 @@ export default {
       this.setFullScreen(this.fullView)
       this.$nextTick(() => {
         const editors = this.$refs.editorContainerRef
+        const reportViewDetail = this.$refs.reportViewDetail
         this.editorHeight = editors.offsetHeight + 'px'
+        if (reportViewDetail.requestFullscreen) {
+          reportViewDetail.requestFullscreen()
+        } else if (reportViewDetail.webkitRequestFullscreen) {
+          // Safari
+          reportViewDetail.webkitRequestFullscreen()
+        } else if (reportViewDetail.msRequestFullscreen) {
+          // IE11
+          reportViewDetail.msRequestFullscreen()
+        }
       })
     },
     closeViewPort() {
@@ -297,7 +307,15 @@ export default {
       this.setFullScreen(this.fullView)
       this.$nextTick(() => {
         const editors = this.$refs.editorContainerRef
+        const reportViewDetail = this.$refs.reportViewDetail
         this.editorHeight = editors.offsetHeight + 'px'
+        if (reportViewDetail.exitFullscreen) {
+          reportViewDetail.exitFullscreen()
+        } else if (reportViewDetail.webkitExitFullscreen) {
+          reportViewDetail.webkitExitFullscreen()
+        } else if (reportViewDetail.msExitFullscreen) {
+          reportViewDetail.msExitFullscreen()
+        }
       })
     },
     updateReportData() {
