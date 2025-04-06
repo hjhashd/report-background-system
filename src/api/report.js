@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-31 20:45:50
+ * @LastEditTime: 2025-04-06 12:53:45
  * @FilePath: /report-background-system/src/api/report.js
  * @Description: 
  * 
@@ -218,17 +218,17 @@ export function updateReport(id) {
 }
 
 // 发布报告
-export function applyReport(id) {
+export function applyReport(id, name) {
     return request({
-        url: reportAPI.applyReport + id,
+        url: reportAPI.applyReport + id + '?reportName=' + name,
         method: 'post',
     })
 }
 
 // 将报告状态转为草稿
-export function setDraftStatus(id) {
+export function setDraftStatus(id, name) {
     return request({
-        url: reportAPI.setDraftStatus + id,
+        url: reportAPI.setDraftStatus + id + '?reportName=' + name,
         method: 'post',
     })
 }

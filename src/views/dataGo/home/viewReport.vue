@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-06 03:22:56
+ * @LastEditTime: 2025-04-06 13:17:06
  * @FilePath: /report-background-system/src/views/dataGo/home/viewReport.vue
  * @Description: 报告预览
  * 
@@ -13,13 +13,7 @@
     <div ref="reportViewDetail" class="page-content flex-col" style="padding: 0; width: 100%">
       <div class="report-view">
         <div class="flex-row-spacebetween tools">
-          <a-tooltip v-if="typeFrom !== 'industryReport'">
-            <template slot="title">
-              <span>{{ reportDetail.reportName }}</span>
-            </template>
-            <div class="sys-title single-line-text">{{ reportDetail.reportName }}</div>
-          </a-tooltip>
-          <a-tooltip v-else>
+          <a-tooltip>
             <template slot="title">
               <span>{{ reportName }}</span>
             </template>
@@ -70,7 +64,7 @@
               <template slot="title">
                 <span>另存草稿</span>
               </template>
-              <div class="btn-item" @click="saveAsDraft">
+              <div class="btn-item" @click="openSetName('draft')">
                 <div class="icon-box"><a-icon style="color: rgb(87, 135, 238)" type="save" /></div>
               </div>
             </a-tooltip>
@@ -78,7 +72,7 @@
               <template slot="title">
                 <span>发布应用</span>
               </template>
-              <div class="btn-item" @click="applyReport">
+              <div class="btn-item" @click="openSetName('apply')">
                 <div class="icon-box">
                   <a-avatar :size="32" :src="applyIcon" />
                 </div>
@@ -201,6 +195,19 @@
         <edit-modal :reportDetail="reportDetail" @refreshEdit="updateEdit"></edit-modal>
       </a-drawer>
     </div>
+    <a-modal
+      class="qr-modal"
+      v-model="setReportName"
+      :bodyStyle="{ padding: 0, backgroundColor: 'transparent' }"
+      :maskClosable="false"
+      @ok="resetReportFun"
+      @cancel="setReportName = false"
+    >
+      <div class="set-name">
+        <div class="set-name-title">{{ popTitle }}</div>
+        <a-input allowClear size="large" v-model="otherSaveReportName"></a-input>
+      </div>
+    </a-modal>
   </a-spin>
   <!-- </page-header-wrapper> -->
 </template>
@@ -241,11 +248,15 @@ export default {
       fullView: false,
       typeFrom: null,
       reportName: null,
+      setType: null,
+      otherSaveReportName: null,
+      setReportName: false,
+      popTitle: null,
     }
   },
   created() {
-    this.typeFrom = this.$route.query.typeFrom || ''
-    this.reportName = this.$route.query.reportName || ''
+    this.typeFrom = (this.$route.query && this.$route.query.typeFrom) || ''
+    this.reportName = (this.$route.query && this.$route.query.reportName) || ''
     this.reportId = this.$route.params.reportId
     this.init()
     this.setCollapsed(true)
@@ -273,6 +284,7 @@ export default {
       } else {
         getReportDetail(this.reportId).then((res) => {
           this.reportDetail = res.data
+          this.reportName = res.data.reportName
           getCustomerDetail(res.data.appUserId).then((result) => {
             this.customerDetail = Object.assign(result.data, {
               logoName: result.data.enterpriseName.substring(0, 1),
@@ -359,31 +371,76 @@ export default {
         this.customerReportDetail = classifyDataByClassName(response.data)
       })
     },
+    openSetName(type) {
+      this.setType = type
+      this.setReportName = true
+      if (type === 'draft') {
+        this.popTitle = '另存草稿报告名称'
+      } else if (type === 'apply') {
+        this.popTitle = '发布应用报告名称'
+      }
+    },
+    resetReportFun() {
+      if (this.setType === 'draft') {
+        this.saveAsDraft()
+      } else if (this.setType === 'apply') {
+        this.applyReport()
+      }
+    },
     saveAsDraft() {
       const { $notification } = this
       this.pageLoading = true
-      setDraftStatus(this.reportDetail.id).then((res) => {
-        this.pageLoading = false
-        this.$refs.editorR.refreshEditor()
-        $notification['success']({
-          message: '通知：',
-          description: `另存为草稿成功`,
-          duration: 6,
+      this.reportName = null
+      setDraftStatus(this.reportDetail.id, this.otherSaveReportName)
+        .then((res) => {
+          this.pageLoading = false
+          this.setReportName = false
+          this.$nextTick(() => {
+            this.reportName = this.otherSaveReportName
+            console.log('this.reportName :>> ', this.reportName)
+          })
+          this.$refs.editorR.refreshEditor()
+          $notification['success']({
+            message: '通知：',
+            description: `另存为草稿成功`,
+            duration: 6,
+          })
         })
-      })
+        .catch((err) => {
+          this.pageLoading = false
+          $notification['error']({
+            message: '通知：',
+            description: `操作失败：${err}`,
+            duration: 6,
+          })
+        })
     },
     applyReport() {
       const { $notification } = this
       this.pageLoading = true
-      applyReport(this.reportDetail.id).then((res) => {
-        this.pageLoading = false
-        this.$refs.editorR.refreshEditor()
-        $notification['success']({
-          message: '通知：',
-          description: `发布成功`,
-          duration: 6,
+      this.reportName = null
+      applyReport(this.reportDetail.id, this.otherSaveReportName)
+        .then((res) => {
+          this.pageLoading = false
+          this.setReportName = false
+          this.$nextTick(() => {
+            this.reportName = this.otherSaveReportName
+          })
+          this.$refs.editorR.refreshEditor()
+          $notification['success']({
+            message: '通知：',
+            description: `发布成功`,
+            duration: 6,
+          })
         })
-      })
+        .catch((err) => {
+          this.pageLoading = false
+          $notification['error']({
+            message: '通知：',
+            description: `操作失败：${err}`,
+            duration: 6,
+          })
+        })
     },
     showDrawer() {
       this.visible = true
@@ -659,5 +716,14 @@ export default {
   color: #000103;
   letter-spacing: 0;
   font-weight: 600;
+}
+
+.set-name {
+  padding: 80px 20px 40px;
+  .set-name-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
 }
 </style>

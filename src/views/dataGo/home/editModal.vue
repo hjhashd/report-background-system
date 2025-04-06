@@ -14,7 +14,8 @@
           </a-select>
           历史版本<a-select v-model="selectModalId" style="width: 250px; margin-left: 20px" @change="changeSelect">
             <a-select-option v-for="(i, index) in modalContentList" :key="index" :value="i.id">
-              版本{{ i.version }}-{{ i.updateTime.split(' ')[0] }}
+              <span v-if="i.versionName">{{ i.versionName }}</span>
+              <span v-else>版本{{ i.version }}-{{ i.updateTime.split(' ')[0] }}</span>
             </a-select-option>
           </a-select>
         </div>
@@ -53,16 +54,12 @@
             <template slot="title">
               <span>另存为</span>
             </template>
-            <a-popconfirm :disabled="editLoading" placement="left" ok-text="保存" cancel-text="取消" @confirm="saveAs">
-              <template slot="title">
-                <div>是否另存结论?</div>
-              </template>
-              <a-button
-                :loading="saveLoading"
-                style="color: #6cbdf6; border: none; background-color: transparent"
-                icon="save"
-              />
-            </a-popconfirm>
+            <a-button
+              @click="setContentPop = true"
+              :loading="saveLoading"
+              style="color: #6cbdf6; border: none; background-color: transparent"
+              icon="save"
+            />
           </a-tooltip>
           <a-tooltip placement="top">
             <template slot="title">
@@ -134,6 +131,22 @@
         </a-col> -->
       </a-row>
     </div>
+    <a-modal
+      class="qr-modal"
+      v-model="setContentPop"
+      :bodyStyle="{ padding: 0, backgroundColor: 'transparent' }"
+      :maskClosable="false"
+      @ok="saveAs"
+      @cancel="setContentPop = false"
+    >
+      <div class="set-name">
+        <div class="set-name-title">另存为新版本</div>
+        <div class="pop-tab-name">版本名称</div>
+        <a-input allowClear size="large" v-model="contentTitle"></a-input>
+        <div class="pop-tab-name">版本描述</div>
+        <a-textarea style="min-height: 200px" v-model="contentDesc" :auto-size="true" />
+      </div>
+    </a-modal>
   </div>
 </template>
   
@@ -156,6 +169,7 @@ export default {
   },
   data() {
     return {
+      isFirstLoading: true,
       applyLoading: false,
       saveLoading: false,
       editLoading: false,
@@ -169,6 +183,9 @@ export default {
         content: '',
       },
       changeContent: null,
+      setContentPop: false,
+      contentTitle: null,
+      contentDesc: null,
     }
   },
   mounted() {
@@ -229,14 +246,17 @@ export default {
       }
       reportContentList(query).then((res) => {
         this.modalContentList = res.data
-        res.data.forEach((v) => {
-          if (v.isUse == 1) {
-            this.useContent = v
-            return
-          }
-        })
-        this.selectModal = this.useContent
-        this.selectModalId = this.useContent.id
+        if (this.isFirstLoading) {
+          res.data.forEach((v) => {
+            if (v.isUse == 1) {
+              this.useContent = v
+              return
+            }
+          })
+          this.isFirstLoading = false
+          this.selectModal = this.useContent
+          this.selectModalId = this.useContent.id
+        }
       })
     },
     changeSelect(version) {
@@ -296,6 +316,15 @@ export default {
     saveAs() {
       // 另存的逻辑，例如创建新的版本记录
       const { $notification } = this
+      // 内容
+      if (!this.contentTitle) {
+        $notification['info']({
+          message: '通知：',
+          description: '请填写版本名称',
+          duration: 8,
+        })
+        return
+      }
       // 现判断是否有修改？
       if (this.changeContent == this.selectModal.content) {
         // 若相等，则没有更改，不进行接口调用
@@ -310,10 +339,13 @@ export default {
         reportId: this.reportDetail.id,
         title: this.currentModalSelect,
         content: this.changeContent,
+        versionName: this.contentTitle,
+        versionDesc: this.contentDesc,
       }
       this.saveLoading = true
       saveReportContent(query)
         .then((res) => {
+          this.setContentPop = false
           $notification['success']({
             message: '通知：',
             description: '操作成功',
@@ -323,6 +355,7 @@ export default {
           this.getModalContent()
         })
         .catch((err) => {
+          this.saveLoading = true
           $notification['error']({
             message: '通知：',
             description: `操作失败：${err}`,
@@ -475,5 +508,15 @@ export default {
   width: 17px;
   height: 20px;
   cursor: pointer;
+}
+.set-name {
+  padding: 0 20px 20px;
+  .set-name-title {
+    display: flex;
+    align-items: center;
+    height: 56px;
+    font-size: 20px;
+    font-weight: bold;
+  }
 }
 </style>

@@ -10,7 +10,7 @@
         </a-select>
       </div>
     </div>
-    <div class="table-contant">
+    <div class="table-contant tab-table">
       <s-table ref="table" rowKey="key" :data="loadData" :columns="qrColumns">
         <template slot="id" slot-scope="txt, scoped, index">{{
           (queryParam.pageNum - 1) * queryParam.pageSize + index + 1
@@ -203,5 +203,14 @@ export default {
 }
 .pointer {
   cursor: pointer;
+}
+/* 去除表格行的鼠标悬停高亮效果 */
+.tab-table {
+  /deep/ .ant-table-tbody > tr:hover > td {
+    background: inherit !important;
+  }
+  /deep/ .ant-table-small > .ant-table-content > .ant-table-body {
+    margin: 0;
+  }
 }
 </style>

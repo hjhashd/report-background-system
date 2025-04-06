@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-26 11:22:54
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-06 03:08:40
+ * @LastEditTime: 2025-04-06 12:38:39
  * @FilePath: /report-background-system/src/views/dataGo/home/viewCustomerData.vue
  * @Description: 
  * 
@@ -45,12 +45,29 @@
         ></customer-upload-detail-new>
       </div>
       <div class="button-group">
-        <a-button v-if="!buildReportId" :loading="buildLoading" style="width: 25%; height: 40px" @click="buildReport"
+        <a-button
+          v-if="!buildReportId"
+          :loading="buildLoading"
+          style="width: 25%; height: 40px"
+          @click="setReportName = true"
           >生成报告</a-button
         >
         <a-button v-if="buildReportId" style="width: 25%; height: 40px" @click="reviewReport">报告预览</a-button>
       </div>
     </div>
+    <a-modal
+      class="qr-modal"
+      v-model="setReportName"
+      :bodyStyle="{ padding: 0, backgroundColor: 'transparent' }"
+      :maskClosable="false"
+      @ok="buildReport"
+      @cancel="setReportName = false"
+    >
+      <div class="set-name">
+        <div class="set-name-title">报告名称</div>
+        <a-input allowClear size="large" v-model="reportName"></a-input>
+      </div>
+    </a-modal>
   </page-header-wrapper>
 </template>
 
@@ -69,13 +86,24 @@ export default {
       queryParams: null,
       modalList: null,
       buildLoading: false,
+      setReportName: false,
       buildReportId: null,
+      reportName: '',
     }
   },
   created() {
     this.queryParams = this.$route.query
     this.modalList = JSON.parse(this.$route.query.template)
     this.initData()
+
+    const reportTypeName =
+      this.queryParams.reportType === 1
+        ? '授信调查报告'
+        : this.queryParams.reportType === 2
+        ? '财务分析报告'
+        : '能耗分析报告'
+    const nowTime = getCurrentTime()
+    this.reportName = `${this.queryParams.enterpriseName},${reportTypeName},${nowTime}`
   },
   methods: {
     initData() {
@@ -93,26 +121,21 @@ export default {
         })
     },
     buildReport() {
-      const { $notification } = this
+      const { $notification, $message } = this
+
+      if (!this.reportName) {
+        $message.warning('报告名称不能为空！')
+        return
+      }
+
       const paramsRequest = {
         appUserId: parseInt(this.queryParams.appUserId),
         reportType: parseInt(this.queryParams.reportType),
         enterpriseName: this.queryParams.enterpriseName,
         template: this.queryParams.template,
+        reportName: this.reportName,
       }
-      const reportTypeName =
-        paramsRequest.reportType === 1
-          ? '授信调查报告'
-          : paramsRequest.reportType === 2
-          ? '财务分析报告'
-          : '能耗分析报告'
-      const nowTime = getCurrentTime()
-      $notification['info']({
-        message: '消息提示：',
-        description: `详情信息：${this.queryParams.enterpriseName},${reportTypeName},${nowTime}。
-        \n 正在用行业小模型生成报告，需要等待几分钟。`,
-        duration: 8,
-      })
+
       this.buildLoading = true
       // 去往查看数据页面
       buildReport(paramsRequest)
@@ -126,6 +149,12 @@ export default {
             })
           } else {
             const { $router } = this
+            $notification['info']({
+              message: '消息提示：',
+              description: `详情信息：${this.reportName}。
+              \n 正在用行业小模型生成报告，需要等待几分钟。`,
+              duration: 8,
+            })
             $router.push({ path: `/homePage/draftList` })
             this.buildReportId = res.data
             this.buildLoading = false
@@ -193,5 +222,13 @@ export default {
 .upload-data-box {
   overflow-x: hidden;
   overflow-y: scroll;
+}
+.set-name {
+  padding: 80px 20px 40px;
+  .set-name-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
 }
 </style>

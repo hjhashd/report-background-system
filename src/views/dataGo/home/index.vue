@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-06 02:44:22
+ * @LastEditTime: 2025-04-06 13:27:40
  * @FilePath: /report-background-system/src/views/dataGo/home/index.vue
  * @Description: 主页
  * 
@@ -23,7 +23,7 @@
         </div>
       </div>
       <data-go-tabs :tab="reportTypeList" @changeTab="changeTab">
-        <div class="p-20">
+        <div class="p-20 tab-table">
           <s-table ref="table" rowKey="key" :data="loadData" :columns="tabColumns">
             <div slot="reportName" slot-scope="text, scoped">
               <span class="report-name" @click="handleChat(scoped)">{{ text }}</span>
@@ -206,7 +206,7 @@ export default {
   align-items: center;
   justify-content: center;
   width: 12.8vw;
-  height: 25vh;
+  height: 16vw;
   margin-bottom: 4px;
   border-radius: 5px;
   cursor: pointer;
@@ -284,6 +284,15 @@ export default {
   &:hover {
     color: #0a69ef;
     border-bottom: 1px solid #0a69ef;
+  }
+} 
+/* 去除表格行的鼠标悬停高亮效果 */
+.tab-table {
+  /deep/ .ant-table-tbody > tr:hover > td {
+    background: inherit !important;
+  }
+  /deep/ .ant-table-small > .ant-table-content > .ant-table-body {
+    margin: 0;
   }
 }
 </style>
