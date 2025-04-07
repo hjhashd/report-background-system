@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 16:45:11
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-01 18:27:17
+ * @LastEditTime: 2025-04-07 17:24:29
  * @FilePath: /report-background-system/src/views/dataGo/client/customerUploadDetail_new.vue
  * @Description: 
  * 
@@ -97,7 +97,7 @@
                 <span>查看</span>
               </template>
               <a-button @click="toSeeTable(scope)" :style="{ color: '#7fbbf1', border: 'none', padding: 0 }">
-                <img style="width: 28px; height: 14px" src="@/assets/images/see.png" alt="dark" />
+                <img style="width: 28px; height: 28px" src="@/assets/images/see.png" alt="dark" />
               </a-button>
             </a-tooltip>
           </div>
