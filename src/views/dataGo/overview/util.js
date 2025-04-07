@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-26 20:29:58
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-24 17:57:06
+ * @LastEditTime: 2025-04-07 17:11:30
  * @FilePath: /report-background-system/src/views/dataGo/overview/util.js
  * @Description: 
  * 
@@ -115,43 +115,116 @@ export const columns = [
         key: 'id',
         width: '80px',
         scopedSlots: { customRender: 'id' },
+        customHeaderCell: () => {
+            return {
+                style: {
+                    backgroundColor: '#EFF6FF',
+                    padding: '5px',
+                    color: '#000',
+                }
+            };
+        },
     },
     {
         title: '报告类型',
         dataIndex: 'reportType',
         key: 'reportType',
         scopedSlots: { customRender: 'reportType' },
+        customHeaderCell: () => {
+            return {
+                style: {
+                    backgroundColor: '#EFF6FF',
+                    padding: '5px',
+                    color: '#000',
+                }
+            };
+        },
     },
     {
         title: '企业名称',
         dataIndex: 'enterpriseName',
-        key: 'enterpriseName',
+        key: 'enterpriseName', 
+        customHeaderCell: () => {
+            return {
+                style: {
+                    backgroundColor: '#EFF6FF',
+                    padding: '5px',
+                    color: '#000',
+                }
+            };
+        },
     },
     {
         title: '报告进度',
         dataIndex: 'status',
         key: 'status',
-        scopedSlots: { customRender: 'status' },
+        width: '120px',
+        scopedSlots: { customRender: 'status' }, 
+        customHeaderCell: () => {
+            return {
+                style: {
+                    backgroundColor: '#EFF6FF',
+                    padding: '5px',
+                    color: '#000',
+                }
+            };
+        },
     },
     {
         title: '累计处理时长',
         dataIndex: 'avgOperationTime',
         key: 'avgOperationTime',
-        scopedSlots: { customRender: 'avgOperationTime' },
+        scopedSlots: { customRender: 'avgOperationTime' }, 
+        customHeaderCell: () => {
+            return {
+                style: {
+                    backgroundColor: '#EFF6FF',
+                    padding: '5px',
+                    color: '#000',
+                }
+            };
+        },
     },
     {
         title: '开始时间',
         dataIndex: 'createTime',
-        key: 'createTime',
+        key: 'createTime', 
+        customHeaderCell: () => {
+            return {
+                style: {
+                    backgroundColor: '#EFF6FF',
+                    padding: '5px',
+                    color: '#000',
+                }
+            };
+        },
     },
     {
         title: '最新修改时间',
         dataIndex: 'updateTime',
-        key: 'updateTime',
+        key: 'updateTime', 
+        customHeaderCell: () => {
+            return {
+                style: {
+                    backgroundColor: '#EFF6FF',
+                    padding: '5px',
+                    color: '#000',
+                }
+            };
+        },
     },
     {
         title: '操作',
         key: 'action',
-        scopedSlots: { customRender: 'action' },
+        scopedSlots: { customRender: 'action' }, 
+        customHeaderCell: () => {
+            return {
+                style: {
+                    backgroundColor: '#EFF6FF',
+                    padding: '5px',
+                    color: '#000',
+                }
+            };
+        },
     },
 ]

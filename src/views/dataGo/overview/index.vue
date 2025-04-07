@@ -30,38 +30,41 @@
     </a-row>
 
     <div class="table-contant">
-      <s-table ref="table" rowKey="key" :data="loadData" :columns="columns">
-        <template slot="id" slot-scope="txt, scoped, index">{{
-          (queryParam.pageNum - 1) * queryParam.pageSize + index + 1
-        }}</template>
-        <span slot="status" slot-scope="text">
-          <!-- // 0 草稿 1 已完成 2 数据未授权 3 数据已授权 -->
-          <span v-if="text == 1" :class="['table-status', 'status' + text]">已完成</span>
-          <span v-if="text == 0 || text == 2" :class="['table-status', 'status' + text]">数据未授权</span>
-          <span v-if="text == 3" :class="['table-status', 'status' + text]">数据已授权</span>
-        </span>
-        <span slot="reportType" slot-scope="text">
-          {{ text == 1 ? '信贷调查报告' : text == 2 ? '财务分析报告' : '能耗分析报告' }}
-        </span>
-        <span slot="avgOperationTime" slot-scope="text">
-          <span v-if="text">约{{ text | dealTime }}小时</span>
-          <span v-else>{{ text }}</span>
-        </span>
-        <template slot="action" slot-scope="text, scoped">
-          <a-tooltip>
-            <template slot="title">
-              <span>查看</span>
-            </template>
-            <a-button
-              :disabled="scoped.status == 2"
-              @click="handleChat(scoped)"
-              :style="{ color: '#7fbbf1', border: 'none', padding: 0 }"
-            >
-              <img style="width: 28px; height: 14px" src="@/assets/images/see.png" alt="dark" />
-            </a-button>
-          </a-tooltip>
-        </template>
-      </s-table>
+      <div class="table-title">超长时报告列表</div>
+      <div class="inline-table">
+        <s-table ref="table" rowKey="key" :data="loadData" :columns="columns">
+          <template slot="id" slot-scope="txt, scoped, index">{{
+            (queryParam.pageNum - 1) * queryParam.pageSize + index + 1
+          }}</template>
+          <span slot="status" slot-scope="text">
+            <!-- // 0 草稿 1 已完成 2 数据未授权 3 数据已授权 -->
+            <span v-if="text == 1" :class="['table-status', 'status' + text]">已完成</span>
+            <span v-if="text == 0 || text == 2" :class="['table-status', 'status' + text]">数据未授权</span>
+            <span v-if="text == 3" :class="['table-status', 'status' + text]">数据已授权</span>
+          </span>
+          <span slot="reportType" slot-scope="text">
+            {{ text == 1 ? '信贷调查报告' : text == 2 ? '财务分析报告' : '能耗分析报告' }}
+          </span>
+          <span slot="avgOperationTime" slot-scope="text">
+            <span v-if="text">约{{ text | dealTime }}小时</span>
+            <span v-else>{{ text }}</span>
+          </span>
+          <template slot="action" slot-scope="text, scoped">
+            <a-tooltip>
+              <template slot="title">
+                <span>查看</span>
+              </template>
+              <a-button
+                :disabled="scoped.status == 2"
+                @click="handleChat(scoped)"
+                :style="{ backgroundColor: 'transparent', border: 'none', padding: 0 }"
+              >
+                <img style="width: 28px; height: 28px" src="@/assets/images/see.png" alt="dark" />
+              </a-button>
+            </a-tooltip>
+          </template>
+        </s-table>
+      </div>
     </div>
     <!-- </div> -->
   </page-header-wrapper>
@@ -121,7 +124,7 @@ export default {
   filters: {
     dealTime(v) {
       let time = parseInt(v)
-      return Math.ceil(time / 3600)
+      return Math.ceil(time / 60)
     },
   },
   computed: {
@@ -340,6 +343,8 @@ export default {
 }
 
 .table-contant {
+  margin-top: 50px;
+  position: relative;
   background-color: #fff;
 }
 
@@ -400,5 +405,19 @@ export default {
   letter-spacing: 0;
   line-height: 61.83px;
   font-weight: 500;
+}
+.inline-table {
+  padding: 20px;
+}
+.table-title {
+  position: absolute;
+  top: -35px;
+  left: 0;
+  font-size: 20px;
+  color: #488fd7;
+  padding: 12px 25px;
+  background-color: #fff;
+  display: inline-block;
+  border-radius: 10px 10px 0 0;
 }
 </style>
