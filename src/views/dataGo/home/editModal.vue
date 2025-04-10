@@ -235,6 +235,7 @@ export default {
       this.changeContent = ''
     },
     changModalShow(v) {
+      this.isFirstLoading = true
       this.currentModalSelect = v
       this.getModalContent()
     },
@@ -284,6 +285,7 @@ export default {
       this.applyLoading = true
       useReportContent(query)
         .then((res) => {
+          this.isFirstLoading = true
           if (res.code != 200) {
             $notification['error']({
               message: '错误通知：',

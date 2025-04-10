@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-26 11:22:54
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-06 12:38:39
+ * @LastEditTime: 2025-04-10 10:58:09
  * @FilePath: /report-background-system/src/views/dataGo/home/viewCustomerData.vue
  * @Description: 
  * 
@@ -97,13 +97,13 @@ export default {
     this.initData()
 
     const reportTypeName =
-      this.queryParams.reportType === 1
+      this.queryParams.reportType == 1
         ? '授信调查报告'
-        : this.queryParams.reportType === 2
+        : this.queryParams.reportType == 2
         ? '财务分析报告'
         : '能耗分析报告'
     const nowTime = getCurrentTime()
-    this.reportName = `${this.queryParams.enterpriseName},${reportTypeName},${nowTime}`
+    this.reportName = `${reportTypeName}`
   },
   methods: {
     initData() {

@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-06 13:17:06
+ * @LastEditTime: 2025-04-10 10:42:26
  * @FilePath: /report-background-system/src/views/dataGo/home/viewReport.vue
  * @Description: 报告预览
  * 
@@ -194,20 +194,20 @@
       >
         <edit-modal :reportDetail="reportDetail" @refreshEdit="updateEdit"></edit-modal>
       </a-drawer>
+      <a-modal
+        class="qr-modal"
+        v-model="setReportName"
+        :bodyStyle="{ padding: 0, backgroundColor: 'transparent' }"
+        :maskClosable="false"
+        @ok="resetReportFun"
+        @cancel="setReportName = false"
+      >
+        <div class="set-name">
+          <div class="set-name-title">{{ popTitle }}</div>
+          <a-input allowClear size="large" v-model="otherSaveReportName"></a-input>
+        </div>
+      </a-modal>
     </div>
-    <a-modal
-      class="qr-modal"
-      v-model="setReportName"
-      :bodyStyle="{ padding: 0, backgroundColor: 'transparent' }"
-      :maskClosable="false"
-      @ok="resetReportFun"
-      @cancel="setReportName = false"
-    >
-      <div class="set-name">
-        <div class="set-name-title">{{ popTitle }}</div>
-        <a-input allowClear size="large" v-model="otherSaveReportName"></a-input>
-      </div>
-    </a-modal>
   </a-spin>
   <!-- </page-header-wrapper> -->
 </template>
@@ -300,7 +300,7 @@ export default {
       this.setFullScreen(this.fullView)
       this.$nextTick(() => {
         const editors = this.$refs.editorContainerRef
-        const reportViewDetail = this.$refs.reportViewDetail
+        const reportViewDetail = document.getElementById('htmlBody');
         this.editorHeight = editors.offsetHeight + 'px'
         if (reportViewDetail.requestFullscreen) {
           reportViewDetail.requestFullscreen()
@@ -319,7 +319,7 @@ export default {
       this.setFullScreen(this.fullView)
       this.$nextTick(() => {
         const editors = this.$refs.editorContainerRef
-        const reportViewDetail = this.$refs.reportViewDetail
+        const reportViewDetail = document.getElementById('htmlBody');
         this.editorHeight = editors.offsetHeight + 'px'
         if (reportViewDetail.exitFullscreen) {
           reportViewDetail.exitFullscreen()
