@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-14 10:23:35
+ * @LastEditTime: 2025-04-14 23:46:47
  * @FilePath: /report-background-system/src/views/dataGo/home/viewReport.vue
  * @Description: 报告预览
  * 
@@ -225,6 +225,7 @@ import {
 } from '@/api/report'
 import { OnlyOfficeEditor } from '@/components'
 import EditModal from './editModal.vue'
+import { getCurrentTime } from './util'
 import { classifyDataByClassName } from '../client/util'
 export default {
   name: 'addReport',
@@ -374,6 +375,14 @@ export default {
     openSetName(type) {
       this.setType = type
       this.setReportName = true
+      const reportTypeName =
+        this.reportDetail.reportType == 1
+          ? '授信调查报告'
+          : this.reportDetail.reportType == 2
+          ? '财务分析报告'
+          : '能耗分析报告'
+      const nowTime = getCurrentTime()
+      this.otherSaveReportName = `${this.reportDetail.enterpriseName}_${reportTypeName}_${nowTime}`
       if (type === 'draft') {
         this.popTitle = '另存草稿报告名称'
       } else if (type === 'apply') {
@@ -397,7 +406,6 @@ export default {
           this.setReportName = false
           this.$nextTick(() => {
             this.reportName = this.otherSaveReportName
-            console.log('this.reportName :>> ', this.reportName)
           })
           this.$refs.editorR.refreshEditor()
           $notification['success']({

@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-26 11:22:54
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-10 10:58:09
+ * @LastEditTime: 2025-04-14 23:41:47
  * @FilePath: /report-background-system/src/views/dataGo/home/viewCustomerData.vue
  * @Description: 
  * 
@@ -103,7 +103,7 @@ export default {
         ? '财务分析报告'
         : '能耗分析报告'
     const nowTime = getCurrentTime()
-    this.reportName = `${reportTypeName}`
+    this.reportName = `${this.queryParams.enterpriseName}_${reportTypeName}_${nowTime}`
   },
   methods: {
     initData() {

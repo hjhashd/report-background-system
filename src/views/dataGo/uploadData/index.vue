@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-31 19:44:02
+ * @LastEditTime: 2025-04-14 23:36:38
  * @FilePath: /report-background-system/src/views/dataGo/uploadData/index.vue
  * @Description: 数据上传
  * 
@@ -126,7 +126,10 @@ export default {
           setTimeout(() => {
             this.pageLoading = false
           }, 200)
-          this.customerUploadList = res.data
+          this.customerUploadList = res.data.filter(
+            (item) =>
+              item.className !== '企业基础信息' || (item.className == '企业基础信息' && item.tableNameZh == '基本情况')
+          )
           // this.customerUploadList = classifyDataByClassName(res.data)
         })
         .catch((err) => {
