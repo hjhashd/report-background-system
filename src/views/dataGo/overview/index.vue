@@ -46,8 +46,8 @@
             {{ text == 1 ? '信贷调查报告' : text == 2 ? '财务分析报告' : '能耗分析报告' }}
           </span>
           <span slot="avgOperationTime" slot-scope="text">
-            <span v-if="text">约{{ text | dealTime }}小时</span>
-            <span v-else>{{ text }}</span>
+            <span>{{ text | dealTime }}</span>
+<!--            <span v-else>{{ text }}分钟</span>-->
           </span>
           <template slot="action" slot-scope="text, scoped">
             <a-tooltip>
@@ -123,8 +123,10 @@ export default {
   },
   filters: {
     dealTime(v) {
-      let time = parseInt(v)
-      return Math.ceil(time / 60)
+      const hours = Math.floor(v / 60);
+      const remainingMinutes = v % 60;
+
+      return `${hours}小时${remainingMinutes}分钟`;
     },
   },
   computed: {
@@ -231,7 +233,7 @@ export default {
         options.xAxis.data = x
         options.series = [
           {
-            name: '数据总采集时长(小时)',
+            name: '数据总采集时长(分钟)',
             type: 'line',
             data: data2,
             itemStyle: {
@@ -239,7 +241,7 @@ export default {
             },
           },
           {
-            name: '制作总时长(小时)',
+            name: '制作总时长(分钟)',
             type: 'line',
             data: data1,
             itemStyle: {
@@ -250,10 +252,10 @@ export default {
         options.legend = {
           data: [
             {
-              name: '制作总时长(小时)',
+              name: '制作总时长(分钟)',
             },
             {
-              name: '数据总采集时长(小时)',
+              name: '数据总采集时长(分钟)',
             },
           ],
           right: 10,
