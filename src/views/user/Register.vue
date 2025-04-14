@@ -155,8 +155,8 @@
         <router-link class="login" :to="{ name: 'login' }">{{ $t('user.register.sign-in') }}</router-link>
       </a-form-item>
       <a-form-item style="margin: 0">
-        <div class="form-item-speical">
-          <a-checkbox @change="agreennnnn">我已阅读并同意</a-checkbox>
+        <div>
+          <a-checkbox class="form-item-speical" @change="agreennnnn">我已阅读并同意</a-checkbox>
           <a-button type="link" style="padding: 0" @click="toAgreement('user')"
             ><span class="agreement">《用户协议》</span></a-button
           >
@@ -485,8 +485,12 @@ export default {
   // z-index: 1000;
   border-radius: 21px;
 }
-.form-item-speical /deep/ .layout-input /deep/ span {
-  background-color: transparent !important;
+.form-item-speical /deep/ span {
+  background: none !important;
+}
+.form-item-speical /deep/ .ant-checkbox-checked>.ant-checkbox-inner {
+  background-color: #1890ff !important;
+  border-color: #1890ff !important;
 }
 .layout-input .phone-input/deep/ .ant-input {
   padding-left: 55px;

@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-06 12:53:45
+ * @LastEditTime: 2025-04-14 10:27:16
  * @FilePath: /report-background-system/src/api/report.js
  * @Description: 
  * 
@@ -38,7 +38,8 @@ const reportAPI = {
     appUploadFile: '/report/data/accredit/lately/detail',
     industryReportList: '/report/industry/list',
     getIndustryClassify: '/report/industry/classify',
-    getIndustryReportConfig: '/report/office/industry/config/'
+    getIndustryReportConfig: '/report/office/industry/config/',
+    getAIConfig: '/report/entity/ai/content',
 }
 
 export function getIndustryClassify() {
@@ -153,6 +154,15 @@ export function getReportDetail(id) {
 export function reportContentList(parameter) {
     return request({
         url: reportAPI.reportContentList,
+        method: 'post',
+        data: parameter
+    })
+}
+
+// 获取AI智能内容
+export function getAIConfig(parameter) {
+    return request({
+        url: reportAPI.getAIConfig,
         method: 'post',
         data: parameter
     })

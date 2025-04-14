@@ -24,13 +24,13 @@
             <template slot="title">
               <span>AI优化</span>
             </template>
-            <a-popconfirm :disabled="editLoading" placement="left" ok-text="AI优化" cancel-text="取消" @confirm="toAI">
+            <!-- <a-popconfirm :disabled="editLoading" placement="left" ok-text="AI优化" cancel-text="取消" @confirm="toAI">
               <template slot="title">
                 <div>是否通过AI对模板结论进行优化?</div>
                 <div>注意：进行AI优化会修改当前编辑框内容。</div>
               </template>
-              <img class="ai-png" src="@/assets/images/ai.png" alt="dark" />
-            </a-popconfirm>
+            </a-popconfirm> -->
+            <img class="ai-png" src="@/assets/images/ai.png" alt="dark" @click="toAI" />
           </a-tooltip>
           <a-tooltip placement="top">
             <template slot="title">
@@ -99,8 +99,67 @@
         <!-- <a-col :span="6" class="flex flex-end"> </a-col> -->
       </a-row>
       <a-row :gutter="[10]" v-if="modalContentList">
-        <a-col :span="11">
-          <a-textarea style="height: 70vh" v-model="useContent.content" :auto-size="true" :disabled="true" />
+        <a-col :span="11" class="un-edit-pass">
+          <a-textarea
+            :style="{ height: !isExpend ? '70vh' : '28px' }"
+            v-model="useContent.content"
+            :auto-size="true"
+            :disabled="true"
+          />
+          <div v-if="aiExspend">
+            <div class="ai-expend" v-show="isExpend">
+              <div class="flex-row-spacebetween btn-part">
+                <div class="flex flex-1" v-for="(item, index) in aiTypeList" :key="index">
+                  <div class="flex-1">
+                    <a-button
+                      class="ai-btn"
+                      :style="{
+                        color: item.value == aiType ? '#fff' : item.defaultColor,
+                        background: item.value == aiType ? item.btBc : 'transparent',
+                      }"
+                      @click="chooseAI(item.value)"
+                    >
+                      <a-icon
+                        class="ai-icon"
+                        :type="item.icon"
+                        :style="{ background: item.value == aiType ? item.bcAction : item.bc }"
+                      />
+                      {{ item.value }}</a-button
+                    >
+                  </div>
+                </div>
+                <a-dropdown>
+                  <a-menu slot="overlay" @click="menuChoose">
+                    <a-menu-item v-for="(item, index) in aiTypeList" :key="index" :value="item.value">
+                      {{ item.value }}
+                    </a-menu-item>
+                  </a-menu>
+                  <a-button style="padding: 0 5px"> <a-icon type="ellipsis" /> </a-button>
+                </a-dropdown>
+              </div>
+              <div class="ai-response" v-if="AIresponse">
+                <div class="ai-title">{{ aiType }}</div>
+                <a-textarea style="height: calc(70vh - 140px)" v-model="AIresponse" :auto-size="true" :disabled="true" />
+              </div>
+            </div>
+            <div class="loading-zezao" v-if="clickInAI">
+              <div class="top-t w100 flex-row-spacebetween">
+                <span>正在补充{{ aiType }}...</span>
+                <span>{{ processNum }}%</span>
+              </div>
+              <a-progress :showInfo="false" strokeColor="#64ceea" :percent="processNum" status="active" />
+              <div class="detail">AI正在分析报告内容</div>
+            </div>
+            <div class="ex-icon">
+              <a-icon
+                theme="filled"
+                style="font-size: 20px"
+                :class="{ 'close-icon': !isExpend }"
+                type="up-circle"
+                @click="isExpend = !isExpend"
+              />
+            </div>
+          </div>
         </a-col>
         <a-col :span="11">
           <a-spin :spinning="editLoading">
@@ -158,8 +217,10 @@ import {
   useReportContent,
   getModalList,
   toAi,
+  getAIConfig,
 } from '@/api/report'
 import { colorList } from '@/config/constants'
+import { aiTypeList } from './util'
 export default {
   props: {
     reportDetail: {
@@ -182,10 +243,17 @@ export default {
       useContent: {
         content: '',
       },
+      aiTypeList,
+      aiType: null,
+      processNum: 0,
+      clickInAI: false,
+      AIresponse: null,
       changeContent: null,
       setContentPop: false,
       contentTitle: null,
       contentDesc: null,
+      aiExspend: false,
+      isExpend: false,
     }
   },
   mounted() {
@@ -213,23 +281,60 @@ export default {
     },
   },
   methods: {
+    menuChoose(v) {
+      this.aiType = v.item.value
+      const parameter = {
+        aiType: this.aiType,
+        reportType: this.reportDetail.reportType,
+        creditCode: this.reportDetail.appUser.enterprise.enterpriseCreditCode,
+        title: this.selectModal.title,
+      }
+      this.getAIConfig(parameter)
+    },
+    chooseAI(value) {
+      this.aiType = value
+      const parameter = {
+        aiType: this.aiType,
+        reportType: this.reportDetail.reportType,
+        creditCode: this.reportDetail.appUser.enterprise.enterpriseCreditCode,
+        title: this.selectModal.title,
+      }
+      this.getAIConfig(parameter)
+    },
+    async getAIConfig(parameter) {
+      this.clickInAI = true
+      const reD = await getAIConfig(parameter)
+      let countdown = 10
+      const intervalId = setInterval(() => {
+        if (countdown > 0) {
+          countdown--
+          this.processNum = (10 - countdown) * 10
+        } else {
+          this.AIresponse = reD.data
+          this.clickInAI = false
+          this.processNum = 0
+          clearInterval(intervalId)
+        }
+      }, 1000)
+    },
     toAI() {
       const { $notification } = this
       // ai
-      this.editLoading = true
-      toAi({ content: this.changeContent }).then((result) => {
-        this.editLoading = false
-        if (result.code != 200) {
-          $notification['error']({
-            message: '错误通知：',
-            description: `${result.msg}`,
-            duration: 8,
-          })
-          return
-        } else {
-          this.changeContent = result.data
-        }
-      })
+      this.aiExspend = true
+      this.isExpend = true
+      // toAi({ content: this.changeContent }).then((result) => {
+      //   this.editLoading = false
+      //   if (result.code != 200) {
+      //     $notification['error']({
+      //       message: '错误通知：',
+      //       description: `${result.msg}`,
+      //       duration: 8,
+      //     })
+      //     return
+      //   } else {
+      //     this.changeContent = result.data
+      //   }
+      // })
     },
     addModalResult() {
       this.changeContent = ''
@@ -400,6 +505,9 @@ export default {
 </script>
   
 <style lang="less" scoped>
+.w100 {
+  width: 100%;
+}
 .drawer-container {
   padding-left: 4px;
   margin-bottom: 20px;
@@ -519,6 +627,77 @@ export default {
     height: 56px;
     font-size: 20px;
     font-weight: bold;
+  }
+}
+.un-edit-pass {
+  position: relative;
+  .ex-icon {
+    position: absolute;
+    right: 5px;
+    top: 1px;
+    z-index: 300;
+    cursor: pointer;
+  }
+  .close-icon {
+    transform: rotate(180deg);
+    transition: transform 0.5s ease;
+  }
+  .ai-expend {
+    background-color: #fff;
+    height: calc(70vh - 28px);
+    width: 100%;
+    border: 1px solid #e5e7eb;
+  }
+}
+.btn-part {
+  padding: 14px;
+}
+.ai-btn {
+  display: flex;
+  align-items: center;
+  padding: 5px 10px;
+  height: auto;
+  box-sizing: border-box;
+  border-radius: 5px;
+}
+.ai-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+.loading-zezao {
+  padding: 0 15px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  .top-t {
+    font-size: 14px;
+    color: #000;
+    font-weight: bold;
+  }
+  .detail {
+    font-size: 12px;
+    color: #adb0b8;
+  }
+}
+.ai-response{
+  padding: 0 15px;
+  .ai-title{
+    font-size: 14px;
+    color: #000;
+    font-weight: bold;
+    padding-bottom: 15px;
   }
 }
 </style>

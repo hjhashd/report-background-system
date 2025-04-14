@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-10 10:42:26
+ * @LastEditTime: 2025-04-14 10:23:35
  * @FilePath: /report-background-system/src/views/dataGo/home/viewReport.vue
  * @Description: 报告预览
  * 
@@ -300,7 +300,7 @@ export default {
       this.setFullScreen(this.fullView)
       this.$nextTick(() => {
         const editors = this.$refs.editorContainerRef
-        const reportViewDetail = document.getElementById('htmlBody');
+        const reportViewDetail = document.getElementById('htmlBody')
         this.editorHeight = editors.offsetHeight + 'px'
         if (reportViewDetail.requestFullscreen) {
           reportViewDetail.requestFullscreen()
@@ -319,7 +319,7 @@ export default {
       this.setFullScreen(this.fullView)
       this.$nextTick(() => {
         const editors = this.$refs.editorContainerRef
-        const reportViewDetail = document.getElementById('htmlBody');
+        const reportViewDetail = document.getElementById('htmlBody')
         this.editorHeight = editors.offsetHeight + 'px'
         if (reportViewDetail.exitFullscreen) {
           reportViewDetail.exitFullscreen()
@@ -549,6 +549,7 @@ export default {
   flex-direction: column;
 }
 .tools {
+  width: 100%;
   padding: 10px 20px;
   border-bottom: 1px solid #ccc;
 }
