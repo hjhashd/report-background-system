@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-23 09:04:39
+ * @LastEditTime: 2025-04-15 11:33:01
  * @FilePath: /report-background-system/src/views/dataGo/anomaly/index.vue
  * @Description: 
  * 
@@ -34,9 +34,10 @@
           :loading="tableLoading"
         >
           <template slot="yoy" slot-scope="text">
-            <div class="up" v-if="text > 0">{{ text }}</div>
+            <!-- <div class="up" v-if="text > 0">{{ text }}</div>
             <div class="down" v-else-if="text < 0">{{ text }}</div>
-            <div v-else>{{ text }}</div>
+            <div v-else>{{ text }}</div> -->
+            <div>{{ text }}</div>
           </template>
           <template slot="yclevel" slot-scope="text">
             <a-tag color="#fae450" v-if="text == '等级1'">
