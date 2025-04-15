@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-03-12 13:54:33
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-23 09:03:15
+ * @LastEditTime: 2025-04-15 19:39:27
  * @FilePath: /report-background-system/src/views/dataGo/anomaly/util.js
  * @Description: 
  * 
@@ -245,12 +245,12 @@ export function dealColumns(data, type) {
             break;
         case '衍生异常指标':
             const dD = {}
-            const valuelist = []
+            let valuelist = []
             sortData = data.sort(wenzistartSort("secondLevel"));
             sortData.forEach(item => {
                 if (!item.dataItem.includes('异常等级')) {
                     if (!yearList.includes(item.recordDate)) yearList.push(item.recordDate);
-                    const ycIndex = sortData.findIndex((yc) => yc.dataItem === item.dataItem + '异常等级')
+                    const ycIndex = sortData.findIndex((yc) => yc.dataItem === item.dataItem + '异常等级' && yc.recordDate == item.recordDate)
                     const level = ycIndex !== -1 ? sortData[ycIndex].dataValue : ''
                     if (level && level !== '正常' && level !== '过滤') {
                         valuelist.push(Object.assign(item, {
@@ -320,9 +320,11 @@ export function dealColumns(data, type) {
                     for (const key in dD) {
                         if (Object.prototype.hasOwnProperty.call(dD, key)) {
                             const element = dD[key][index];
-                            inReData[`${element.recordDate}dataItem`] = element.dataItem;
-                            inReData[`${element.recordDate}dataValue`] = element.dataValue;
-                            inReData[`${element.recordDate}level`] = element.level;
+                            if(element){
+                                inReData[`${element.recordDate}dataItem`] = element.dataItem;
+                                inReData[`${element.recordDate}dataValue`] = element.dataValue;
+                                inReData[`${element.recordDate}level`] = element.level;
+                            }
                         }
                     }
                     reData.push(inReData)

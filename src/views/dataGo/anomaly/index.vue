@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-15 11:33:01
+ * @LastEditTime: 2025-04-15 19:40:31
  * @FilePath: /report-background-system/src/views/dataGo/anomaly/index.vue
  * @Description: 
  * 
@@ -47,9 +47,6 @@
               {{ text }}
             </a-tag>
             <a-tag color="#f50" v-else-if="text == '等级3'">
-              {{ text }}
-            </a-tag>
-            <a-tag v-else>
               {{ text }}
             </a-tag>
           </template>
