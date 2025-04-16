@@ -195,7 +195,7 @@ export const columns = [
         key: 'enterpriseName',
     },
     {
-        title: '智能生产状态',
+        title: '智能生成状态',
         dataIndex: 'genStatus',
         key: 'genStatus',
         width: '180px',

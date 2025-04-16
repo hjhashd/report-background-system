@@ -43,9 +43,12 @@
           <span v-if="text == 2" :class="['table-status', 'status' + text]">数据未授权</span>
           <span v-if="text == 3" :class="['table-status', 'status' + text]">数据已授权</span>
         </span>
-        <template slot="genStatus" slot-scope="text">
+        <template slot="genStatus" slot-scope="text, scoped">
           <span v-if="text == 1" class="table-status status1">已完成</span>
-          <span v-else-if="text == 0">生成中</span>
+          <span v-else-if="text == 0">
+            生成中
+            <a-progress :percent="scoped.process" size="small" />
+          </span>
           <span class="table-status status4" v-else>生成失败</span>
         </template>
         <span slot="reportType" slot-scope="text">
