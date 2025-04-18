@@ -225,7 +225,7 @@ import {
 } from '@/api/report'
 import { OnlyOfficeEditor } from '@/components'
 import EditModal from './editModal.vue'
-import { getCurrentTime } from './util'
+import { getCurrentDate, getCurrentTime } from './util'
 import { classifyDataByClassName } from '../client/util'
 export default {
   name: 'addReport',
@@ -381,7 +381,7 @@ export default {
           : this.reportDetail.reportType == 2
           ? '财务分析报告'
           : '能耗分析报告'
-      const nowTime = getCurrentTime()
+      const nowTime = getCurrentDate()
       this.otherSaveReportName = `${this.reportDetail.enterpriseName}_${reportTypeName}_${nowTime}`
       if (type === 'draft') {
         this.popTitle = '另存草稿报告名称'
