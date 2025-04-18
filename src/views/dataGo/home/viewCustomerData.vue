@@ -75,7 +75,7 @@
 import { customerData } from '@/api/report'
 import CustomerUploadDetailNew from '../client/customerUploadDetail_new.vue'
 import { buildReport } from '@/api/report'
-import { getCurrentTime } from './util'
+import { getCurrentDate, getCurrentTime } from './util'
 export default {
   name: 'viewCustomerData',
   components: { CustomerUploadDetailNew },
@@ -102,7 +102,7 @@ export default {
         : this.queryParams.reportType == 2
         ? '财务分析报告'
         : '能耗分析报告'
-    const nowTime = getCurrentTime()
+    const nowTime = getCurrentDate()
     this.reportName = `${this.queryParams.enterpriseName}_${reportTypeName}_${nowTime}`
   },
   methods: {
