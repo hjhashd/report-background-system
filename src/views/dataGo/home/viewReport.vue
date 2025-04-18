@@ -164,9 +164,9 @@
                         <a-icon style="color: #5ec269" v-if="item.status == 1" type="check-circle" />
                       </div>
                     </div>
-                    <!-- <div class="flex-row-spacebetween">
+                  <div class="flex-row-spacebetween">
                     <a-button class="update-btn" type="primary" size="small" @click="updateTable(item)">更新</a-button>
-                  </div> -->
+                  </div>
                   </div>
                 </div>
               </div>
@@ -352,7 +352,7 @@ export default {
             } else {
               $notification['success']({
                 message: '通知：',
-                description: `更新报告数据成功`,
+                description: `正在生成，请在草稿列表查看进度`,
                 duration: 6,
               })
               this.pageLoading = false
