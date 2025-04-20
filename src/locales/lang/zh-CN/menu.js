@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2022-10-10 22:31:07
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-27 22:37:54
+ * @LastEditTime: 2025-04-20 11:18:43
  * @FilePath: /report-background-system/src/locales/lang/zh-CN/menu.js
  * @Description: 
  * 
@@ -52,7 +52,7 @@ export default {
     'menu.overview': '数据看板',
     'menu.uploadData': '上传数据',
     'menu.readWord': '慧读文档',
-    'menu.anomaly': '异常分析',
+    'menu.anomaly': '数据验证',
     'menu.client': '客户列表',
     'menu.home.addReport': '新增报告',
     'menu.home.viewReport': '报告预览',

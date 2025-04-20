@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-14 10:27:16
+ * @LastEditTime: 2025-04-20 10:51:52
  * @FilePath: /report-background-system/src/api/report.js
  * @Description: 
  * 
@@ -40,6 +40,7 @@ const reportAPI = {
     getIndustryClassify: '/report/industry/classify',
     getIndustryReportConfig: '/report/office/industry/config/',
     getAIConfig: '/report/entity/ai/content',
+    getAbnormalNew: '/report/entity/customer/abnormal/list/'
 }
 
 export function getIndustryClassify() {
@@ -273,6 +274,15 @@ export function getCustomerAbnormalList(id, type) {
     return request({
         url: `${reportAPI.getCustomerAbnormalList}${id}?firstLevel=${type}`,
         method: 'get',
+    })
+}
+
+// 获取异常数据-new
+export function getAbnormalNew(id, parameter) {
+    return request({
+        url: `${reportAPI.getAbnormalNew}${id}`,
+        method: 'post',
+        data: parameter
     })
 }
 

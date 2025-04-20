@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-15 19:40:31
+ * @LastEditTime: 2025-04-20 11:32:28
  * @FilePath: /report-background-system/src/views/dataGo/anomaly/index.vue
  * @Description: 
  * 
@@ -26,6 +26,16 @@
         </data-go-tabs>
       </div>
       <div class="p-20">
+        <div class="tab-list flex" v-if="tabSelected === '财务基础指标'">
+          <div
+            :class="{ 'one-tab': true, 'tab-active': item.value == secondLevel }"
+            v-for="(item, index) in caiwuList"
+            :key="index"
+            @click="secondLevel = item.value"
+          >
+            <a-icon :type="item.icon" /><span>{{ item.name }}</span>
+          </div>
+        </div>
         <a-table
           :columns="columns"
           :data-source="tableData"
@@ -71,9 +81,32 @@ const reportTypeList = [
     name: '衍生异常指标',
   },
 ]
-import { getCustomerAbnormalList, getCustomerList } from '@/api/report'
+//负债表、利润表、现金流量表
+const caiwuList = [
+  {
+    value: '负债表',
+    name: '负债表',
+    icon: 'credit-card',
+  },
+  {
+    value: '利润表',
+    name: '利润表',
+    icon: 'rise',
+  },
+  {
+    value: '现金流量表',
+    name: '现金流量表',
+    icon: 'bar-chart',
+  },
+  {
+    value: '',
+    name: '财务报表',
+    icon: 'file-text',
+  },
+]
+import { getAbnormalNew, getCustomerList } from '@/api/report'
 import { DataGoTabs } from '@/components'
-import { dealColumns } from './util'
+import { dealColumns, dealColumnsNew } from './util'
 export default {
   components: { DataGoTabs },
   data() {
@@ -83,6 +116,8 @@ export default {
       tableLoading: true,
       customers: [],
       tabSelected: '财务基础指标',
+      caiwuList,
+      secondLevel: '负债表',
       columns: [],
       tableData: [],
     }
@@ -95,6 +130,13 @@ export default {
       this.selectedCustomer = res.data[0].userId
       this.getAbnormalData()
     })
+  },
+  watch: {
+    secondLevel: {
+      handler() {
+        this.getAbnormalData()
+      },
+    },
   },
   methods: {
     changeTab(v) {
@@ -120,10 +162,16 @@ export default {
     },
     getAbnormalData() {
       this.tableLoading = true
-      getCustomerAbnormalList(this.selectedCustomer, this.tabSelected).then((res) => {
+      const query = {
+        firstLevel: this.tabSelected,
+        secondLevel: this.tabSelected === '财务基础指标' ? this.secondLevel : null, 
+        year: null,
+      }
+      getAbnormalNew(this.selectedCustomer, query).then((res) => {
         const reObj = dealColumns(res.data, this.tabSelected)
-        this.columns = reObj.columns
-        this.tableData = reObj.reData
+        const reObjN = dealColumnsNew(res.data, this.tabSelected, this.secondLevel)
+        this.columns = reObjN.columns
+        this.tableData = reObjN.reData
         this.tableLoading = false
       })
     },
@@ -165,5 +213,24 @@ export default {
 }
 .p-20 {
   padding: 20px;
+}
+.tab-list {
+  padding-bottom: 20px;
+  .one-tab {
+    margin-right: 20px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 1px solid #e3e2e7;
+    cursor: pointer;
+    span {
+      margin-left: 10px;
+    }
+    &.tab-active {
+      position: relative;
+      background-color: #3965e4;
+      color: #fff;
+      font-weight: bold;
+    }
+  }
 }
 </style>
