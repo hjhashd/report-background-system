@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-02-19 16:51:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-24 16:31:02
- * @FilePath: /report-background-system/src/components/buildQRCode/buildQRCode.vue
+ * @LastEditTime: 2025-04-20 18:03:50
+ * @FilePath: \report-background-system\src\components\buildQRCode\buildQRCode.vue
  * @Description: 
  * 
 -->

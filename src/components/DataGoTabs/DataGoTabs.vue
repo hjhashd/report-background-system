@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-03-21 22:37:18
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-24 18:15:44
- * @FilePath: /report-background-system/src/components/DataGoTabs/DataGoTabs.vue
+ * @LastEditTime: 2025-04-20 18:09:52
+ * @FilePath: \report-background-system\src\components\DataGoTabs\DataGoTabs.vue
  * @Description: 
  * 
 -->
@@ -22,7 +22,7 @@
             <img v-if="item.type != active" style="width: 35px; height: 35px" :src="item.icon" alt="dark" />
             <img v-else style="width: 35px; height: 35px" :src="item.iconActive || item.icon" alt="dark" />
           </div>
-          {{ item.name }}
+          <span>{{ item.name }}</span>
         </div>
       </div>
       <slot name="rightContant" v-if="hasRightContant"></slot>
@@ -123,6 +123,21 @@ export default {
   background-image: url(~@/assets/images/active-tab.jpg) !important;
   background-size: 100% 100%;
   background-repeat: no-repeat;
+  span {
+    position: relative;
+    z-index: 100;
+    &::after {
+      display: block;
+      content: '';
+      position: absolute;
+      bottom: 3px;
+      width: 100%;
+      height: 12px;
+      border-radius: 50%;
+      background-color: #e7effb;
+      z-index: -1;
+    }
+  }
 }
 .active .item-1 {
   font-family: PingFangSC-Regular;
@@ -133,6 +148,21 @@ export default {
   background-image: url(~@/assets/images/active-tab.jpg) !important;
   background-size: 100% 100%;
   background-repeat: no-repeat;
+  span {
+    position: relative;
+    z-index: 100;
+    &::after {
+      display: block;
+      content: '';
+      position: absolute;
+      bottom: 3px;
+      width: 100%;
+      height: 12px;
+      border-radius: 50%;
+      background-color: #e7effb;
+      z-index: -1;
+    }
+  }
 }
 .active .item-2 {
   font-family: PingFangSC-Regular;
@@ -140,5 +170,20 @@ export default {
   color: #154291;
   font-weight: 400;
   background: #fff;
+  span {
+    position: relative;
+    z-index: 100;
+    &::after {
+      display: block;
+      content: '';
+      position: absolute;
+      bottom: 3px;
+      width: 100%;
+      height: 12px;
+      border-radius: 50%;
+      background-color: #e7effb;
+      z-index: -1;
+    }
+  }
 }
 </style>

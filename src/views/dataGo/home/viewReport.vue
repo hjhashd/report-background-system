@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-14 23:46:47
- * @FilePath: /report-background-system/src/views/dataGo/home/viewReport.vue
+ * @LastEditTime: 2025-04-20 17:58:13
+ * @FilePath: \report-background-system\src\views\dataGo\home\viewReport.vue
  * @Description: 报告预览
  * 
 -->
@@ -46,7 +46,7 @@
             </a-tooltip>
             <a-tooltip>
               <template slot="title">
-                <span>查看数据</span>
+                <span>数据验证</span>
               </template>
               <div class="btn-item" @click="isListCollapsed = false">
                 <div class="icon-box"><a-icon style="color: rgb(87, 135, 238)" type="eye" /></div>
@@ -144,31 +144,49 @@
             </div>
             <div class="content-item">
               <div class="limit-title flex-row-spacebetween">
-                <div><img src="@/assets/images/data-overview.png" alt="dark" />授权数据</div>
-                <a-button class="update-btn" type="primary" size="small" @click="toCustomerDetail">详情</a-button>
+                <div><img src="@/assets/images/data-overview.png" alt="dark" />数据验证</div>
+                <!-- <a-button class="update-btn" type="primary" size="small" @click="toCustomerDetail">详情</a-button> -->
               </div>
               <div class="detail-content">
-                <div v-for="(parentItem, i) in customerReportDetail" :key="i">
-                  <div class="config-title" :style="{ marginTop: i !== 0 ? '15px' : '0' }">{{ parentItem.name }}</div>
-                  <div
-                    :class="{ 'finished-content': item.status == 1 }"
-                    class="table-show"
-                    v-for="item in parentItem.data"
-                    :key="item.id"
-                  >
-                    <div class="flex-row-spacebetween" style="margin-bottom: 4px">
-                      <div class="table-name single-line-text">{{ item.tableNameZh }}</div>
-                      <div class="time">
-                        {{ item.status == 1 ? '已完成' : '未授权' }} {{ item.createTime | dealCreateTime }}
-                        <a-icon style="color: #9d59ef" v-if="item.status == 0" type="question-circle" />
-                        <a-icon style="color: #5ec269" v-if="item.status == 1" type="check-circle" />
+                <a-collapse expand-icon-position="right">
+                  <a-collapse-panel v-for="(parentItem, i) in customerReportDetail" :key="i">
+                    <template slot="header">
+                      <div class="config-title">
+                        {{ parentItem.name }}
+                      </div>
+                    </template>
+                    <div
+                      :class="{ 'finished-content': item.status == 1 }"
+                      class="table-show"
+                      v-for="item in parentItem.data"
+                      :key="item.id"
+                    >
+                      <div class="flex-row-spacebetween" style="margin-bottom: 4px">
+                        <div>
+                          <div class="table-name single-line-text">{{ item.tableNameZh }}</div>
+                          <div class="time">
+                            {{ item.status == 1 ? '已完成' : '未授权' }} {{ item.createTime | dealCreateTime }}
+                            <a-icon style="color: #9d59ef" v-if="item.status == 0" type="question-circle" />
+                            <a-icon style="color: #5ec269" v-if="item.status == 1" type="check-circle" />
+                          </div>
+                        </div>
+                        <div class="flex-row-spacebetween">
+                          <a-button class="update-btn" type="primary" size="small" @click="updateTable(item)"
+                            >更新</a-button
+                          >
+                          <a-button
+                            v-if="judgeShowDataRoute(item)"
+                            class="update-btn org-btn"
+                            type="primary"
+                            size="small"
+                            @click="openDataYCFun(item)"
+                            >现场调研</a-button
+                          >
+                        </div>
                       </div>
                     </div>
-                  <div class="flex-row-spacebetween">
-                    <a-button class="update-btn" type="primary" size="small" @click="updateTable(item)">更新</a-button>
-                  </div>
-                  </div>
-                </div>
+                  </a-collapse-panel>
+                </a-collapse>
               </div>
             </div>
           </div>
@@ -207,6 +225,16 @@
           <a-input allowClear size="large" v-model="otherSaveReportName"></a-input>
         </div>
       </a-modal>
+      <!-- 打开弹窗 -->
+      <a-modal
+        class="view-page-pop"
+        v-model="openDataYC"
+        width="80vw"
+        :bodyStyle="{ height: '80vh', padding: 0, backgroundColor: 'transparent' }"
+        :footer="null"
+      >
+        <anomaly-content :customerDetail="customerDetail"></anomaly-content>
+      </a-modal>
     </div>
   </a-spin>
   <!-- </page-header-wrapper> -->
@@ -214,6 +242,7 @@
 
 <script>
 import { mapActions } from 'vuex'
+import AnomalyContent from '../anomaly/innerContent.vue'
 import {
   getReportDetail,
   customerData,
@@ -229,7 +258,7 @@ import { getCurrentDate, getCurrentTime } from './util'
 import { classifyDataByClassName } from '../client/util'
 export default {
   name: 'addReport',
-  components: { OnlyOfficeEditor, EditModal },
+  components: { OnlyOfficeEditor, EditModal, AnomalyContent },
   data() {
     return {
       applyIcon: require('@/assets/images/apply.png'),
@@ -252,6 +281,7 @@ export default {
       setType: null,
       otherSaveReportName: null,
       setReportName: false,
+      openDataYC: false,
       popTitle: null,
     }
   },
@@ -279,6 +309,10 @@ export default {
   },
   methods: {
     ...mapActions(['setCollapsed', 'setFullScreen']),
+    judgeShowDataRoute(v) {
+      const showbtnList = ['资产负债表', '利润表', '现金流量表']
+      return showbtnList.includes(v.tableNameZh)
+    },
     init() {
       if (this.typeFrom && this.typeFrom === 'industryReport') {
         return
@@ -395,6 +429,10 @@ export default {
       } else if (this.setType === 'apply') {
         this.applyReport()
       }
+    },
+    openDataYCFun(v) {
+      console.log(v)
+      this.openDataYC = true
     },
     saveAsDraft() {
       const { $notification } = this
@@ -626,10 +664,8 @@ export default {
 }
 .detail-content {
   margin: 10px 0;
-  border: 1px solid #ccc;
   border-radius: 5px;
   background-color: #fff;
-  padding: 8px;
   .customer-info {
     margin-left: 8px;
   }
@@ -707,6 +743,11 @@ export default {
   background-color: #4781ea;
   letter-spacing: 0;
   word-spacing: 0;
+  &.org-btn {
+    margin-left: 5px;
+    background-color: #ff9800;
+    border: 1px solid #ff9800;
+  }
 }
 .container-detail {
   position: relative;
@@ -734,5 +775,13 @@ export default {
     font-weight: bold;
     margin-bottom: 20px;
   }
+}
+/deep/.ant-collapse-content > .ant-collapse-content-box {
+  padding: 5px;
+}
+.view-page-pop {
+  width: 80vw;
+  height: 80vh;
+  background-color: #fff;
 }
 </style>

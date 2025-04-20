@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2022-10-10 22:31:07
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-21 12:02:58
- * @FilePath: /report-background-system/src/main.js
+ * @LastEditTime: 2025-04-20 14:24:01
+ * @FilePath: \report-background-system\src\main.js
  * @Description: 
  * 
  */
@@ -19,10 +19,12 @@ import i18n from './locales'
 import { VueAxios } from './utils/request'
 import ProLayout, { PageHeaderWrapper } from '@ant-design-vue/pro-layout'
 import themePluginConfig from '../config/themePluginConfig'
-
 // mock
 // WARNING: `mockjs` NOT SUPPORT `IE` PLEASE DO NOT USE IN `production` ENV.
 // import './mock'
+import { Collapse } from 'ant-design-vue'
+Vue.component(Collapse.name, Collapse)
+Vue.component(Collapse.Panel.name, Collapse.Panel)
 
 import bootstrap from './core/bootstrap'
 import './core/lazy_use' // use lazy load components

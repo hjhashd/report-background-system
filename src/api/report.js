@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-20 10:51:52
- * @FilePath: /report-background-system/src/api/report.js
+ * @LastEditTime: 2025-04-20 16:14:24
+ * @FilePath: \report-background-system\src\api\report.js
  * @Description: 
  * 
  */
@@ -40,7 +40,9 @@ const reportAPI = {
     getIndustryClassify: '/report/industry/classify',
     getIndustryReportConfig: '/report/office/industry/config/',
     getAIConfig: '/report/entity/ai/content',
-    getAbnormalNew: '/report/entity/customer/abnormal/list/'
+    getAbnormalNew: '/report/entity/customer/abnormal/list/',
+    dUploadFile: '/report/entity/indicators/batch/upload',
+    updateSearchContent: '/report/entity/indicators/save',
 }
 
 export function getIndustryClassify() {
@@ -269,6 +271,14 @@ export function appUploadFile(parameter) {
     })
 }
 
+export function dUploadFile(parameter) {
+    return request({
+        url: reportAPI.dUploadFile,
+        method: 'post',
+        data: parameter
+    })
+}
+
 // 将报告状态转为草稿
 export function getCustomerAbnormalList(id, type) {
     return request({
@@ -281,6 +291,15 @@ export function getCustomerAbnormalList(id, type) {
 export function getAbnormalNew(id, parameter) {
     return request({
         url: `${reportAPI.getAbnormalNew}${id}`,
+        method: 'post',
+        data: parameter
+    })
+}
+
+// 更新content
+export function updateSearchContent(parameter) {
+    return request({
+        url: `${reportAPI.updateSearchContent}`,
         method: 'post',
         data: parameter
     })
