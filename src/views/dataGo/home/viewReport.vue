@@ -331,39 +331,58 @@ export default {
     },
     allViewPort() {
       // 打开全屏
-      this.fullView = true
-      this.setFullScreen(this.fullView)
-      this.$nextTick(() => {
-        const editors = this.$refs.editorContainerRef
-        const reportViewDetail = document.getElementById('htmlBody')
-        this.editorHeight = editors.offsetHeight + 'px'
+      this.fullView = true;
+      this.setFullScreen(this.fullView);
+      const reportViewDetail = this.$refs.reportViewDetail;
+      if (reportViewDetail) {
         if (reportViewDetail.requestFullscreen) {
-          reportViewDetail.requestFullscreen()
+          reportViewDetail.requestFullscreen();
         } else if (reportViewDetail.webkitRequestFullscreen) {
-          // Safari
-          reportViewDetail.webkitRequestFullscreen()
-        } else if (reportViewDetail.msRequestFullscreen) {
-          // IE11
-          reportViewDetail.msRequestFullscreen()
+          reportViewDetail.webkitRequestFullscreen();
         }
-      })
+      }
+      // 监听全屏状态变化
+      const handleFullscreenChange = () => {
+        if (document.fullscreenElement === reportViewDetail) {
+          // 进入全屏后重新计算编辑器高度
+          setTimeout(()=>{
+            this.$nextTick(() => {
+              const editors = this.$refs.editorContainerRef;
+              if (editors) {
+                this.editorHeight = editors.offsetHeight + 'px';
+              }
+            });
+          },200)
+        } else {
+          // 退出全屏后恢复正常高度
+          this.fullView = false;
+          this.setFullScreen(this.fullView);
+          setTimeout(()=>{
+            this.$nextTick(() => {
+              const editors = this.$refs.editorContainerRef;
+              if (editors) {
+                this.editorHeight = editors.offsetHeight + 'px';
+              }
+            });
+          },200)
+        }
+      };
+      document.addEventListener('fullscreenchange', handleFullscreenChange);
+      document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
     },
     closeViewPort() {
-      // 关闭全屏
-      this.fullView = false
-      this.setFullScreen(this.fullView)
+      // 退出全屏
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      }
       this.$nextTick(() => {
-        const editors = this.$refs.editorContainerRef
-        const reportViewDetail = document.getElementById('htmlBody')
-        this.editorHeight = editors.offsetHeight + 'px'
-        if (reportViewDetail.exitFullscreen) {
-          reportViewDetail.exitFullscreen()
-        } else if (reportViewDetail.webkitExitFullscreen) {
-          reportViewDetail.webkitExitFullscreen()
-        } else if (reportViewDetail.msExitFullscreen) {
-          reportViewDetail.msExitFullscreen()
+        const editors = this.$refs.editorContainerRef;
+        if (editors) {
+          this.editorHeight = editors.offsetHeight + 'px';
         }
-      })
+      });
     },
     updateReportData() {
       // 更新数据
