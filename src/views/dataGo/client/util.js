@@ -34,6 +34,33 @@ export function classifyDataByClassName(data) {
     return reD;
 }
 
+/**
+ * 处理客户数据情况信息ByTemplateName
+ */
+export function classifyDataByTemplateName(data) {
+  const classifiedData = {};
+  data.forEach(item => {
+    const className = item.templateName;
+    if (!classifiedData[className]) {
+      classifiedData[className] = [];
+    }
+    classifiedData[className].push(item);
+  });
+
+  const reD = [];
+  for (const key in classifiedData) {
+    if (Object.prototype.hasOwnProperty.call(classifiedData, key)) {
+      const element = classifiedData[key];
+      reD.push({
+        name: key,
+        data: element
+      })
+    }
+  }
+  return reD;
+}
+
+
 export const graftFun = [
     {
         name: '数据上传',

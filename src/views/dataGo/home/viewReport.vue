@@ -255,7 +255,7 @@ import {
 import { OnlyOfficeEditor } from '@/components'
 import EditModal from './editModal.vue'
 import { getCurrentDate, getCurrentTime } from './util'
-import { classifyDataByClassName } from '../client/util'
+import { classifyDataByClassName,classifyDataByTemplateName } from '../client/util'
 export default {
   name: 'addReport',
   components: { OnlyOfficeEditor, EditModal, AnomalyContent },
@@ -422,7 +422,7 @@ export default {
         reportType: this.reportDetail.reportType,
         template: JSON.parse(this.reportDetail.template),
       }).then((response) => {
-        this.customerReportDetail = classifyDataByClassName(response.data)
+        this.customerReportDetail = classifyDataByTemplateName(response.data)
       })
     },
     openSetName(type) {
