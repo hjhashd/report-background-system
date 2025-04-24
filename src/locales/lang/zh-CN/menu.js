@@ -9,7 +9,7 @@
  */
 export default {
     'menu.welcome': '欢迎',
-    'menu.home': '首页',
+    'menu.home': '数据准备',
     'menu.dashboard': '仪表盘',
     'menu.dashboard.analysis': '分析页',
     'menu.dashboard.monitor': '监控页',
@@ -48,17 +48,20 @@ export default {
 
 
     /// 新增
+    'menu.dataReady': '数据准备',
     'menu.homepage': '智能报告助手',
     'menu.overview': '数据看板',
     'menu.uploadData': '上传数据',
-    'menu.readWord': '慧读文档',
-    'menu.anomaly': '数据验证',
-    'menu.client': '客户列表',
+    'menu.readWord': '转换工具',
+    'menu.anomaly': '指标验证',
+    'menu.client': '数据验证',
     'menu.home.addReport': '新增报告',
     'menu.home.viewReport': '报告预览',
-    'menu.report': '报告管理系统',
+    'menu.report': '新建报告',
     'menu.reportList': '已完成报告列表',
     'menu.draftList': '草稿箱',
-    'menu.qrCodeList': '二维码列表',
+    'menu.qrCodeList': '数据申请',
     'menu.industryReport': '行业报告',
+    'menu.writeReport': '撰写报告',
+    'menu.other': '其他'
 }
