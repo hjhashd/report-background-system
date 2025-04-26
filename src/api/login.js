@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-02-13 16:01:48
  * @LastEditors: bekon
- * @LastEditTime: 2025-02-28 18:12:07
- * @FilePath: /report-background-system/src/api/login.js
+ * @LastEditTime: 2025-04-26 22:41:19
+ * @FilePath: \report-background-system\src\api\login.js
  * @Description: 
  * 
  */
@@ -73,7 +73,7 @@ export function AILoginByCode (parameter) {
   })
 }
 
-export function AIGetInfo () {
+export async function AIGetInfo () {
   return request({
     url: userApi.AIGetInfo,
     method: 'get'

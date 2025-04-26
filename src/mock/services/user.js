@@ -1,8 +1,7 @@
 import Mock from 'mockjs2'
 import { builder } from '../util'
 
-export const info = options => {
-  console.log('options', options)
+export const info = async options => {
   const userInfo = {
     id: '4291d7da9005377ec9aec4a71ea837f',
     name: '天野远子',

@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-19 16:51:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-20 18:03:50
+ * @LastEditTime: 2025-04-26 22:32:26
  * @FilePath: \report-background-system\src\components\buildQRCode\buildQRCode.vue
  * @Description: 
  * 
@@ -44,7 +44,13 @@
           </div>
           <div v-if="activeTab === 2" class="tab-content">
             <div class="form-item">
-              <a-select style="width: 80%" placeholder="选择客户" @change="uploadCustomerHandle">
+              <a-select
+                showSearch
+                style="width: 80%"
+                placeholder="选择客户"
+                @change="uploadCustomerHandle"
+                :filter-option="filterOption"
+              >
                 <a-select-option :value="item.userId" v-for="item in customerList" :key="item.userId">
                   {{ item.userName }}
                 </a-select-option>
@@ -195,6 +201,9 @@ export default {
     userInfo: (state) => state.user.info,
   }),
   methods: {
+    filterOption(input, option) {
+      return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
+    },
     qrlinkClick(v) {
       this.checkQrLine = v
       this.activeQr = v.id
