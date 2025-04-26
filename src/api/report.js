@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-20 16:14:24
+ * @LastEditTime: 2025-04-26 20:43:30
  * @FilePath: \report-background-system\src\api\report.js
  * @Description: 
  * 
@@ -43,6 +43,107 @@ const reportAPI = {
     getAbnormalNew: '/report/entity/customer/abnormal/list/',
     dUploadFile: '/report/entity/indicators/batch/upload',
     updateSearchContent: '/report/entity/indicators/save',
+
+    importCashFlow: '/report/v2/entity/import/cashFlow',
+    importBalanceSheet: '/report/v2/entity/import/balanceSheet',
+    importProfitSheet: '/report/v2/entity/import/profitSheet',
+    importNormal: '/report/v2/entity/upload/data',
+    getCashFlowFields: '/report/v2/entity/cashFlow/fields',
+    getBalanceSheetFields: '/report/v2/entity/balanceSheet/fields',
+    getProfitSheetFields: '/report/v2/entity/profitSheet/fields',
+    getNormalFields: '/report/v2/entity/table/fields/',
+
+    getAppFileList: '/report/v2/entity/client/upload/files',
+    deleteFile: '/report/v2/entity/indicators/delete/file/',
+    deleteSearchContent: '/report/entity/indicators/',
+}
+// 删除指标文件
+export function deleteFile(id) {
+    return request({
+        url: reportAPI.deleteFile + id,
+        method: 'delete',
+    })
+}
+// 删除现场调研接口
+export function deleteSearchContent(id) {
+    return request({
+        url: reportAPI.deleteSearchContent + id,
+        method: 'delete',
+    })
+}
+export function getAppFileList(parameter) {
+    return request({
+        url: reportAPI.getAppFileList,
+        method: 'post',
+        data: parameter
+    })
+}
+
+// 获取上传数据表格Fields
+export function getFields(clickItem) {
+    const { tableNameZh, id } = clickItem
+    switch (tableNameZh) {
+        case '现金流量表':
+            return request({
+                url: reportAPI.getCashFlowFields,
+                method: 'get',
+            })
+        case '利润表':
+            return request({
+                url: reportAPI.getProfitSheetFields,
+                method: 'get',
+            })
+        case '资产负债表':
+            return request({
+                url: reportAPI.getBalanceSheetFields,
+                method: 'get',
+            })
+        default:
+            return request({
+                url: reportAPI.getNormalFields + id,
+                method: 'get',
+            })
+    }
+}
+
+// 导入数据文件
+export function pullTableData(clickItem, data, pickFieldsData, mapping) {
+    const { tableNameZh, id } = clickItem
+    switch (tableNameZh) {
+        case '现金流量表':
+            data.append('mapping', JSON.stringify(mapping))
+            return request({
+                url: reportAPI.importCashFlow,
+                method: 'post',
+                data
+            })
+        case '利润表':
+            data.append('mapping', JSON.stringify(mapping))
+            return request({
+                url: reportAPI.importProfitSheet,
+                method: 'post',
+                data
+            })
+        case '资产负债表':
+            data.append('mapping', JSON.stringify(mapping))
+            return request({
+                url: reportAPI.importBalanceSheet,
+                method: 'post',
+                data
+            })
+        default:
+            data.append('tableId', id)
+            let mapIn = {}
+            pickFieldsData.forEach(element => {
+                mapIn[element.sysEn] = element.excelEn
+            });
+            data.append('mapping', JSON.stringify(mapIn))
+            return request({
+                url: reportAPI.importNormal,
+                method: 'post',
+                data
+            })
+    }
 }
 
 export function getIndustryClassify() {

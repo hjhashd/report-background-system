@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2022-10-10 22:31:07
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-23 11:50:22
- * @FilePath: /report-background-system/src/components/index.js
+ * @LastEditTime: 2025-04-26 13:53:59
+ * @FilePath: \report-background-system\src\components\index.js
  * @Description: 
  * 
  */
@@ -41,6 +41,7 @@ import OnlyOfficeEditor from '@/components/OnlyOfficeEditor/OnlyOfficeEditor.vue
 import AddCustomer from '@/components/AddCustomer/addCustomer.vue';
 import DataGoTabs from '@/components/DataGoTabs/DataGoTabs.vue';
 import DataGoTable from '@/components/dataGoTable/dataGoTable.vue';
+import UploadFileTab from '@/components/UploadFileTab/index.vue';
 
 export {
   AvatarList,
@@ -73,5 +74,6 @@ export {
   OnlyOfficeEditor,
   AddCustomer,
   DataGoTabs,
-  DataGoTable
+  DataGoTable,
+  UploadFileTab
 }

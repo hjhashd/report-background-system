@@ -35,6 +35,17 @@
             <img style="width: 40px; height: 40px" :src="text" alt="dark" />
           </div>
         </template>
+        <template slot="action" slot-scope="text, scoped">
+          <!-- 这里可以定义操作列的具体内容，例如按钮 -->
+          <a-popconfirm title="是否删除该二维码?" ok-text="是" cancel-text="否" @confirm="deleteQrCode(scoped)">
+            <a-tooltip v-if="scoped.status === 1">
+              <template slot="title">
+                <span>删除</span>
+              </template>
+              <a-button icon="delete" :style="{ color: '#ff4d4f', border: 'none', padding: 0 }"> </a-button>
+            </a-tooltip>
+          </a-popconfirm>
+        </template>
       </s-table>
     </div>
     <a-modal class="qr-modal" v-model="qrCodePop" :footer="null">
@@ -57,7 +68,7 @@ const reportTypeList = [
   },
 ]
 import { mapState } from 'vuex'
-import { getQRCodeList } from '@/api/qrcode'
+import { getQRCodeList, deleteQr } from '@/api/qrcode'
 import { STable } from '@/components'
 import { baseMixin } from '@/store/app-mixin'
 import { qrColumns } from './util'
@@ -138,6 +149,17 @@ export default {
     showImg(url) {
       this.showImgUrl = url
       this.qrCodePop = true
+    },
+    deleteQrCode(v) {
+      const { $notification } = this
+      deleteQr(v.id).then((res) => {
+        $notification['success']({
+          message: '通知：',
+          description: '删除成功',
+          duration: 8,
+        })
+        this.$refs.table.refresh()
+      })
     },
   },
 }

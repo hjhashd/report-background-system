@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-03-12 13:54:33
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-20 16:28:47
+ * @LastEditTime: 2025-04-26 22:12:05
  * @FilePath: \report-background-system\src\views\dataGo\anomaly\util.js
  * @Description: 
  * 
@@ -495,6 +495,7 @@ export function dealColumnsNew(data, type, secondLevel) {
             const valueList = []
             const reDataList = []
             let yearResearchInfo = null
+            let yearFileList = null
             sortData = data.sort(wenzistartSort("secondLevel"));
             sortData.forEach(item => {
                 if (!yearList.includes(item.recordDate)) yearList.push(item.recordDate);
@@ -505,14 +506,20 @@ export function dealColumnsNew(data, type, secondLevel) {
                     if (item.researchList && item.researchList.length) {
                         yearResearchInfo = item.researchList[0]
                     }
+                    if (item.fileList && item.fileList.length) {
+                        yearFileList = item.fileList
+                    }
                     if (fIndex !== -1) {
                         // 已存在
                         valueList[fIndex][item.recordDate] = item.dataValue
                         valueList[fIndex][item.recordDate + 'searchInfo'] = yearResearchInfo
+                        valueList[fIndex][item.recordDate + 'fileList'] = yearFileList
                         yearResearchInfo = null
+                        yearFileList = null
                     } else {
-                        valueList.push(Object.assign(item, { [item.recordDate]: item.dataValue, [item.recordDate + 'searchInfo']: yearResearchInfo }))
+                        valueList.push(Object.assign(item, { [item.recordDate]: item.dataValue, [item.recordDate + 'searchInfo']: yearResearchInfo, [item.recordDate + 'fileList']: yearFileList }))
                         yearResearchInfo = null
+                        yearFileList = null
                     }
                 }
             });
@@ -612,12 +619,14 @@ export function dealColumnsNew(data, type, secondLevel) {
                 reData.forEach((reV) => {
                     if (reV[y + 'level'] && reV[y + 'level'] !== '正常' && reV[y + 'level'] !== '过滤') {
                         rr.push({
+                            year: y,
                             dataItem: reV.dataItem,
                             [y]: reV[y],
                             [y + 'yoy']: reV[y + 'yoy'],
                             [y + 'level']: reV[y + 'level'],
                             searchInfo: reV[y + 'searchInfo'],
-                            creditCode: reV.creditCode
+                            fileList: reV[y + 'fileList'],
+                            creditCode: reV.creditCode,
                         })
                     }
                 })

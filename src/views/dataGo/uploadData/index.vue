@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-14 23:36:38
- * @FilePath: /report-background-system/src/views/dataGo/uploadData/index.vue
+ * @LastEditTime: 2025-04-26 14:59:28
+ * @FilePath: \report-background-system\src\views\dataGo\uploadData\index.vue
  * @Description: 数据上传
  * 
 -->
@@ -28,7 +28,7 @@
             </a-select-option>
           </a-select>
         </div>
-        <div style="margin-left: 20px" v-if="customerInfo">
+        <!-- <div style="margin-left: 20px" v-if="customerInfo">
           <img style="width: 22px; height: 22px" src="@/assets/images/customers.png" alt="dark" />
           <span>数据采集类型</span>
           <a-select
@@ -42,7 +42,7 @@
               {{ table.name }}
             </a-select-option>
           </a-select>
-        </div>
+        </div> -->
 
         <!-- <div v-if="customerInfo">
         <a-button style="margin-right: 20px" type="primary" @click="refreshPage">
@@ -52,7 +52,19 @@
       </div> -->
       </div>
       <div class="upload-data-box" v-if="customerUploadList">
+        <div class="type-tab">
+          <div
+            class="tab-item flex-1"
+            :class="{ 'tab-active': selectTab == item.value }"
+            v-for="item in tableType"
+            :key="item.value"
+            @click="changeTab(item)"
+          >
+            {{ item.name }}
+          </div>
+        </div>
         <customer-upload-detail-new
+          @updateData="getCustomerData"
           :customerUploadList="customerUploadList"
           :customerInfo="customerInfo"
         ></customer-upload-detail-new>
@@ -66,13 +78,18 @@ import { getCustomerList, customerData } from '@/api/report'
 import { mapActions } from 'vuex'
 import CustomerUploadDetailNew from '../client/customerUploadDetail_new.vue'
 const tableType = [
+  // 新增dataType字段，crwal 自动采集 upload 上传数据 other 其他授权
   {
-    name: '数据采集',
-    value: 'crawl',
+    name: '上传数据',
+    value: 'upload',
   },
   {
-    name: '数据上传',
-    value: 'upload',
+    name: '自动采集',
+    value: 'crwal',
+  },
+  {
+    name: '其他授权',
+    value: 'other',
   },
 ]
 
@@ -81,7 +98,7 @@ export default {
   data() {
     return {
       tableType,
-      selectTab: null,
+      selectTab: tableType[0].value,
       customers: [],
       customerUploadList: null,
       customerInfo: null,
@@ -112,6 +129,10 @@ export default {
           this.$message.error('获取客户列表失败:' + err)
         })
     },
+    changeTab(v) {
+      this.selectTab = v.value
+      this.getCustomerData()
+    },
     customerHandle(v) {
       this.customerInfo = this.customers[v]
       this.getCustomerData()
@@ -121,16 +142,17 @@ export default {
     },
     getCustomerData() {
       this.pageLoading = true
-      customerData({ creditCode: this.customerInfo.creditCode, type: this.selectTab })
+      customerData({ creditCode: this.customerInfo.creditCode, dataType: this.selectTab })
         .then((res) => {
           setTimeout(() => {
             this.pageLoading = false
           }, 200)
-          this.customerUploadList = res.data.filter(
-            (item) =>
-              item.className !== '企业基础信息' || (item.className == '企业基础信息' && item.tableNameZh == '基本情况')
-          )
+          // this.customerUploadList = res.data.filter(
+          //   (item) =>
+          //     item.className !== '企业基础信息' || (item.className == '企业基础信息' && item.tableNameZh == '基本情况')
+          // )
           // this.customerUploadList = classifyDataByClassName(res.data)
+          this.customerUploadList = res.data
         })
         .catch((err) => {
           setTimeout(() => {
@@ -173,5 +195,16 @@ export default {
   letter-spacing: 0;
   line-height: 61.83px;
   font-weight: 500;
+}
+.type-tab {
+  display: flex;
+  text-align: center;
+  border-radius: 8px 8px 0 0;
+  line-height: 2;
+  overflow: hidden;
+  .tab-active {
+    background-color: #fff;
+    cursor: pointer;
+  }
 }
 </style>

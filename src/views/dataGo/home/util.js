@@ -289,6 +289,11 @@ export const qrColumns = [
         dataIndex: 'codeUrl',
         scopedSlots: { customRender: 'codeUrl' },
     },
+    {
+        title: '操作',
+        key: 'action',
+        scopedSlots: { customRender: 'action' },
+    },
 ]
 
 export function getCurrentTime() {

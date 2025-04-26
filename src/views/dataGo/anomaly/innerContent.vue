@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-20 17:55:33
+ * @LastEditTime: 2025-04-26 22:19:43
  * @FilePath: \report-background-system\src\views\dataGo\anomaly\innerContent.vue
  * @Description: 
  * 
@@ -65,7 +65,7 @@
         </div>
         <div class="flex-col" v-else>
           <div class="table-title" v-if="tabSelected === '财务异常指标'">资产负债表重点数据</div>
-          <a-collapse v-model="activeKey" expand-icon-position="right">
+          <a-collapse v-model="activeKey" expand-icon-position="right" v-if="columns.length">
             <a-collapse-panel v-for="(item, index) in columns" :key="item.year">
               <template slot="header">
                 <div class="flex">
@@ -101,12 +101,39 @@
                   </a-tag>
                 </template>
                 <template slot="searchResult" slot-scope="text, scoped">
-                  <div class="text-show">
+                  <div class="text-show" v-if="scoped.fileList && scoped.fileList.length">
                     <span v-if="scoped.searchInfo && scoped.searchInfo.content">{{ scoped.searchInfo.content }}</span
-                    ><a-button class="table-btn" size="small" @click="updateReasult(scoped)">添加</a-button>
+                    ><a-button
+                      v-if="scoped.searchInfo && scoped.searchInfo.content"
+                      class="table-btn"
+                      size="small"
+                      @click="updateReasult(scoped)"
+                      >修改</a-button
+                    ><a-popconfirm
+                      v-if="scoped.searchInfo && scoped.searchInfo.content"
+                      title="是否确定删除该现场调研结果?"
+                      ok-text="确定"
+                      cancel-text="取消"
+                      @confirm="deleteResult(scoped)"
+                    >
+                      <a-button class="table-btn delete-btn" size="small">删除</a-button> </a-popconfirm
+                    ><a-button v-else class="table-btn" size="small" @click="updateReasult(scoped)">添加</a-button>
                   </div>
                 </template>
                 <template slot="uploadFile" slot-scope="text, scoped">
+                  <div v-for="(i, index) in scoped.fileList" :key="index">
+                    <span>{{ i.fileName }}</span
+                    ><a-popconfirm
+                      title="是否确定删除已上传文件?"
+                      ok-text="确定"
+                      cancel-text="取消"
+                      @confirm="deleteUploadedFile(i)"
+                    >
+                      <a-button :style="{ color: '#7fbbf1', border: 'none', padding: 0 }">
+                        <img style="width: 16px; height: 18px" src="@/assets/images/delete.png" alt="dark" />
+                      </a-button>
+                    </a-popconfirm>
+                  </div>
                   <a-button icon="upload" class="table-btn" size="small" @click="uploadItem(scoped)">
                     上传文件
                   </a-button>
@@ -114,12 +141,27 @@
               </a-table>
             </a-collapse-panel>
           </a-collapse>
+          <empty :imageStyle="{ height: '60px' }" class="empty-class" v-else />
         </div>
       </div>
     </div>
+
+    <!-- 弹窗 -->
     <a-modal v-model="tableUploadPop" width="50vw" title="上传文件" :footer="null">
+      <div class="tab">
+        <div
+          class="flex-1 tab-item"
+          :class="{ active: item == tabSelect }"
+          v-for="(item, index) in uploadTab"
+          :key="index"
+          @click="() => (tabSelect = item)"
+        >
+          {{ item }}
+        </div>
+      </div>
       <div class="pop-box">
         <a-upload
+          v-if="tabSelect == '选择本地文件'"
           :name="clickItem?.dataItem || ''"
           :customRequest="uploadFile"
           :showUploadList="false"
@@ -132,7 +174,25 @@
             <a-button class="choose-file">选择文件</a-button>
           </div>
         </a-upload>
-        <div class="upload-list-show" v-if="fileList.length">
+        <div v-else-if="tabSelect == '选择APP文件'">
+          <div class="app-border">
+            <div class="title">选择APP文件</div>
+            <div class="choose-box">
+              <a-checkbox-group @change="mutilSelectChange" v-if="appfileList.length">
+                <a-row class="group-check">
+                  <a-col class="p-5" :span="24" v-for="item in appfileList" :key="item.id">
+                    <a-checkbox :value="item"> {{ item.fileName }} </a-checkbox>
+                  </a-col>
+                </a-row>
+              </a-checkbox-group>
+              <empty v-else />
+            </div>
+            <div class="flex" style="justify-content: flex-end; padding: 5px 10px">
+              <a-button class="a-pop-btn" @click="chooseFiles"> 选择文件 </a-button>
+            </div>
+          </div>
+        </div>
+        <div class="upload-list-show" v-if="fileList.length || showAppChooseFile.length">
           <div class="name-title">已上传文件列表：</div>
           <div v-for="(i, index) in fileList" :key="index">
             <span>{{ i.name }}</span
@@ -147,21 +207,46 @@
               </a-button>
             </a-popconfirm>
           </div>
+          <div v-for="(i, index) in showAppChooseFile" :key="index">
+            <span>{{ i.fileName }}</span
+            ><a-popconfirm
+              title="是否确定删除已上传文件?"
+              ok-text="确定"
+              cancel-text="取消"
+              @confirm="deleteAppFile(i)"
+            >
+              <a-button :style="{ color: '#7fbbf1', border: 'none', padding: 0 }">
+                <img style="width: 16px; height: 18px" src="@/assets/images/delete.png" alt="dark" />
+              </a-button>
+            </a-popconfirm>
+          </div>
         </div>
-        <a-button class="pop-btn" @click="dUploadFileFun"> 完成 </a-button>
+
+        <div>
+          <a-button class="pop-btn" @click="tableUploadPop = false"> 取消 </a-button>
+          <a-button
+            style="margin-left: 20px; background-color: #528bfb; color: #fff"
+            class="pop-btn"
+            @click="dUploadFileFun"
+          >
+            确定上传
+          </a-button>
+        </div>
       </div>
     </a-modal>
     <a-modal v-model="changeResearch" width="50vw" title="编辑现场调研结果" :footer="null">
       <a-textarea :style="{ height: '200px' }" v-model="searchInfoContent" :auto-size="true" />
       <div style="text-align: right; margin-top: 16px">
         <a-button class="pop-btn" @click="changeResearch = false"> 取消 </a-button>
-        <a-button class="pop-btn new-record ml-10" @click="updateSearchInfo"> 保存为新记录 </a-button>
+        <a-button class="pop-btn new-record ml-10" @click="updateSearchInfo"> 保存 </a-button>
       </div>
     </a-modal>
   </div>
 </template>
   
   <script>
+import { Empty } from 'ant-design-vue'
+const uploadTab = ['选择本地文件', '选择APP文件']
 const reportTypeList = [
   {
     type: 1,
@@ -199,11 +284,20 @@ const caiwuList = [
     icon: 'file-text',
   },
 ]
-import { getAbnormalNew, getCustomerList, dUploadFile, updateSearchContent } from '@/api/report'
+import { mapState } from 'vuex'
+import {
+  getAbnormalNew,
+  getCustomerList,
+  dUploadFile,
+  updateSearchContent,
+  getAppFileList,
+  deleteFile,
+  deleteSearchContent,
+} from '@/api/report'
 import { DataGoTabs } from '@/components'
 import { dealColumnsNew } from './util'
 export default {
-  components: { DataGoTabs },
+  components: { DataGoTabs, Empty },
   props: {
     customerDetail: {
       type: Object,
@@ -212,6 +306,8 @@ export default {
   },
   data() {
     return {
+      uploadTab,
+      tabSelect: uploadTab[0],
       reportTypeList,
       selectedCustomer: null,
       tableLoading: true,
@@ -228,6 +324,9 @@ export default {
       columns: [],
       tableData: [],
       fileList: [],
+      appfileList: [],
+      appChooseFileList: [],
+      showAppChooseFile: [],
     }
   },
   created() {
@@ -251,11 +350,23 @@ export default {
       },
     },
   },
+  computed: {
+    ...mapState({
+      // 动态主路由
+      userInfo: (state) => state.user.info,
+    }),
+  },
   methods: {
     updateReasult(v) {
       this.currentChangeItem = v
       this.searchInfoContent = v.searchInfo?.content || ''
       this.changeResearch = true
+    },
+    mutilSelectChange(v) {
+      this.appChooseFileList = v
+    },
+    chooseFiles() {
+      this.showAppChooseFile = this.appChooseFileList
     },
     changeTab(v) {
       switch (v) {
@@ -300,7 +411,7 @@ export default {
           this.tableData = reObjN.reData
           this.columns = reObjN.columns
         }
-        if (this.tabSelected !== '财务基础指标') {
+        if (this.tabSelected !== '财务基础指标' && this.columns.length) {
           this.activeKey = [this.columns[0].year]
         }
         this.tableLoading = false
@@ -310,17 +421,88 @@ export default {
       const { file, filename, onSuccess, onError } = options
       this.fileList.push(file)
     },
+    deleteUploadedFile(i) {
+      const { $notification } = this
+      deleteFile(i.id)
+        .then((res) => {
+          if (res.code && res.code == 200) {
+            $notification['success']({
+              message: '通知：',
+              description: `删除成功`,
+              duration: 6,
+            })
+            this.fileList = []
+            this.showAppChooseFile = []
+            this.getAbnormalData()
+          } else {
+            $notification['error']({
+              message: '通知：',
+              description: `${res.msg}`,
+              duration: 6,
+            })
+          }
+        })
+        .catch((err) => {
+          $notification['error']({
+            message: '通知：',
+            description: `${err}`,
+            duration: 6,
+          })
+        })
+    },
+    deleteResult(i) {
+      const { $notification } = this
+      deleteSearchContent(i.searchInfo.id)
+        .then((res) => {
+          if (res.code && res.code == 200) {
+            $notification['success']({
+              message: '通知：',
+              description: `删除成功`,
+              duration: 6,
+            })
+            this.fileList = []
+            this.showAppChooseFile = []
+            this.getAbnormalData()
+          } else {
+            $notification['error']({
+              message: '通知：',
+              description: `${res.msg}`,
+              duration: 6,
+            })
+          }
+        })
+        .catch((err) => {
+          $notification['error']({
+            message: '通知：',
+            description: `${err}`,
+            duration: 6,
+          })
+        })
+    },
     deleteUploadFile(i) {
       this.fileList = this.fileList.filter((v) => v.uid !== i.uid)
+    },
+    deleteAppFile(i) {
+      this.showAppChooseFile = this.showAppChooseFile.filter((v) => v.id !== i.id)
     },
     dUploadFileFun() {
       const { $notification } = this
       const formData = new FormData()
       formData.append('indicatorsName', this.clickItem.dataItem)
       formData.append('creditCode', this.clickItem.creditCode)
+      formData.append('year', this.clickItem.year)
       this.fileList.forEach((fileItem) => {
         formData.append('files', fileItem)
       })
+      const appChooseList = this.showAppChooseFile.length
+        ? this.showAppChooseFile.map((u) => {
+            return {
+              fileName: u.fileName,
+              fileUrl: u.fileUrl,
+            }
+          })
+        : ''
+      formData.append('clientFiles', JSON.stringify(appChooseList))
       dUploadFile(formData).then((res) => {
         this.tableUploadPop = false
         if (res.code && res.code == 200) {
@@ -330,6 +512,8 @@ export default {
             duration: 6,
           })
           this.fileList = []
+          this.showAppChooseFile = []
+          this.getAbnormalData()
         } else {
           $notification['error']({
             message: '上传通知：',
@@ -342,6 +526,11 @@ export default {
     uploadItem(v) {
       this.tableUploadPop = true
       this.clickItem = v
+      if (!this.appfileList.length) {
+        getAppFileList({ agentUserId: this.userInfo.userId, appUserId: this.selectedCustomer }).then((res) => {
+          this.appfileList = res.data
+        })
+      }
     },
     updateSearchInfo() {
       const { $notification } = this
@@ -349,6 +538,7 @@ export default {
         indicatorsName: this.currentChangeItem.dataItem,
         creditCode: this.currentChangeItem.creditCode,
         content: this.searchInfoContent,
+        year: this.currentChangeItem.year,
       }
       updateSearchContent(query)
         .then((res) => {
@@ -451,6 +641,11 @@ export default {
   font-size: 12px;
   letter-spacing: -1px;
 }
+.delete-btn {
+  color: #ef447e;
+  background-color: #ffffff;
+  border: 1px solid #ef447e;
+}
 .table-upload-btn {
   width: 100%;
   display: block;
@@ -483,5 +678,51 @@ export default {
     font-weight: bold;
     font-size: 14px;
   }
+}
+.tab {
+  margin-bottom: 10px;
+  display: flex;
+  .tab-item {
+    line-height: 2;
+    margin: 4px;
+    text-align: center;
+    border: 1px solid #e4e4e7;
+    border-radius: 3px;
+    cursor: pointer;
+    &.active {
+      color: #fff;
+      background-color: #528bfb;
+    }
+  }
+}
+.p-5 {
+  padding: 5px;
+}
+.app-border {
+  text-align: left;
+  font-size: 16px;
+  font-weight: bold;
+  color: #000;
+  background-color: #f9fafb;
+  border-radius: 4px;
+  border: 1px solid #e4e4e7;
+  .title {
+    padding: 5px 10px;
+  }
+  .choose-box {
+    background-color: #fff;
+  }
+  .group-check {
+    padding: 0 10px;
+  }
+}
+.a-pop-btn {
+  display: block;
+  margin-right: 10px;
+  background-color: #f9fafb;
+  color: #000;
+}
+.empty-class {
+  padding: 20px;
 }
 </style>
