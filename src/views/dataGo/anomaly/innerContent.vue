@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-26 22:19:43
- * @FilePath: \report-background-system\src\views\dataGo\anomaly\innerContent.vue
+ * @LastEditTime: 2025-04-27 21:14:30
+ * @FilePath: /report-background-system/src/views/dataGo/anomaly/innerContent.vue
  * @Description: 
  * 
 -->
@@ -50,17 +50,6 @@
               <div v-else>{{ text }}</div> -->
               <div>{{ text }}</div>
             </template>
-            <template slot="yclevel" slot-scope="text">
-              <a-tag color="#fae450" v-if="text == '等级1'">
-                {{ text }}
-              </a-tag>
-              <a-tag color="#f3ae44" v-else-if="text == '等级2'">
-                {{ text }}
-              </a-tag>
-              <a-tag color="#f50" v-else-if="text == '等级3'">
-                {{ text }}
-              </a-tag>
-            </template>
           </a-table>
         </div>
         <div class="flex-col" v-else>
@@ -90,13 +79,13 @@
                   <div>{{ text }}</div>
                 </template>
                 <template slot="yclevel" slot-scope="text">
-                  <a-tag color="#fae450" v-if="text == '等级1'">
+                  <a-tag color="#fae450" v-if="text == '低'">
                     {{ text }}
                   </a-tag>
-                  <a-tag color="#f3ae44" v-else-if="text == '等级2'">
+                  <a-tag color="#f3ae44" v-else-if="text == '中'">
                     {{ text }}
                   </a-tag>
-                  <a-tag color="#f50" v-else-if="text == '等级3'">
+                  <a-tag color="#f50" v-else-if="text == '高'">
                     {{ text }}
                   </a-tag>
                 </template>

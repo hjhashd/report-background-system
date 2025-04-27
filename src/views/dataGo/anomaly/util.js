@@ -2,339 +2,27 @@
  * @Author: bekon
  * @Date: 2025-03-12 13:54:33
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-26 22:12:05
- * @FilePath: \report-background-system\src\views\dataGo\anomaly\util.js
+ * @LastEditTime: 2025-04-27 21:13:28
+ * @FilePath: /report-background-system/src/views/dataGo/anomaly/util.js
  * @Description: 
  * 
  */
 
-export function dealColumns(data, type) {
-    let columns = [];
-    let reData = [];
-    let yearList = [];
-    let analysis = [];
-    let sortData = null;
-    switch (type) {
-        case '财务基础指标':
-            let colSpanSet = {};
-            let analysisYoy = [];
-            sortData = data.sort(wenzistartSort("secondLevel"));
-            sortData.forEach(item => {
-                if (!yearList.includes(item.recordDate)) yearList.push(item.recordDate);
-                const fIndex = reData.findIndex((i) => i.dataItem == item.dataItem)
-                if (fIndex !== -1) {
-                    // 已存在
-                    reData[fIndex][item.recordDate] = item.dataValue ? Math.round(item.dataValue * 10000) / 10000 : null
-                } else {
-                    reData.push(Object.assign(item, { [item.recordDate]: item.dataValue ? Math.round(item.dataValue * 10000) / 10000 : null }))
-                }
-            });
-            yearList = yearList.sort((a, b) => Number(a) - Number(b));
-            reData.map((ii) => {
-                if (colSpanSet[ii.secondLevel]) {
-                    colSpanSet[ii.secondLevel].span++;
-                    ii.showLeftTitle = false
-                } else {
-                    colSpanSet[ii.secondLevel] = {
-                        span: 1
-                    }
-                    ii.showLeftTitle = true
-                }
-                // 计算各环比同比值
-                yearList.forEach((y, index) => {
-                    // 忽略第一个年份
-                    if (index !== 0) {
-                        if (ii[y] && ii[yearList[index - 1]]) {
-                            ii[`${y}Yoy`] = Math.round((ii[y] - ii[yearList[index - 1]]) / ii[yearList[index - 1]] * 10000) / 10000
-                        } else {
-                            ii[`${y}Yoy`] = null
-                        }
-                    }
-                })
-            })
-            yearList.forEach((y, index) => {
-                if (index >= (yearList.length - 4)) {
-                    analysis.push({
-                        title: y,
-                        dataIndex: y,
-                        customHeaderCell: () => {
-                            return {
-                                style: {
-                                    backgroundColor: '#E5EDF9'
-                                }
-                            };
-                        },
-                    })
-                    if (index > (yearList.length - 4)) {
-                        analysisYoy.push({
-                            title: y,
-                            dataIndex: `${y}Yoy`,
-                            customHeaderCell: () => {
-                                return {
-                                    style: {
-                                        backgroundColor: '#E5EDF9'
-                                    }
-                                };
-                            },
-                            scopedSlots: { customRender: 'yoy' },
-                        })
-                    }
-                }
-            })
-            columns = [
-                {
-                    title: '财务报表分析',
-                    customHeaderCell: () => {
-                        return {
-                            style: {
-                                backgroundColor: '#e6edf8',
-                            }
-                        };
-                    },
-                    children: [
-                        {
-                            title: '',
-                            dataIndex: 'secondLevel',
-                            customHeaderCell: () => {
-                                return {
-                                    style: {
-                                        backgroundColor: '#ccdcfc',
-                                    }
-                                };
-                            },
-                            customRender: (text, row, index) => {
-                                const obj = {
-                                    children: text,
-                                    attrs: {},
-                                }
-                                if (row.showLeftTitle) {
-                                    obj.attrs.rowSpan = colSpanSet[row.secondLevel].span
-                                } else {
-                                    obj.attrs.rowSpan = 0
-                                }
-
-                                obj.attrs.style = `background-color: #ccdcfc`
-                                return obj;
-                            },
-                        },
-                        {
-                            title: '指标名称',
-                            dataIndex: 'dataItem',
-                            customHeaderCell: () => {
-                                return {
-                                    style: {
-                                        backgroundColor: '#ccdcfc',
-                                    }
-                                };
-                            },
-                        },
-                        ...analysis
-                    ],
-                }, {
-                    title: '相对上年的环比',
-                    customHeaderCell: () => {
-                        return {
-                            style: {
-                                backgroundColor: '#e6edf8',
-                            }
-                        };
-                    },
-                    children: analysisYoy
-                }
-            ]
-            break;
-        case '财务异常指标':
-            const levelLists = {}
-            const valueList = []
-            sortData = data.sort(wenzistartSort("secondLevel"));
-            sortData.forEach(item => {
-                if (!yearList.includes(item.recordDate)) yearList.push(item.recordDate);
-                const fIndex = valueList.findIndex((i) => i.dataItem === item.dataItem)
-                if (item.dataItem.includes('异常等级')) {
-                    levelLists[item.recordDate + item.dataItem] = item.dataValue
-                } else {
-                    if (fIndex !== -1) {
-                        // 已存在
-                        valueList[fIndex][item.recordDate] = item.dataValue
-                    } else {
-                        valueList.push(Object.assign(item, { [item.recordDate]: item.dataValue }))
-                    }
-                }
-            });
-            yearList = yearList.sort((a, b) => Number(a) - Number(b));
-            reData = valueList.map((v) => {
-                let yoy = ""
-                const lastIndex = yearList.length - 1
-                const lastSecondIndex = yearList.length - 2
-                let key = levelLists[yearList[yearList.length - 1] + v.dataItem + '异常等级']
-                if (v[yearList[lastIndex]] && v[yearList[lastSecondIndex]]) {
-                    yoy = Math.round((v[yearList[lastIndex]] - v[yearList[lastSecondIndex]]) / v[yearList[lastSecondIndex]] * 10000) / 10000
-                }
-                return Object.assign(v, {
-                    level: key,
-                    yoy
-                })
-            })
-            yearList.forEach((y, index) => {
-                if (index >= (yearList.length - 3)) {
-                    analysis.push({
-                        title: y,
-                        dataIndex: y,
-                        customHeaderCell: () => {
-                            return {
-                                style: {
-                                    backgroundColor: '#ccdcfc',
-                                }
-                            };
-                        },
-                    })
-                }
-                if (index == yearList.length - 1) {
-                    analysis.push({
-                        title: y + '增长率',
-                        dataIndex: 'yoy',
-                        customHeaderCell: () => {
-                            return {
-                                style: {
-                                    backgroundColor: '#ccdcfc',
-                                }
-                            };
-                        },
-                        scopedSlots: { customRender: 'yoy' },
-                    });
-                    analysis.push({
-                        title: yearList[yearList.length - 1] + '异常等级',
-                        dataIndex: 'level',
-                        customHeaderCell: () => {
-                            return {
-                                style: {
-                                    backgroundColor: '#ccdcfc',
-                                }
-                            };
-                        },
-                        scopedSlots: { customRender: 'yclevel' },
-                    });
-                }
-            })
-            reData = reData.filter((inI) => inI.level && inI.level !== '正常' && inI.level !== '过滤').sort((a, b) => a.id - b.id)
-            columns = [
-                {
-                    title: '资产负债表重点数据',
-                    customHeaderCell: () => {
-                        return {
-                            style: {
-                                backgroundColor: '#e6edf8',
-                            }
-                        };
-                    },
-                    children: [
-                        {
-                            title: '',
-                            dataIndex: 'dataItem',
-                            customHeaderCell: () => {
-                                return {
-                                    style: {
-                                        backgroundColor: '#ccdcfc',
-                                    }
-                                };
-                            },
-                        },
-                        ...analysis
-                    ],
-                }]
-            break;
-        case '衍生异常指标':
-            const dD = {}
-            let valuelist = []
-            sortData = data.sort(wenzistartSort("secondLevel"));
-            sortData.forEach(item => {
-                if (!item.dataItem.includes('异常等级')) {
-                    if (!yearList.includes(item.recordDate)) yearList.push(item.recordDate);
-                    const ycIndex = sortData.findIndex((yc) => yc.dataItem === item.dataItem + '异常等级' && yc.recordDate == item.recordDate)
-                    const level = ycIndex !== -1 ? sortData[ycIndex].dataValue : ''
-                    if (level && level !== '正常' && level !== '过滤') {
-                        valuelist.push(Object.assign(item, {
-                            level
-                        }))
-                    }
-                }
-            });
-            yearList = yearList.sort((a, b) => Number(a) - Number(b));
-            const yearLength = yearList.length;
-            let maxL = 0
-            let maxYear = null
-            yearList.forEach((y, index) => {
-                if (index >= (yearLength - 3)) {
-                    dD[y] = valuelist.filter((vv) => vv.recordDate === y)
-                    if (maxL < dD[y].length) {
-                        maxL = dD[y].length
-                        maxYear = y
-                    }
-                    analysis.push({
-                        title: `${y}年衍生指标`,
-                        customHeaderCell: () => {
-                            return {
-                                style: {
-                                    backgroundColor: '#e6edf8',
-                                }
-                            };
-                        },
-                        children: [{
-                            title: `指标名称`,
-                            dataIndex: `${y}dataItem`,
-                            customHeaderCell: () => {
-                                return {
-                                    style: {
-                                        backgroundColor: '#ccdcfc',
-                                    }
-                                };
-                            },
-                        }, {
-                            title: y,
-                            dataIndex: `${y}dataValue`,
-                            customHeaderCell: () => {
-                                return {
-                                    style: {
-                                        backgroundColor: '#ccdcfc',
-                                    }
-                                };
-                            },
-                        }, {
-                            title: '异常等级',
-                            dataIndex: `${y}level`,
-                            customHeaderCell: () => {
-                                return {
-                                    style: {
-                                        backgroundColor: '#ccdcfc',
-                                    }
-                                };
-                            },
-                            scopedSlots: { customRender: 'yclevel' },
-                        }]
-                    });
-                }
-            })
-            if (maxYear) {
-                dD[maxYear].forEach((ii, index) => {
-                    let inReData = {}
-                    for (const key in dD) {
-                        if (Object.prototype.hasOwnProperty.call(dD, key)) {
-                            const element = dD[key][index];
-                            if (element) {
-                                inReData[`${element.recordDate}dataItem`] = element.dataItem;
-                                inReData[`${element.recordDate}dataValue`] = element.dataValue;
-                                inReData[`${element.recordDate}level`] = element.level;
-                            }
-                        }
-                    }
-                    reData.push(inReData)
-                })
-            }
-            columns = analysis
-            break;
-    }
-    return { reData, columns }
-}
+const jy1 = ["销售商品、提供劳务收到的现金", "收到其他与经营活动有关的现金", "经营活动现金流入小计", "购买商品、接受劳务支付的现金", "支付给职工以及为职工支付的现金", "支付的各项税费", "支付其他与经营活动有关的现金", "经营活动现金流出小计", "经营活动产生的现金流量净额"]
+const jy2 = ["收回投资收到的现金", "取得投资收益收到的现金", "处置固定资产、无形资产和其他长期资产收回的现金净额", "取得其他与投资活动有关的现金", "投资活动现金流入小计", "购建固定资产、无形资产和其他长期资产支付的现金", "投资支付的现金", "取得子公司及其他营业单位支付的现金净额", "支付其他与投资活动有关的现金", "投资活动现金流出小计", "投资活动产生的现金流量净额"]
+const jy3 = ["吸收投资收到的现金", "取得借款收到的现金", "发行债券收到的现金", "收到其他与筹资活动有关的现金", "筹资活动现金流入小计", "偿还债务支付的现金", "分配股利、利润或偿付利息支付的现金", "支付其他与筹资活动有关的现金", "筹资活动现金流出小计", "筹资活动产生的现金流量净额", "四、汇率变动对现金及现金等价物的影响", "五、现金及现金等价物净增加额", "加：期初现金及现金等价物余额", "六、期末现金及现金等价物余额"]
+const fz = ["货币资金", "应收票据", "应收账款", "预付款项", "其他应收款", "存货", "流动资产", "固定资产", "长期待摊费用", "非流动性资产", "资产总计", "短期负债", "应付票据", "应付账款", "预收款项", "应付职工薪酬", "应交税费", "其他应付款", "一年内到期的非流动负债", "流动负债合计", "长期借款", "非流动负债", "负债合计",]
+const lr = ["营业收入", "营业成本", "销售费用", "管理费用", "研发费用", "财务费用", "利息收入", "资产减值损失", "营业利润", "利润总额", "净利润", "综合收益总额"]
+const sortFirst = [{
+    title: "一、经营活动产生的现金流量",
+    data: jy1,
+}, {
+    title: "二、投资活动产生的现金流量",
+    data: jy2,
+}, {
+    title: "三、筹资活动产生的现金流量",
+    data: jy3,
+}]
 
 export function dealColumnsNew(data, type, secondLevel) {
     let columns = [];
@@ -411,9 +99,48 @@ export function dealColumnsNew(data, type, secondLevel) {
                 }
             })
             if (secondLevel) {
-                columns = [
-                    {
-                        title: '指标名称',
+                // 整理reData
+                let dealSortData = []
+                if (secondLevel == '负债表' || secondLevel == '利润表') {
+                    const forList = secondLevel == '负债表' ? fz : lr
+                    forList.forEach((u) => {
+                        const item = reData.find((i) => i.dataItem == u)
+                        if (item) {
+                            dealSortData.push(item)
+                        }
+                    })
+                    reData = dealSortData
+                    columns = [
+                        {
+                            title: '年份',
+                            dataIndex: 'dataItem',
+                            customHeaderCell: () => {
+                                return {
+                                    style: {
+                                        backgroundColor: '#ccdcfc',
+                                    }
+                                };
+                            },
+                        },
+                        ...analysis
+                    ]
+                } else if (secondLevel == '现金流量表') {
+                    sortFirst.forEach((fir) => {
+                        dealSortData.push({
+                            dataItem: fir.title,
+                            col: analysis.length,
+                            index: dealSortData.length
+                        })
+                        fir.data.forEach((u) => {
+                            const item = reData.find((i) => i.dataItem == u)
+                            if (item) {
+                                dealSortData.push(item)
+                            }
+                        })
+                    })
+                    reData = dealSortData
+                    columns = [{
+                        title: '年份',
                         dataIndex: 'dataItem',
                         customHeaderCell: () => {
                             return {
@@ -422,9 +149,51 @@ export function dealColumnsNew(data, type, secondLevel) {
                                 }
                             };
                         },
-                    },
-                    ...analysis
-                ]
+                        customRender: (text, record, index) => {
+                            return {
+                                children: text,
+                                attrs: {
+                                    colSpan: record.col + 1 || 1,
+                                },
+                                style: {
+                                    textAlign: record.col ? 'center' : 'left',
+                                    fontWeight: record.col ? 'bold' : 'normal',
+                                }
+                            }
+                        },
+                    }]
+                    const dealA = []
+                    analysis.forEach((u) => {
+                        dealA.push(Object.assign(u, {
+                            customRender: (text, record, index) => {
+                                return {
+                                    children: text,
+                                    attrs: {
+                                        colSpan: record.col ? 0 : 1
+                                    }
+                                }
+                            },
+                        }))
+                    })
+
+                    columns.push(...dealA)
+                    return { reData, columns }
+                } else {
+                    columns = [
+                        {
+                            title: '年份',
+                            dataIndex: 'dataItem',
+                            customHeaderCell: () => {
+                                return {
+                                    style: {
+                                        backgroundColor: '#ccdcfc',
+                                    }
+                                };
+                            }
+                        },
+                        ...analysis
+                    ]
+                }
             } else {
                 columns = [
                     {
