@@ -2,39 +2,61 @@
  * @Author: bekon
  * @Date: 2025-03-23 11:53:48
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-23 12:15:00
+ * @LastEditTime: 2025-04-27 17:26:14
  * @FilePath: /report-background-system/src/components/dataGoTable/util.js
  * @Description: 
  * 
  */
-export function dealTable(data) {
+export function dealTable(data, isCanEdit = false) {
     let columns = [];
-    let reData = data;
 
     if (data.length) {
         const first = data[0]
         for (const key in first) {
-            if (Object.prototype.hasOwnProperty.call(first, key)) {
-                columns.push(
-                    {
-                        width: '200px',
-                        title: key,
-                        dataIndex: key,
-                        key: key,
-                        customHeaderCell: () => {
-                            return {
-                                style: {
-                                    backgroundColor: '#EFF6FF',
-                                    color: '#656D92',
-                                    padding: '5px'
-                                }
-                            };
-                        },
+            if (key !== 'id') {
+                const columnItem = {
+                    width: '200px',
+                    title: key,
+                    dataIndex: key,
+                    key: key,
+                    customHeaderCell: () => {
+                        return {
+                            style: {
+                                backgroundColor: '#EFF6FF',
+                                color: '#656D92',
+                                padding: '5px'
+                            }
+                        };
                     },
-                )
+                }
+                if (isCanEdit) {
+                    columnItem.scopedSlots = { customRender: key }
+                }
+                columns.push(columnItem)
             }
         }
+
+        if (isCanEdit) {
+            columns.push({
+                width: '100px',
+                title: '操作',
+                dataIndex: 'tool',
+                key: 'tool',
+                scopedSlots: { customRender: 'tool' },
+                customHeaderCell: () => {
+                    return {
+                        style: {
+                            backgroundColor: '#EFF6FF',
+                            color: '#656D92',
+                            padding: '5px'
+                        }
+                    };
+                },
+            })
+        }
     }
+    let reData = data.map((u) => Object.assign(u, { canEdit: false }));
+
 
     return { columns, reData }
 }

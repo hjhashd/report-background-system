@@ -1,9 +1,9 @@
 <!--
  * @Author: bekon
- * @Date: 2025-02-21 16:45:11
+ * @Date: 2025-04-27 11:52:54
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-26 20:03:28
- * @FilePath: \report-background-system\src\views\dataGo\client\customerUploadDetail_new.vue
+ * @LastEditTime: 2025-04-27 18:56:15
+ * @FilePath: /report-background-system/src/views/dataGo/client/customerUploadDetail_new.vue
  * @Description: 
  * 
 -->
@@ -54,7 +54,18 @@
         </div>
         <div slot="tool" slot-scope="text, scope">
           <div class="flex">
-            <a-tooltip v-if="scope.status === 1">
+            <a-tooltip v-if="scope.status === 1 && scope.dataType == 'crwal'">
+              <template slot="title">
+                <span>查看编辑</span>
+              </template>
+              <a-button
+                @click="toSeeChangeTable(scope)"
+                :style="{ color: '#7fbbf1', border: 'none', padding: 0, 'padding-right': '5px' }"
+              >
+                <img style="width: 28px; height: 28px" src="@/assets/images/see.png" alt="dark" /><span>查看编辑</span>
+              </a-button>
+            </a-tooltip>
+            <a-tooltip v-else-if="scope.status === 1">
               <template slot="title">
                 <span>查看</span>
               </template>
@@ -131,6 +142,19 @@
     <a-modal v-model="dataSeeStatus" width="80vw" :title="'<<' + chooseTableName + '>>数据查看'" :footer="null">
       <data-go-table :seeQuery="seeQuery"></data-go-table>
     </a-modal>
+    <!-- 查看编辑 -->
+    <a-modal v-model="changeItemStatus" width="80vw" :footer="null">
+      <template slot="title">
+        <div class="change-title">{{ changeItem?.tableNameZh }} <span class="mini-title">数据查看与编辑</span></div>
+      </template>
+      <scan-edit
+        :showPop="changeItemStatus"
+        :customerInfo="customerInfo"
+        :changeItem="changeItem"
+        :seeQuery="seeQuery"
+        @closePop="changeItemStatus = false"
+      ></scan-edit>
+    </a-modal>
     <!-- 批量上传 -->
     <a-modal :dialogStyle="{ top: '5vh' }" v-model="mutilUploading" width="85vw" title="批量上传" :footer="null">
       <mutil-upload
@@ -168,12 +192,12 @@
 import MutilUpload from '../client/mutilUpload.vue'
 import MutilDownloadModal from '../client/mutilDownloadModal.vue'
 import AppDataDownload from '../client/appDataDownload.vue'
-import { DataGoTable, UploadFileTab } from '@/components'
+import { DataGoTable, UploadFileTab, ScanEdit } from '@/components'
 import { graftFun, newColumns, classifyDataByClassName } from './util'
 import { mapActions } from 'vuex'
 export default {
   name: 'CustomerUploadDetailNew',
-  components: { DataGoTable, MutilUpload, MutilDownloadModal, AppDataDownload, UploadFileTab },
+  components: { DataGoTable, MutilUpload, MutilDownloadModal, AppDataDownload, UploadFileTab, ScanEdit },
   props: {
     customerInfo: {
       type: Object,
@@ -199,6 +223,8 @@ export default {
       uploadMutilData: [],
       seeQuery: {},
       chooseTableName: null,
+      changeItem: null,
+      changeItemStatus: false,
     }
   },
   mounted() {
@@ -216,6 +242,17 @@ export default {
         this.$refs.appD.initData()
       }
       this.appFirstLoad = false
+    },
+    toSeeChangeTable(item) {
+      this.seeQuery = {
+        id: item.id,
+        tableName: item.tableName,
+        creditCode: this.customerInfo.creditCode,
+        pageNum: 1,
+        pageSize: 10,
+      }
+      this.changeItemStatus = true
+      this.changeItem = item
     },
     toSeeTable(item) {
       this.seeQuery = {
@@ -339,5 +376,15 @@ export default {
   margin-left: 15px;
   margin-right: 2px;
   line-height: 1;
+}
+.change-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #000;
+  .mini-title {
+    font-weight: normal;
+    font-size: 14px;
+    color: #6c727f;
+  }
 }
 </style>

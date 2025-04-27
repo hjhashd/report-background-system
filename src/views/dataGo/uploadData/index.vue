@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-26 14:59:28
- * @FilePath: \report-background-system\src\views\dataGo\uploadData\index.vue
+ * @LastEditTime: 2025-04-27 11:58:23
+ * @FilePath: /report-background-system/src/views/dataGo/uploadData/index.vue
  * @Description: 数据上传
  * 
 -->
@@ -200,11 +200,14 @@ export default {
   display: flex;
   text-align: center;
   border-radius: 8px 8px 0 0;
-  line-height: 2;
+  height: 40px;
+  line-height: 40px;
   overflow: hidden;
+  cursor: pointer;
   .tab-active {
+    height: 100%;
+    line-height: 40px;
     background-color: #fff;
-    cursor: pointer;
   }
 }
 </style>

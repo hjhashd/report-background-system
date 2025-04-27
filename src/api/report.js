@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-26 20:43:30
- * @FilePath: \report-background-system\src\api\report.js
+ * @LastEditTime: 2025-04-27 13:38:28
+ * @FilePath: /report-background-system/src/api/report.js
  * @Description: 
  * 
  */
@@ -43,7 +43,6 @@ const reportAPI = {
     getAbnormalNew: '/report/entity/customer/abnormal/list/',
     dUploadFile: '/report/entity/indicators/batch/upload',
     updateSearchContent: '/report/entity/indicators/save',
-
     importCashFlow: '/report/v2/entity/import/cashFlow',
     importBalanceSheet: '/report/v2/entity/import/balanceSheet',
     importProfitSheet: '/report/v2/entity/import/profitSheet',
@@ -52,11 +51,50 @@ const reportAPI = {
     getBalanceSheetFields: '/report/v2/entity/balanceSheet/fields',
     getProfitSheetFields: '/report/v2/entity/profitSheet/fields',
     getNormalFields: '/report/v2/entity/table/fields/',
-
     getAppFileList: '/report/v2/entity/client/upload/files',
     deleteFile: '/report/v2/entity/indicators/delete/file/',
     deleteSearchContent: '/report/entity/indicators/',
+    uploadProof: '/report/v2/entity/proof/file/upload',
+    updateTable: '/report/v2/entity/update/table/data',
+    deleteProofFile: '/report/v2/entity/delete/proof/file/',
+    getProofFile: '/report/v2/entity/proof/file/list'
 }
+
+// 获取证明材料
+export function getProofFile(parameter) {
+    return request({
+        url: reportAPI.getProofFile,
+        method: 'post',
+        data: parameter
+    })
+}
+
+// 更新证明材料
+export function uploadProof(parameter) {
+    return request({
+        url: reportAPI.uploadProof,
+        method: 'post',
+        data: parameter
+    })
+}
+
+// 更新表
+export function updateTable(parameter) {
+    return request({
+        url: reportAPI.updateTable,
+        method: 'post',
+        data: parameter
+    })
+}
+
+// 删除证明材料
+export function deleteProofFile(id) {
+    return request({
+        url: reportAPI.deleteProofFile + id,
+        method: 'delete',
+    })
+}
+
 // 删除指标文件
 export function deleteFile(id) {
     return request({
