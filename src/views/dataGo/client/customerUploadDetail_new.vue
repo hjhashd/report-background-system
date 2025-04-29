@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-04-27 11:52:54
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-29 14:32:26
+ * @LastEditTime: 2025-04-29 20:07:43
  * @FilePath: /report-background-system/src/views/dataGo/client/customerUploadDetail_new.vue
  * @Description: 
  * 
@@ -12,24 +12,21 @@
     <div class="item-content">
       <div class="class-name">
         <div class="icon-btn flex" @click="toDealFun('redo')">
-          <img style="width: 18px; height: 20px" src="@/assets/images/dun.jpg" alt="dark" />
-          批量授权
+          <img style="width: 18px; height: 20px; margin-right: 3px" src="@/assets/images/dun.jpg" alt="dark" />批量授权
         </div>
         <!-- <div class="icon-btn flex" @click="mutilUploads">
-          <img style="width: 18px; height: 20px; margin-left: 15px" src="@/assets/images/mutil-upload.png" alt="dark" />
+          <img style="width: 18px; height: 20px; margin-right: 3px" src="@/assets/images/mutil-upload.png" alt="dark" />
           批量上传
         </div> -->
         <div class="icon-btn flex" @click="mutilDownLoadModalPop = true">
           <img
-            style="width: 18px; height: 20px; margin-left: 15px"
+            style="width: 18px; height: 20px; margin-right: 3px"
             src="@/assets/images/download-modal.png"
             alt="dark"
-          />
-          下载模板
+          />下载模板
         </div>
         <div class="icon-btn flex" @click="openAppPop">
-          <span class="app-icon">APP</span>
-          数据下载
+          <img style="width: 18px; height: 20px; margin-right: 3px" src="@/assets/images/app.png" alt="dark" />数据下载
         </div>
       </div>
       <a-table
@@ -149,6 +146,7 @@
         <div class="change-title">{{ changeItem?.tableNameZh }} <span class="mini-title">数据查看与编辑</span></div>
       </template>
       <scan-edit
+        ref="scanEdit"
         :showPop="changeItemStatus"
         :customerInfo="customerInfo"
         :changeItem="changeItem"
@@ -236,6 +234,13 @@ export default {
       handler(v) {
         if (!v) {
           this.$refs.uploadPop.resetData()
+        }
+      },
+    },
+    changeItemStatus: {
+      handler(v) {
+        if (!v) {
+          this.$refs.scanEdit.hasUploadFile = false
         }
       },
     },
@@ -327,6 +332,7 @@ export default {
   justify-content: flex-end;
   margin-bottom: 12px;
   .icon-btn {
+    margin-right: 22px;
     font-family: PingFangSC-Medium;
     font-size: 14px;
     color: #6cbdf6;

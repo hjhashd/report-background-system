@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-27 21:14:45
+ * @LastEditTime: 2025-04-29 20:44:52
  * @FilePath: /report-background-system/src/api/report.js
  * @Description: 
  * 
@@ -57,7 +57,9 @@ const reportAPI = {
     uploadProof: '/report/v2/entity/proof/file/upload',
     updateTable: '/report/v2/entity/update/table/data',
     deleteProofFile: '/report/v2/entity/delete/proof/file/',
-    getProofFile: '/report/v2/entity/proof/file/list'
+    getProofFile: '/report/v2/entity/proof/file/list',
+    deleteReport: '/report/entity/',
+    getAIType: '/report/v2/entity/ai/content/type?creditCode='
 }
 
 // 获取证明材料
@@ -84,6 +86,14 @@ export function updateTable(parameter) {
         url: reportAPI.updateTable,
         method: 'post',
         data: parameter
+    })
+}
+
+// 删除报告
+export function deleteReport(id) {
+    return request({
+        url: reportAPI.deleteReport + id,
+        method: 'delete',
     })
 }
 
@@ -187,6 +197,13 @@ export function pullTableData(clickItem, data, pickFieldsData, mapping) {
 export function getIndustryClassify() {
     return request({
         url: reportAPI.getIndustryClassify,
+        method: 'get',
+    })
+}
+
+export function getAIType(creditCode) {
+    return request({
+        url: reportAPI.getAIType + creditCode,
         method: 'get',
     })
 }

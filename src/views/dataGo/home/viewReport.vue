@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-20 17:58:13
- * @FilePath: \report-background-system\src\views\dataGo\home\viewReport.vue
+ * @LastEditTime: 2025-04-29 21:36:31
+ * @FilePath: /report-background-system/src/views/dataGo/home/viewReport.vue
  * @Description: 报告预览
  * 
 -->
@@ -13,12 +13,21 @@
     <div ref="reportViewDetail" class="page-content flex-col" style="padding: 0; width: 100%">
       <div class="report-view">
         <div class="flex-row-spacebetween tools">
-          <a-tooltip>
-            <template slot="title">
-              <span>{{ reportName }}</span>
-            </template>
-            <div class="sys-title single-line-text">{{ reportName }}</div>
-          </a-tooltip>
+          <div class="flex">
+            <a-tooltip>
+              <template slot="title">
+                <span>{{ reportName }}</span>
+              </template>
+              <div class="sys-title single-line-text">{{ reportName }}</div>
+            </a-tooltip>
+            <a-badge
+              :offset="[-3, 5]"
+              v-if="reportDetail && reportDetail.tableChangeInfos && reportDetail.tableChangeInfos.length"
+              :count="reportDetail.tableChangeInfos.length"
+            >
+              <a-button style="margin-left: 5px" icon="bell" type="link" @click="lookUploadModal(scoped)"></a-button>
+            </a-badge>
+          </div>
           <div class="flex" v-if="typeFrom !== 'industryReport'">
             <a-tooltip v-if="!fullView">
               <template slot="title">
@@ -44,14 +53,14 @@
                 <div class="icon-box"><a-icon style="color: rgb(87, 135, 238)" type="redo" /></div>
               </div>
             </a-tooltip>
-            <a-tooltip>
+            <!-- <a-tooltip>
               <template slot="title">
                 <span>数据验证</span>
               </template>
               <div class="btn-item" @click="isListCollapsed = false">
                 <div class="icon-box"><a-icon style="color: rgb(87, 135, 238)" type="eye" /></div>
               </div>
-            </a-tooltip>
+            </a-tooltip> -->
             <a-tooltip>
               <template slot="title">
                 <span>编辑</span>
@@ -235,6 +244,12 @@
       >
         <anomaly-content :customerDetail="customerDetail"></anomaly-content>
       </a-modal>
+      <a-modal :footer="null" v-model="udt" title="数据更新提醒">
+        <div class="update-item-line" v-for="item in uploadTableList" :key="item.id">
+          <span class="update-item-title">{{ item.tableNameC }}</span>
+          <span class="update-item-time">{{ item.changeTime }}</span>
+        </div>
+      </a-modal>
     </div>
   </a-spin>
   <!-- </page-header-wrapper> -->
@@ -255,7 +270,7 @@ import {
 import { OnlyOfficeEditor } from '@/components'
 import EditModal from './editModal.vue'
 import { getCurrentDate, getCurrentTime } from './util'
-import { classifyDataByClassName,classifyDataByTemplateName } from '../client/util'
+import { classifyDataByClassName, classifyDataByTemplateName } from '../client/util'
 export default {
   name: 'addReport',
   components: { OnlyOfficeEditor, EditModal, AnomalyContent },
@@ -283,6 +298,8 @@ export default {
       setReportName: false,
       openDataYC: false,
       popTitle: null,
+      udt: false,
+      uploadTableList: [],
     }
   },
   created() {
@@ -331,58 +348,58 @@ export default {
     },
     allViewPort() {
       // 打开全屏
-      this.fullView = true;
-      this.setFullScreen(this.fullView);
-      const reportViewDetail = this.$refs.reportViewDetail;
+      this.fullView = true
+      this.setFullScreen(this.fullView)
+      const reportViewDetail = this.$refs.reportViewDetail
       if (reportViewDetail) {
         if (reportViewDetail.requestFullscreen) {
-          reportViewDetail.requestFullscreen();
+          reportViewDetail.requestFullscreen()
         } else if (reportViewDetail.webkitRequestFullscreen) {
-          reportViewDetail.webkitRequestFullscreen();
+          reportViewDetail.webkitRequestFullscreen()
         }
       }
       // 监听全屏状态变化
       const handleFullscreenChange = () => {
         if (document.fullscreenElement === reportViewDetail) {
           // 进入全屏后重新计算编辑器高度
-          setTimeout(()=>{
+          setTimeout(() => {
             this.$nextTick(() => {
-              const editors = this.$refs.editorContainerRef;
+              const editors = this.$refs.editorContainerRef
               if (editors) {
-                this.editorHeight = editors.offsetHeight + 'px';
+                this.editorHeight = editors.offsetHeight + 'px'
               }
-            });
-          },200)
+            })
+          }, 200)
         } else {
           // 退出全屏后恢复正常高度
-          this.fullView = false;
-          this.setFullScreen(this.fullView);
-          setTimeout(()=>{
+          this.fullView = false
+          this.setFullScreen(this.fullView)
+          setTimeout(() => {
             this.$nextTick(() => {
-              const editors = this.$refs.editorContainerRef;
+              const editors = this.$refs.editorContainerRef
               if (editors) {
-                this.editorHeight = editors.offsetHeight + 'px';
+                this.editorHeight = editors.offsetHeight + 'px'
               }
-            });
-          },200)
+            })
+          }, 200)
         }
-      };
-      document.addEventListener('fullscreenchange', handleFullscreenChange);
-      document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+      }
+      document.addEventListener('fullscreenchange', handleFullscreenChange)
+      document.addEventListener('webkitfullscreenchange', handleFullscreenChange)
     },
     closeViewPort() {
       // 退出全屏
       if (document.exitFullscreen) {
-        document.exitFullscreen();
+        document.exitFullscreen()
       } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
+        document.webkitExitFullscreen()
       }
       this.$nextTick(() => {
-        const editors = this.$refs.editorContainerRef;
+        const editors = this.$refs.editorContainerRef
         if (editors) {
-          this.editorHeight = editors.offsetHeight + 'px';
+          this.editorHeight = editors.offsetHeight + 'px'
         }
-      });
+      })
     },
     updateReportData() {
       // 更新数据
@@ -587,6 +604,10 @@ export default {
           })
         }
       })
+    },
+    lookUploadModal(v) {
+      this.uploadTableList = this.reportDetail.tableChangeInfos
+      this.udt = true
     },
   },
 }

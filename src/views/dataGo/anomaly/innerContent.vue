@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-27 21:14:30
+ * @LastEditTime: 2025-04-29 22:19:01
  * @FilePath: /report-background-system/src/views/dataGo/anomaly/innerContent.vue
  * @Description: 
  * 
@@ -491,7 +491,7 @@ export default {
             }
           })
         : ''
-      formData.append('clientFiles', JSON.stringify(appChooseList))
+      formData.append('clientFiles', appChooseList ? JSON.stringify(appChooseList) : null)
       dUploadFile(formData).then((res) => {
         this.tableUploadPop = false
         if (res.code && res.code == 200) {

@@ -9,6 +9,7 @@
           </a-select-option>
         </a-select>
       </div>
+      <a-button @click="toDealFun">新增数据申请</a-button>
     </div>
     <div class="table-contant tab-table">
       <s-table ref="table" rowKey="key" :data="loadData" :columns="qrColumns">
@@ -67,7 +68,7 @@ const reportTypeList = [
     name: '数据上传',
   },
 ]
-import { mapState } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 import { getQRCodeList, deleteQr } from '@/api/qrcode'
 import { STable } from '@/components'
 import { baseMixin } from '@/store/app-mixin'
@@ -139,6 +140,7 @@ export default {
     }),
   },
   methods: {
+    ...mapActions(['changeBuildQrCodePop']),
     handleChat(v) {
       const { $router } = this
       $router.push({ path: `/homePage/viewReport/` + v.id })
@@ -160,6 +162,9 @@ export default {
         })
         this.$refs.table.refresh()
       })
+    },
+    toDealFun() {
+      this.changeBuildQrCodePop(true)
     },
   },
 }

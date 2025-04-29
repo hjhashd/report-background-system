@@ -16,7 +16,7 @@
             :multiple="true"
             accept=".doc,.docx,image/*,.pdf,.xlsx,.xls"
           >
-            <div v-if="!fileList.length && !hasUploadFile" class="table-upload-btn">
+            <div class="table-upload-btn">
               <img
                 style="width: 38px; height: 36px; margin-bottom: 10px"
                 src="@/assets/images/upload-file.png"
@@ -26,7 +26,7 @@
               <div class="upload-txt-2">或拖放文件到此处</div>
             </div>
           </a-upload>
-          <div class="flex uploaded-show" v-if="fileList.length && !hasUploadFile">
+          <div class="flex uploaded-show" v-if="fileList.length">
             <div class="flex-1">
               <div class="uploaded-file" v-for="(i, index) in fileList" :key="index">
                 <div class="ppp">
@@ -50,26 +50,7 @@
               确定上传
             </a-button>
           </div>
-          <div v-else-if="hasUploadFile">
-            <div class="flex-1">
-              <div class="uploaded-file" v-for="(i, index) in fileList" :key="index">
-                <div class="ppp">
-                  <a-icon type="file-text" style="color: #3b82f6; font-size: 18px" /><span>{{
-                    i.name || i.fileName
-                  }}</span>
-                </div>
-                <a-popconfirm
-                  title="是否确定删除已上传文件?"
-                  ok-text="确定"
-                  cancel-text="取消"
-                  @confirm="deleteUploadFile(i)"
-                >
-                  <a-button :style="{ color: '#7fbbf1', border: 'none', padding: 0 }">
-                    <img style="width: 16px; height: 18px" src="@/assets/images/delete.png" alt="dark" />
-                  </a-button>
-                </a-popconfirm>
-              </div>
-            </div>
+          <div v-if="hasUploadFile">
             <div class="show-sue">
               <a-icon
                 type="check-circle"
@@ -86,7 +67,7 @@
         style="color: #5c9463; font-size: 18px; margin-right: 10px"
       />证明材料已上传，现在您可以编辑数据了
     </div>
-    <data-go-table :customerInfo="customerInfo" :seeQuery="seeQuery" :canEdit="hasUploadFile"></data-go-table>
+    <data-go-table ref="aaa" :customerInfo="customerInfo" :seeQuery="seeQuery" :canEdit="hasUploadFile"></data-go-table>
     <div class="flex footer-btn">
       <a-button class="pop-btn black-style" @click="closePop"> 确定 </a-button>
     </div>
@@ -147,6 +128,8 @@ export default {
       clickItem: null,
       hasUploadFile: false,
       fileList: [],
+      uploadedList: [],
+      showFileList: [],
     }
   },
   methods: {
@@ -171,7 +154,10 @@ export default {
     },
     deleteUploadFile(i) {
       this.fileList = this.fileList.filter((v) => (i.uid ? v.uid !== i.uid : i.id !== v.id))
-      if (!this.fileList.length) this.hasUploadFile = false
+      if (!this.fileList.length || !this.fileList.filter((b) => !!b.id).length) {
+        this.$refs.aaa.getViewTable()
+        this.hasUploadFile = false
+      }
       if (!i.uid) {
         this.loadingb = true
         deleteProofFile(i.id).then((res) => {
@@ -180,12 +166,24 @@ export default {
       }
     },
     confirmUpload() {
+      const { $notification } = this
       const formData = new FormData()
       formData.append('tableId', this.changeItem.id)
       formData.append('appUserId', this.customerInfo.appUserId)
+      let hasNewFile = false
       this.fileList.forEach((fileItem) => {
-        formData.append('file', fileItem)
+        if (fileItem.uid) {
+          formData.append('file', fileItem)
+          hasNewFile = true
+        }
       })
+      if (!hasNewFile) {
+        $notification['warning']({
+          message: '消息提示：',
+          description: `没有获取到新上传文件`,
+          duration: 8,
+        })
+      }
       this.loadingb = true
       uploadProof(formData).then((res) => {
         this.loadingb = false

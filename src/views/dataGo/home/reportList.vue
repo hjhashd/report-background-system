@@ -43,16 +43,21 @@
           <span v-if="text == 2" :class="['table-status', 'status' + text]">数据未授权</span>
           <span v-if="text == 3" :class="['table-status', 'status' + text]">数据已授权</span>
         </span>
-        <template slot="genStatus" slot-scope="text">
+        <template slot="genStatus" slot-scope="text, scoped">
           <span v-if="text == 1" class="table-status status1">已完成</span>
-          <span v-else-if="text == 0">生成中</span>
-          <span class="table-status status4" v-else>生成失败</span>
+          <a-badge
+            :offset="[-3, 5]"
+            v-if="scoped.tableChangeInfos && scoped.tableChangeInfos.length"
+            :count="scoped.tableChangeInfos.length"
+          >
+            <a-button style="margin-left: 5px" icon="bell" type="link" @click="lookUploadModal(scoped)"></a-button>
+          </a-badge>
         </template>
         <span slot="reportType" slot-scope="text">
           {{ text == 1 ? '信贷调查报告' : text == 2 ? '财务分析报告' : '能耗分析报告' }}
         </span>
         <span slot="avgOperationTime" slot-scope="text">
-          <span v-if="text">约{{ text | dealTime }}小时</span>
+          <span v-if="text">{{ text | dealTime }}</span>
           <span v-else>{{ text }}</span>
         </span>
         <template slot="action" slot-scope="text, scoped">
@@ -65,9 +70,26 @@
               <img style="width: 28px; height: 28px" src="@/assets/images/see.png" alt="dark" />
             </a-button>
           </a-tooltip>
+          <a-popconfirm title="是否确定删除该报告?" ok-text="确定" cancel-text="取消" @confirm="deleteChat(scoped)">
+            <a-tooltip>
+              <template slot="title">
+                <span>删除</span>
+              </template>
+              <a-button :style="{ color: '#7fbbf1', border: 'none', padding: 0, 'margin-left': '10px' }">
+                <img style="width: 22px; height: 22px" src="@/assets/images/delete.png" alt="dark" />
+              </a-button>
+            </a-tooltip>
+          </a-popconfirm>
         </template>
       </s-table>
     </div>
+
+    <a-modal :footer="null" v-model="udt" title="数据更新提醒">
+      <div class="update-item-line" v-for="item in uploadTableList" :key="item.id">
+        <span class="update-item-title">{{ item.tableNameC }}</span>
+        <span class="update-item-time">{{ item.changeTime }}</span>
+      </div>
+    </a-modal>
   </page-header-wrapper>
 </template>
 
@@ -87,7 +109,7 @@ const reportTypeList = [
   },
 ]
 import { mapState } from 'vuex'
-import { reportList } from '@/api/report'
+import { reportList, deleteReport } from '@/api/report'
 import { STable } from '@/components'
 import { baseMixin } from '@/store/app-mixin'
 import { columns } from './util'
@@ -105,6 +127,8 @@ export default {
       draftTypeSelected: null,
       search: null,
       reportTypeList,
+      udt: false,
+      uploadTableList: [],
       // 查询参数
       queryParam: {
         pageNum: 1,
@@ -138,9 +162,19 @@ export default {
     }
   },
   filters: {
-    dealTime(v) {
-      let time = parseInt(v)
-      return Math.ceil(time / 3600)
+    dealTime(seconds) {
+      const oneHour = 60 * 60
+      const oneMin = 60
+      const hours = Math.floor(seconds / oneHour)
+      const ddMinute = seconds % oneHour
+      const min = Math.floor(ddMinute / oneMin)
+      const llseconds = seconds % oneMin
+      let str = ''
+      str += hours ? `${hours} 小时 ` : ''
+      str += min ? `${min} 分钟` : ''
+      str += llseconds ? `${llseconds} 秒` : ''
+
+      return str
     },
   },
   computed: {
@@ -155,6 +189,21 @@ export default {
     },
     selectChange() {
       this.$refs.table.refresh()
+    },
+    deleteChat(v) {
+      const { $notification } = this
+      deleteReport(v.id).then((res) => {
+        $notification['success']({
+          message: '通知：',
+          description: '删除成功',
+          duration: 8,
+        })
+        this.$refs.table.refresh()
+      })
+    },
+    lookUploadModal(v) {
+      this.uploadTableList = v.tableChangeInfos
+      this.udt = true
     },
   },
 }

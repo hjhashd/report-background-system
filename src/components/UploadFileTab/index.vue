@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-04-26 13:52:52
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-29 15:07:15
+ * @LastEditTime: 2025-04-29 19:23:20
  * @FilePath: /report-background-system/src/components/UploadFileTab/index.vue
  * @Description: 
  * 
@@ -216,7 +216,7 @@ export default {
             reD.forEach((item) => {
               if (typeof item == 'object') {
                 const fE = this.excelData.find((i) => i.fieldNameCh == item.fieldNameCh)
-                mapping[item.fieldNameCh] = fE.fieldNameCh
+                mapping[item.fieldNameCh] = fE ? fE.fieldNameCh : this.excelData[0].fieldNameCh
                 uploadTableFiedls.push(item)
               } else {
                 const fE = this.excelData.find((i) => i.fieldNameCh == item)

@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-26 21:23:54
+ * @LastEditTime: 2025-04-29 20:30:17
  * @FilePath: /report-background-system/src/views/dataGo/home/addReport.vue
  * @Description: 
  * 
@@ -70,7 +70,7 @@
               </div>
               <div class="button-group">
                 <a-button :loading="applyLoading" style="width: 80%; height: 40px" @click="buildReport"
-                  >新建报告</a-button
+                  >生成报告</a-button
                 >
               </div>
             </div>
@@ -118,10 +118,10 @@ export default {
   data() {
     return {
       tabs: [
-        { type: 1, name: '选择模板' },
         { type: 2, name: '选择客户' },
+        { type: 1, name: '选择模板' },
       ],
-      tabA: 1,
+      tabA: 2,
       reportType: null,
       applyLoading: false,
       reportTypeList,

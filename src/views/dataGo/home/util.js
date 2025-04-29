@@ -8,21 +8,35 @@ export const overviewObj = {
 }
 
 export const aiTypeList = [{
-    value: '文本扩写',
+    value: "简洁档",
     icon: 'file-text',
     btBc: 'linear-gradient(to right, #0096ff, #66c2ff)',
     bc: '#dee9fc',
     bcAction: '#7c9fea',
     defaultColor: '#3662e3',
 }, {
-    value: '数据补充',
+    value: "较简洁档",
     icon: 'bar-chart',
     btBc: 'linear-gradient(to right, #a465ef, #d95597)',
     bc: '#f1e8fd',
     bcAction: '#c98de0',
     defaultColor: '#883ae1',
 }, {
-    value: '提炼总结',
+    value: "标准档",
+    icon: 'bulb',
+    btBc: 'linear-gradient(to right, #eaa748, #e87b35)',
+    bc: '#fcf3cc',
+    bcAction: '#f0bc7b',
+    defaultColor: '#cc7c2e',
+}, {
+    value: "较丰富档",
+    icon: 'bulb',
+    btBc: 'linear-gradient(to right, #eaa748, #e87b35)',
+    bc: '#fcf3cc',
+    bcAction: '#f0bc7b',
+    defaultColor: '#cc7c2e',
+}, {
+    value: "丰富档",
     icon: 'bulb',
     btBc: 'linear-gradient(to right, #eaa748, #e87b35)',
     bc: '#fcf3cc',
@@ -216,6 +230,7 @@ export const columns = [
     {
         title: '操作',
         key: 'action',
+        width: '120px',
         scopedSlots: { customRender: 'action' },
     },
 ]

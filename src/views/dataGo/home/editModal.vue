@@ -20,7 +20,7 @@
           </a-select>
         </div>
         <div>
-          <a-tooltip placement="top">
+          <a-tooltip placement="top" style="margin-right: 10px">
             <template slot="title">
               <span>AI优化</span>
             </template>
@@ -32,7 +32,7 @@
             </a-popconfirm> -->
             <img class="ai-png" src="@/assets/images/ai.png" alt="dark" @click="toAI" />
           </a-tooltip>
-          <a-tooltip placement="top">
+          <a-tooltip placement="top" style="margin-right: 10px">
             <template slot="title">
               <span>新增结论</span>
             </template>
@@ -50,7 +50,7 @@
               <a-button style="color: #6cbdf6; border: none; background-color: transparent" icon="plus" />
             </a-popconfirm>
           </a-tooltip>
-          <a-tooltip placement="top">
+          <a-tooltip placement="top" style="margin-right: 10px">
             <template slot="title">
               <span>另存为</span>
             </template>
@@ -101,7 +101,7 @@
       <a-row :gutter="[10]" v-if="modalContentList">
         <a-col :span="11" class="un-edit-pass">
           <a-textarea
-            :style="{ height: !isExpend ? '70vh' : '28px' }"
+            :style="{ height: !isExpend ? '68vh' : '28px' }"
             v-model="useContent.content"
             :auto-size="true"
             :disabled="true"
@@ -119,19 +119,19 @@
                       }"
                       @click="chooseAI(item.value)"
                     >
-                      <a-icon
+                      <!-- <a-icon
                         class="ai-icon"
                         :type="item.icon"
                         :style="{ background: item.value == aiType ? item.bcAction : item.bc }"
-                      />
+                      /> -->
                       {{ item.value }}</a-button
                     >
                   </div>
                 </div>
                 <a-dropdown>
                   <a-menu slot="overlay" @click="menuChoose">
-                    <a-menu-item v-for="(item, index) in aiTypeList" :key="index" :value="item.value">
-                      {{ item.value }}
+                    <a-menu-item v-for="(item, index) in aiType" :key="index" :value="item">
+                      {{ item }}
                     </a-menu-item>
                   </a-menu>
                   <a-button style="padding: 0 5px"> <a-icon type="ellipsis" /> </a-button>
@@ -139,7 +139,12 @@
               </div>
               <div class="ai-response" v-if="AIresponse">
                 <div class="ai-title">{{ aiType }}</div>
-                <a-textarea style="height: calc(70vh - 140px)" v-model="AIresponse" :auto-size="true" :disabled="true" />
+                <a-textarea
+                  style="height: calc(70vh - 140px)"
+                  v-model="AIresponse"
+                  :auto-size="true"
+                  :disabled="true"
+                />
               </div>
             </div>
             <div class="loading-zezao" v-if="clickInAI">
@@ -160,11 +165,67 @@
               />
             </div>
           </div>
+          <div class="footer-btns">
+            <a-button class="normal-btn" @click="toAI"
+              ><img style="width: 22px; height: 25px" src="@/assets/images/AI-icon.png" alt="dark" />AI生成</a-button
+            >
+            <a-popconfirm
+              style="margin-left: 15px"
+              v-if="AIresponse"
+              :disabled="editLoading"
+              placement="top"
+              ok-text="确定"
+              cancel-text="取消"
+              @confirm="transfromText"
+            >
+              <template slot="title">
+                <div>是否将AI内容替换到修改编辑内容中?</div>
+              </template>
+              <a-button class="normal-btn" @click="transfromText"
+                ><img style="width: 22px; height: 25px" src="@/assets/images/AI-icon.png" alt="dark" />替换</a-button
+              >
+            </a-popconfirm>
+          </div>
         </a-col>
         <a-col :span="11">
           <a-spin :spinning="editLoading">
-            <a-textarea style="height: 70vh" v-model="changeContent" :auto-size="true" />
+            <a-textarea style="height: 68vh" v-model="changeContent" :auto-size="true" />
           </a-spin>
+          <div class="footer-btns">
+            <a-tooltip placement="top" style="margin-right: 10px">
+              <template slot="title">
+                <span>新增结论</span>
+              </template>
+              <a-popconfirm
+                :disabled="editLoading"
+                placement="top"
+                ok-text="新增结论"
+                cancel-text="取消"
+                @confirm="addModalResult"
+              >
+                <template slot="title">
+                  <div>是否新增模板结论?</div>
+                  <div>注意：进行新增模板结论会清空当前编辑框内容。</div>
+                </template>
+                <a-button class="normal-btn">+ 新增</a-button>
+              </a-popconfirm>
+            </a-tooltip>
+            <a-button style="margin-right: 10px" class="normal-btn" icon="save" @click="setContentPop = true"
+              >另存版本</a-button
+            >
+            <a-popconfirm
+              :disabled="editLoading"
+              placement="top"
+              ok-text="应用结论"
+              cancel-text="取消"
+              @confirm="applyChanges"
+            >
+              <template slot="title">
+                <div>是否应用?</div>
+              </template>
+              <a-button class="normal-btn" icon="check">应用到报告</a-button>
+            </a-popconfirm>
+          </div>
         </a-col>
         <!-- <a-col :span="6" class="history-box">
           <div class="history-title">历史版本</div>
@@ -218,6 +279,7 @@ import {
   getModalList,
   toAi,
   getAIConfig,
+  getAIType,
 } from '@/api/report'
 import { colorList } from '@/config/constants'
 import { aiTypeList } from './util'
@@ -254,7 +316,13 @@ export default {
       contentDesc: null,
       aiExspend: false,
       isExpend: false,
+      aiType: [],
     }
+  },
+  created() {
+    getAIType(this.reportDetail.creditCode).then((res) => {
+      this.aiType = res.data
+    })
   },
   mounted() {
     const { $notification } = this
@@ -281,6 +349,9 @@ export default {
     },
   },
   methods: {
+    transfromText() {
+      this.changeContent = this.AIresponse
+    },
     menuChoose(v) {
       this.aiType = v.item.value
       const parameter = {
@@ -644,7 +715,7 @@ export default {
   }
   .ai-expend {
     background-color: #fff;
-    height: calc(70vh - 28px);
+    height: calc(68vh - 28px);
     width: 100%;
     border: 1px solid #e5e7eb;
   }
@@ -691,13 +762,21 @@ export default {
     color: #adb0b8;
   }
 }
-.ai-response{
+.ai-response {
   padding: 0 15px;
-  .ai-title{
+  .ai-title {
     font-size: 14px;
     color: #000;
     font-weight: bold;
     padding-bottom: 15px;
+  }
+}
+.footer-btns {
+  padding: 10px;
+  display: flex;
+  justify-content: flex-end;
+  .ai-btn {
+    margin-left: 10px;
   }
 }
 </style>

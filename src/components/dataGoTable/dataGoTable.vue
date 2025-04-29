@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-03-23 11:47:16
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-29 11:44:50
+ * @LastEditTime: 2025-04-29 19:42:03
  * @FilePath: /report-background-system/src/components/dataGoTable/dataGoTable.vue
  * @Description: 
  * 
@@ -31,8 +31,15 @@
             <a-button v-else type="line" style="color: #448ef7" icon="check-circle" @click="uploadLine(scoped)" />
           </div>
           <div v-else>
-            <div v-if="!canEdit">{{ text }}</div>
-            <div v-if="canEdit && !scoped.canEdit">
+            <div v-if="canEdit && scoped.canEdit">
+              <a-input
+                v-model="scoped[item.key]"
+                :data-key="item.key"
+                :data-id="scoped.id"
+                @change="handleInputChange"
+              />
+            </div>
+            <div v-else-if="canEdit && !scoped.canEdit">
               <a-tooltip>
                 <template slot="title">
                   <span>{{ text }}</span>
@@ -41,12 +48,7 @@
               </a-tooltip>
             </div>
             <div v-else>
-              <a-input
-                v-model="scoped[item.key]"
-                :data-key="item.key"
-                :data-id="scoped.id"
-                @change="handleInputChange"
-              />
+              {{ text }}
             </div>
           </div>
         </div>
