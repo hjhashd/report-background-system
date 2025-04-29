@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-04-26 13:52:52
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-26 19:57:38
- * @FilePath: \report-background-system\src\components\UploadFileTab\index.vue
+ * @LastEditTime: 2025-04-29 15:07:15
+ * @FilePath: /report-background-system/src/components/UploadFileTab/index.vue
  * @Description: 
  * 
 -->
@@ -22,12 +22,12 @@
             :customRequest="uploadFile"
             :showUploadList="false"
             :multiple="true"
-            accept=".doc,.docx,image/*,.pdf,.xlsx,.xls"
+            accept=".xlsx,.xls"
           >
             <div class="table-upload-btn">
               <a-icon type="upload" style="color: #3b82f6; font-size: 24px" />
               <div class="upload-txt-1">点击或拖拽文件到此处上传</div>
-              <div class="upload-txt-2">支持 Excel、CSV 等格式</div>
+              <div class="upload-txt-2">支持 Excel 格式</div>
             </div>
           </a-upload>
           <div class="upload-list-show" v-if="fileList.length">
@@ -220,14 +220,13 @@ export default {
                 uploadTableFiedls.push(item)
               } else {
                 const fE = this.excelData.find((i) => i.fieldNameCh == item)
-                mapping[item] = fE.fieldNameCh
+                mapping[item] = fE ? fE.fieldNameCh : this.excelData[0].fieldNameCh
                 uploadTableFiedls.push({
                   fieldName: item,
                   fieldNameCh: item,
                 })
               }
             })
-            console.log(mapping)
             this.uploadTableFiedls = uploadTableFiedls
             this.mapping = mapping
             this.selectTab = tabType[1]
@@ -281,6 +280,7 @@ export default {
       this.mapping = {}
     },
     closePop() {
+      this.resetData()
       this.$emit('closePop')
     },
     update() {
@@ -303,7 +303,6 @@ export default {
           if (specialTable.includes(tableNameZh)) {
             // 特殊化处理
             this.excelData = await specialTableDeal(excelData)
-            console.log(this.excelData)
           } else {
             this.excelData = await normalTableDeal(excelData)
           }

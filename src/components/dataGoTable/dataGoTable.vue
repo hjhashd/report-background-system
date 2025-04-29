@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-03-23 11:47:16
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-27 19:44:06
+ * @LastEditTime: 2025-04-29 11:44:50
  * @FilePath: /report-background-system/src/components/dataGoTable/dataGoTable.vue
  * @Description: 
  * 
@@ -122,9 +122,7 @@ export default {
         } else {
           this.hasFirstLoad = false
           const reObj = dealTable(result.rows, this.canEdit)
-          if (!this.columns.length) {
-            this.columns = reObj.columns
-          }
+          this.columns = reObj.columns
           this.tableData = reObj.reData
           this.pagination.total = result.total
         }

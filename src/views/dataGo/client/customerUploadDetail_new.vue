@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-04-27 11:52:54
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-27 18:56:15
+ * @LastEditTime: 2025-04-29 14:32:26
  * @FilePath: /report-background-system/src/views/dataGo/client/customerUploadDetail_new.vue
  * @Description: 
  * 
@@ -132,6 +132,7 @@
     <!-- 重新上传 -->
     <a-modal v-model="uploadStatus" width="80vw" :title="'更新' + clickItem?.tableNameZh" :footer="null">
       <upload-file-tab
+        ref="uploadPop"
         :customerInfo="customerInfo"
         :clickItem="clickItem"
         @closePop="uploadStatus = false"
@@ -229,6 +230,15 @@ export default {
   },
   mounted() {
     this.uploadMutilData = classifyDataByClassName(this.customerUploadList)
+  },
+  watch: {
+    uploadStatus: {
+      handler(v) {
+        if (!v) {
+          this.$refs.uploadPop.resetData()
+        }
+      },
+    },
   },
   methods: {
     ...mapActions(['changeBuildQrCodePop']),

@@ -1,3 +1,12 @@
+/*
+ * @Author: bekon
+ * @Date: 2025-04-27 11:52:54
+ * @LastEditors: bekon
+ * @LastEditTime: 2025-04-29 15:00:33
+ * @FilePath: /report-background-system/src/components/UploadFileTab/util.js
+ * @Description: 
+ * 
+ */
 export async function specialTableDeal(data) {
     const dealingData = JSON.parse(data)
     console.log("进入特殊化", dealingData)
@@ -7,7 +16,7 @@ export async function specialTableDeal(data) {
         "fieldNameCh": '--不匹配---'
     }]
     dealingData.forEach((i, index) => {
-        if (index > 1 && i.length > 1) {
+        if (index > 1 && i.length > 1 && reField.findIndex(u => u.fieldName == i[0]) == -1) {
             reField.push({
                 "fieldName": i[0],
                 "fieldNameCh": i[0]
