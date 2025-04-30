@@ -491,7 +491,7 @@ export default {
             }
           })
         : ''
-      formData.append('clientFiles', appChooseList ? JSON.stringify(appChooseList) : null)
+      formData.append('clientFiles', appChooseList ? JSON.stringify(appChooseList) : '')
       dUploadFile(formData).then((res) => {
         this.tableUploadPop = false
         if (res.code && res.code == 200) {
