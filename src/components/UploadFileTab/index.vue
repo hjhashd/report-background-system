@@ -177,13 +177,15 @@ export default {
       // 最后一步
       this.selectTab = this.tabType[2]
       let pickFieldsData = []
+      console.log(this.excelData)
       for (const key in this.mapping) {
+        console.log(key)
         if (Object.prototype.hasOwnProperty.call(this.mapping, key)) {
           const sysEn = this.uploadTableFiedls.find((u) => u.fieldNameCh == key)
             ? this.uploadTableFiedls.find((u) => u.fieldNameCh == key).fieldName
             : null
-          const excelEn = this.excelData.find((u) => u.fieldNameCh == key)
-            ? this.excelData.find((u) => u.fieldNameCh == key).fieldName
+          const excelEn = this.excelData.find((u) => u.fieldNameCh == this.mapping[key])
+            ? this.excelData.find((u) => u.fieldNameCh == this.mapping[key]).fieldName
             : null
           const element = this.mapping[key]
           pickFieldsData.push({
