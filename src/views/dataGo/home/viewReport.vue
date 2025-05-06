@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-29 21:36:31
+ * @LastEditTime: 2025-05-06 15:06:52
  * @FilePath: /report-background-system/src/views/dataGo/home/viewReport.vue
  * @Description: 报告预览
  * 
@@ -350,42 +350,44 @@ export default {
       // 打开全屏
       this.fullView = true
       this.setFullScreen(this.fullView)
-      const reportViewDetail = this.$refs.reportViewDetail
-      if (reportViewDetail) {
-        if (reportViewDetail.requestFullscreen) {
-          reportViewDetail.requestFullscreen()
-        } else if (reportViewDetail.webkitRequestFullscreen) {
-          reportViewDetail.webkitRequestFullscreen()
+      this.$nextTick(() => {
+        const reportViewDetail = document.getElementById('htmlBody')
+        if (reportViewDetail) {
+          if (reportViewDetail.requestFullscreen) {
+            reportViewDetail.requestFullscreen()
+          } else if (reportViewDetail.webkitRequestFullscreen) {
+            reportViewDetail.webkitRequestFullscreen()
+          }
         }
-      }
-      // 监听全屏状态变化
-      const handleFullscreenChange = () => {
-        if (document.fullscreenElement === reportViewDetail) {
-          // 进入全屏后重新计算编辑器高度
-          setTimeout(() => {
-            this.$nextTick(() => {
-              const editors = this.$refs.editorContainerRef
-              if (editors) {
-                this.editorHeight = editors.offsetHeight + 'px'
-              }
-            })
-          }, 200)
-        } else {
-          // 退出全屏后恢复正常高度
-          this.fullView = false
-          this.setFullScreen(this.fullView)
-          setTimeout(() => {
-            this.$nextTick(() => {
-              const editors = this.$refs.editorContainerRef
-              if (editors) {
-                this.editorHeight = editors.offsetHeight + 'px'
-              }
-            })
-          }, 200)
+        // 监听全屏状态变化
+        const handleFullscreenChange = () => {
+          if (document.fullscreenElement === reportViewDetail) {
+            // 进入全屏后重新计算编辑器高度
+            setTimeout(() => {
+              this.$nextTick(() => {
+                const editors = this.$refs.editorContainerRef
+                if (editors) {
+                  this.editorHeight = editors.offsetHeight + 'px'
+                }
+              })
+            }, 200)
+          } else {
+            // 退出全屏后恢复正常高度
+            this.fullView = false
+            this.setFullScreen(this.fullView)
+            setTimeout(() => {
+              this.$nextTick(() => {
+                const editors = this.$refs.editorContainerRef
+                if (editors) {
+                  this.editorHeight = editors.offsetHeight + 'px'
+                }
+              })
+            }, 200)
+          }
         }
-      }
-      document.addEventListener('fullscreenchange', handleFullscreenChange)
-      document.addEventListener('webkitfullscreenchange', handleFullscreenChange)
+        document.addEventListener('fullscreenchange', handleFullscreenChange)
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange)
+      })
     },
     closeViewPort() {
       // 退出全屏
@@ -394,11 +396,13 @@ export default {
       } else if (document.webkitExitFullscreen) {
         document.webkitExitFullscreen()
       }
-      this.$nextTick(() => {
-        const editors = this.$refs.editorContainerRef
-        if (editors) {
-          this.editorHeight = editors.offsetHeight + 'px'
-        }
+      setTimeout(() => {
+        this.$nextTick(() => {
+          const editors = this.$refs.editorContainerRef
+          if (editors) {
+            this.editorHeight = editors.offsetHeight + 'px'
+          }
+        })
       })
     },
     updateReportData() {

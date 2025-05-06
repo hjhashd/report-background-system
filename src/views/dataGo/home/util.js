@@ -231,6 +231,7 @@ export const columns = [
         title: '操作',
         key: 'action',
         width: '120px',
+        align: 'left',
         scopedSlots: { customRender: 'action' },
     },
 ]

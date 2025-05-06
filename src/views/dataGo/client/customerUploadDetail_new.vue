@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-04-27 11:52:54
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-29 20:07:43
+ * @LastEditTime: 2025-05-06 13:58:09
  * @FilePath: /report-background-system/src/views/dataGo/client/customerUploadDetail_new.vue
  * @Description: 
  * 
@@ -93,9 +93,9 @@
                 <span v-else>上传</span>
               </a-button>
             </a-tooltip>
-            <a-tooltip v-else-if="scope.dataType !== 'upload' && scope.status == 0" style="margin-right: 10px">
+            <a-tooltip v-else-if="scope.dataType !== 'upload'" style="margin-right: 10px">
               <template slot="title">
-                <span>授权</span>
+                <span>{{ scope.status == 0 ? '授权' : '重新采集' }}</span>
               </template>
               <a-button
                 @click="toDealFun('redo')"
@@ -105,7 +105,7 @@
                   style="width: 25px; height: 22px; margin-right: 5px"
                   src="@/assets/images/caiji.png"
                   alt="dark"
-                /><span>授权</span>
+                /><span>{{ scope.status == 0 ? '授权' : '重新采集' }}</span>
               </a-button>
             </a-tooltip>
             <a-tooltip v-if="scope.dataType === 'upload'" style="margin-right: 10px">

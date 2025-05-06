@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-26 11:22:54
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-14 23:41:47
+ * @LastEditTime: 2025-05-06 14:36:32
  * @FilePath: /report-background-system/src/views/dataGo/home/viewCustomerData.vue
  * @Description: 
  * 
@@ -38,7 +38,18 @@
           </div>
         </div>
       </div>
-      <div class="upload-data-box" :style="{ height: '60vh' }" v-if="customerUploadList">
+      <div class="type-tab" v-if="customerUploadList">
+        <div
+          class="tab-item flex-1"
+          :class="{ 'tab-active': selectTab == item.value }"
+          v-for="item in tableType"
+          :key="item.value"
+          @click="changeTab(item)"
+        >
+          {{ item.name }}
+        </div>
+      </div>
+      <div class="upload-data-box" :style="{ height: '58vh' }" v-if="customerUploadList">
         <customer-upload-detail-new
           :customerUploadList="customerUploadList"
           :customerInfo="queryParams"
@@ -76,11 +87,28 @@ import { customerData } from '@/api/report'
 import CustomerUploadDetailNew from '../client/customerUploadDetail_new.vue'
 import { buildReport } from '@/api/report'
 import { getCurrentDate, getCurrentTime } from './util'
+const tableType = [
+  // 新增dataType字段，crwal 自动采集 upload 上传数据 other 其他授权
+  {
+    name: '上传数据',
+    value: 'upload',
+  },
+  {
+    name: '自动采集',
+    value: 'crwal',
+  },
+  {
+    name: '其他授权',
+    value: 'other',
+  },
+]
 export default {
   name: 'viewCustomerData',
   components: { CustomerUploadDetailNew },
   data() {
     return {
+      tableType,
+      selectTab: tableType[0].value,
       customers: [],
       customerUploadList: null,
       queryParams: null,
@@ -106,8 +134,13 @@ export default {
     this.reportName = `${this.queryParams.enterpriseName}_${reportTypeName}_${nowTime}`
   },
   methods: {
+    changeTab(v) {
+      this.selectTab = v.value
+      this.initData()
+    },
     initData() {
       const query = {
+        dataType: this.selectTab,
         creditCode: this.queryParams.creditCode,
         reportType: this.$route.query && this.$route.query.reportType ? parseInt(this.$route.query.reportType) : null,
         template: this.$route.query && this.$route.query.template ? JSON.parse(this.$route.query.template) : null,
@@ -229,6 +262,20 @@ export default {
     font-size: 20px;
     font-weight: bold;
     margin-bottom: 20px;
+  }
+}
+.type-tab {
+  display: flex;
+  text-align: center;
+  border-radius: 8px 8px 0 0;
+  height: 40px;
+  line-height: 40px;
+  overflow: hidden;
+  cursor: pointer;
+  .tab-active {
+    height: 100%;
+    line-height: 40px;
+    background-color: #fff;
   }
 }
 </style>

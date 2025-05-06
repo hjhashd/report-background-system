@@ -8,54 +8,65 @@
         <div class="flex-1">
           <div class="p-1">数据编辑需要先上传证明材料</div>
           <div class="p-1 p-2">为确保数据的真实性和可靠性，编辑自动采集的数据需要先上传相关证明材料。</div>
-          <div class="p-1 p-2">支持的文件格式：PDF、Word文档、JPG/PNG图片（最大10MB）</div>
-          <a-upload
-            :name="clickItem?.dataItem || ''"
-            :customRequest="uploadFile"
-            :showUploadList="false"
-            :multiple="true"
-            accept=".doc,.docx,image/*,.pdf,.xlsx,.xls"
-          >
-            <div class="table-upload-btn">
-              <img
-                style="width: 38px; height: 36px; margin-bottom: 10px"
-                src="@/assets/images/upload-file.png"
-                alt="dark"
-              />
-              <div class="upload-txt-1">点击选择证明材料</div>
-              <div class="upload-txt-2">或拖放文件到此处</div>
-            </div>
-          </a-upload>
-          <div class="flex uploaded-show" v-if="fileList.length">
-            <div class="flex-1">
-              <div class="uploaded-file" v-for="(i, index) in fileList" :key="index">
-                <div class="ppp">
-                  <a-icon type="file-text" style="color: #3b82f6; font-size: 18px" /><span>{{
-                    i.name || i.fileName
-                  }}</span>
-                </div>
-                <a-popconfirm
-                  title="是否确定删除已上传文件?"
-                  ok-text="确定"
-                  cancel-text="取消"
-                  @confirm="deleteUploadFile(i)"
-                >
-                  <a-button :style="{ color: '#7fbbf1', border: 'none', padding: 0 }">
-                    <img style="width: 16px; height: 18px" src="@/assets/images/delete.png" alt="dark" />
-                  </a-button>
-                </a-popconfirm>
-              </div>
-            </div>
-            <a-button type="primary" icon="upload" :style="{ border: 'none' }" @click="confirmUpload">
-              确定上传
-            </a-button>
+          <div class="flex-row-spacebetween p-1 p-2">
+            <span>支持的文件格式：PDF、Word文档、JPG/PNG图片（最大10MB）</span>
+            <a-button
+              :class="{ inouticon: !collapseCard }"
+              type="link"
+              icon="down"
+              style="color: #3149ad"
+              @click="collapseCard = !collapseCard"
+            />
           </div>
-          <div v-if="hasUploadFile">
-            <div class="show-sue">
-              <a-icon
-                type="check-circle"
-                style="color: #5c9463; font-size: 18px; margin-right: 10px"
-              />证明材料已上传，现在您可以编辑数据了
+          <div :class="{ closeCard: collapseCard }">
+            <a-upload
+              :name="clickItem?.dataItem || ''"
+              :customRequest="uploadFile"
+              :showUploadList="false"
+              :multiple="true"
+              accept=".doc,.docx,image/*,.pdf,.xlsx,.xls"
+            >
+              <div class="table-upload-btn">
+                <img
+                  style="width: 38px; height: 36px; margin-bottom: 10px"
+                  src="@/assets/images/upload-file.png"
+                  alt="dark"
+                />
+                <div class="upload-txt-1">点击选择证明材料</div>
+                <div class="upload-txt-2">或拖放文件到此处</div>
+              </div>
+            </a-upload>
+            <div class="flex uploaded-show" :class="{ closeCard: collapseCard }" v-if="fileList.length">
+              <div class="flex-1">
+                <div class="uploaded-file" v-for="(i, index) in fileList" :key="index">
+                  <div class="ppp">
+                    <a-icon type="file-text" style="color: #3b82f6; font-size: 18px" /><span>{{
+                      i.name || i.fileName
+                    }}</span>
+                  </div>
+                  <a-popconfirm
+                    title="是否确定删除已上传文件?"
+                    ok-text="确定"
+                    cancel-text="取消"
+                    @confirm="deleteUploadFile(i)"
+                  >
+                    <a-button :style="{ color: '#7fbbf1', border: 'none', padding: 0 }">
+                      <img style="width: 16px; height: 18px" src="@/assets/images/delete.png" alt="dark" />
+                    </a-button>
+                  </a-popconfirm>
+                </div>
+              </div>
+              <a-button type="primary" icon="upload" :style="{ border: 'none' }" @click="confirmUpload">
+                确定上传
+              </a-button>
+            </div>
+            <div v-if="hasUploadFile">
+              <div class="show-sue">
+                <a-icon
+                  type="check-circle"
+                  style="color: #5c9463; font-size: 18px; margin-right: 10px"
+                />证明材料已上传，现在您可以编辑数据了
+              </div>
             </div>
           </div>
         </div>
@@ -127,6 +138,7 @@ export default {
       loadingb: false,
       clickItem: null,
       hasUploadFile: false,
+      collapseCard: false,
       fileList: [],
       uploadedList: [],
       showFileList: [],
@@ -281,5 +293,14 @@ export default {
   display: flex;
   align-items: center;
   background-color: #f2fdf5;
+}
+.inouticon {
+  transform: rotate(-180deg);
+  transition: 0.5s ease-in-out;
+}
+.closeCard {
+  overflow: hidden;
+  height: 0;
+  transition: 0.5s ease-in-out;
 }
 </style>

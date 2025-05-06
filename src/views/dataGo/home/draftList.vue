@@ -69,7 +69,10 @@
             <template slot="title">
               <span>查看</span>
             </template>
-            <a-button @click="handleChat(scoped)" :style="{ color: '#7fbbf1', border: 'none', padding: 0 }">
+            <a-button
+              @click="handleChat(scoped)"
+              :style="{ color: '#7fbbf1', border: 'none', padding: 0, margin: '0 5px' }"
+            >
               <img style="width: 28px; height: 28px" src="@/assets/images/see.png" alt="dark" />
             </a-button>
           </a-tooltip>
@@ -78,7 +81,7 @@
               <template slot="title">
                 <span>删除</span>
               </template>
-              <a-button :style="{ color: '#7fbbf1', border: 'none', padding: 0, 'margin-left': '10px' }">
+              <a-button :style="{ color: '#7fbbf1', border: 'none', padding: 0, margin: '0 5px' }">
                 <img style="width: 22px; height: 22px" src="@/assets/images/delete.png" alt="dark" />
               </a-button>
             </a-tooltip>

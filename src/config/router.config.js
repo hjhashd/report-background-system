@@ -20,7 +20,7 @@ export const asyncRouterMap = [
         name: 'home',
         redirect: 'homePage/qrCodeList',
         component: RouteView,
-        meta: {title: 'menu.dataReady', keepAlive: true, icon: 'database', permission: ['home']},
+        meta: { title: 'menu.dataReady', keepAlive: true, icon: 'database', permission: ['home'] },
         children: [
           {
             path: '/homePage/qrCodeList',
@@ -40,12 +40,6 @@ export const asyncRouterMap = [
             name: 'anomaly',
             component: () => import('@/views/dataGo/anomaly'),
             meta: { title: 'menu.anomaly', keepAlive: true, icon: "file-exclamation", permission: ['anomaly'] }
-          },
-          {
-            path: '/readWordPage/index',
-            name: 'readWord',
-            component: () => import('@/views/dataGo/readWord'),
-            meta: { title: 'menu.readWord', keepAlive: true, icon: 'container', permission: ['readWord'] }
           },
         ]
       },
@@ -99,7 +93,7 @@ export const asyncRouterMap = [
             name: 'viewCustomerData',
             hidden: true,
             component: () => import('@/views/dataGo/home/viewCustomerData'),
-            meta: { title: 'menu.uploadData', keepAlive: false, permission: ['home'] }
+            meta: { title: 'menu.checkData', keepAlive: false, permission: ['home'] }
           },
         ]
       },
@@ -108,7 +102,7 @@ export const asyncRouterMap = [
         name: 'other',
         redirect: 'overviewPage/index',
         component: RouteView,
-        meta: {title: 'menu.other', keepAlive: true, icon: 'calendar', permission: ['home']},
+        meta: { title: 'menu.other', keepAlive: true, icon: 'calendar', permission: ['home'] },
         children: [
           {
             path: '/overviewPage/index',
@@ -116,6 +110,12 @@ export const asyncRouterMap = [
             component: () => import('@/views/dataGo/overview'),
             // meta: { title: 'menu.overview', keepAlive: true, icon: 'a-bianzu9', permission: ['overview'] }
             meta: { title: 'menu.overview', keepAlive: true, icon: 'bar-chart', permission: ['overview'] }
+          },
+          {
+            path: '/readWordPage/index',
+            name: 'readWord',
+            component: () => import('@/views/dataGo/readWord'),
+            meta: { title: 'menu.readWord', keepAlive: true, icon: 'container', permission: ['readWord'] }
           },
         ]
       },

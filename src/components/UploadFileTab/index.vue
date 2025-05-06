@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-04-26 13:52:52
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-29 19:23:20
+ * @LastEditTime: 2025-05-06 13:51:51
  * @FilePath: /report-background-system/src/components/UploadFileTab/index.vue
  * @Description: 
  * 
@@ -51,7 +51,7 @@
         </div>
         <div class="flex footer-btn">
           <a-button class="pop-btn" @click="closePop"> 取消 </a-button>
-          <a-button class="pop-btn black-style" @click="analysisFile"> 文件解析 </a-button>
+          <a-button class="pop-btn black-style" @click="analysisFile"> 文件上传 </a-button>
         </div>
       </div>
       <div v-else-if="selectTab == tabType[1]">
@@ -115,7 +115,7 @@
         </div>
         <div class="flex footer-btn">
           <a-button class="pop-btn" @click="preStep"> 返回调整 </a-button>
-          <a-button class="pop-btn green-style" @click="importToDatabase"> 确定导入数据库 </a-button>
+          <a-button class="pop-btn green-style" @click="importToDatabase"> 导入 </a-button>
         </div>
       </div>
     </a-spin>
