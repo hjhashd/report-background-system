@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-02-19 16:51:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-26 22:32:26
- * @FilePath: \report-background-system\src\components\buildQRCode\buildQRCode.vue
+ * @LastEditTime: 2025-05-06 16:56:45
+ * @FilePath: /report-background-system/src/components/buildQRCode/buildQRCode.vue
  * @Description: 
  * 
 -->
@@ -32,6 +32,19 @@
               </a-select-option>
             </a-select>
           </div>
+          <div class="form-item">
+            <a-select
+              showSearch
+              style="width: 80%"
+              placeholder="选择客户"
+              @change="uploadCustomerHandle"
+              :filter-option="filterOption"
+            >
+              <a-select-option :value="item.userId" v-for="item in customerList" :key="item.userId">
+                {{ item.userName }}
+              </a-select-option>
+            </a-select>
+          </div>
           <div v-if="activeTab === 1" class="tab-content">
             <div class="data-need">
               <label>需求数据：</label>
@@ -43,19 +56,6 @@
             </div>
           </div>
           <div v-if="activeTab === 2" class="tab-content">
-            <div class="form-item">
-              <a-select
-                showSearch
-                style="width: 80%"
-                placeholder="选择客户"
-                @change="uploadCustomerHandle"
-                :filter-option="filterOption"
-              >
-                <a-select-option :value="item.userId" v-for="item in customerList" :key="item.userId">
-                  {{ item.userName }}
-                </a-select-option>
-              </a-select>
-            </div>
             <div class="form-item">
               <a-select style="width: 80%" placeholder="选择上传数据" @change="uploadTypeHandle" mode="multiple">
                 <a-select-option :value="item.id" v-for="item in dataType" :key="item.id">
