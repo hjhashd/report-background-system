@@ -7,6 +7,8 @@
     :handleMediaQuery="handleMediaQuery"
     :handleCollapse="handleCollapse"
     :i18nRender="i18nRender"
+    :open-keys="openKeys"
+    @openChange="onOpenChange"
     v-bind="settings"
   >
     <template v-slot:menuHeaderRender>
@@ -103,6 +105,7 @@ export default {
       isDev: process.env.NODE_ENV === 'development' || process.env.VUE_APP_PREVIEW === 'true',
       // base
       menus: [],
+      openKeys: [],
       // 侧栏收起状态
       // collapsed: false,
       title: defaultSettings.title,
@@ -140,6 +143,7 @@ export default {
   created() {
     const routes = this.mainMenu.find((item) => item.path === '/')
     this.menus = (routes && routes.children) || []
+    this.openKeys = this.menus[0] ? [this.menus[0].path] : []
     // 处理侧栏收起状态
     this.$watch('collapsed', () => {
       this.$store.commit(SIDEBAR_TYPE, this.collapsed)
@@ -168,6 +172,15 @@ export default {
   methods: {
     ...mapActions(['changeBuildQrCodePop', 'getOverView', 'setCollapsed']),
     i18nRender,
+    onOpenChange(openKeys) {
+      const latestOpenKey = openKeys.find((key) => this.openKeys.indexOf(key) === -1)
+      const rootSubmenuKeys = this.menus.map((u) => u.path)
+      if (rootSubmenuKeys.indexOf(latestOpenKey) === -1) {
+        this.openKeys = openKeys
+      } else {
+        this.openKeys = latestOpenKey ? [latestOpenKey] : []
+      }
+    },
     handleMediaQuery(val) {
       this.query = val
       if (this.isMobile && !val['screen-xs']) {

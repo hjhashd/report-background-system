@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-05-06 15:06:52
+ * @LastEditTime: 2025-05-08 17:45:51
  * @FilePath: /report-background-system/src/views/dataGo/home/viewReport.vue
  * @Description: 报告预览
  * 
@@ -475,7 +475,7 @@ export default {
       this.openDataYC = true
     },
     saveAsDraft() {
-      const { $notification } = this
+      const { $notification, $router } = this
       this.pageLoading = true
       this.reportName = null
       setDraftStatus(this.reportDetail.id, this.otherSaveReportName)
@@ -488,9 +488,13 @@ export default {
           this.$refs.editorR.refreshEditor()
           $notification['success']({
             message: '通知：',
-            description: `另存为草稿成功`,
+            description: `${this.otherSaveReportName}，另存为草稿成功`,
             duration: 6,
           })
+          setTimeout(() => {
+            // 去草稿
+            $router.push({ path: '/homePage/draftList' })
+          }, 500)
         })
         .catch((err) => {
           this.pageLoading = false

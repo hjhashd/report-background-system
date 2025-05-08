@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-29 22:19:01
+ * @LastEditTime: 2025-05-08 19:02:57
  * @FilePath: /report-background-system/src/views/dataGo/anomaly/innerContent.vue
  * @Description: 
  * 
@@ -110,7 +110,7 @@
                   </div>
                 </template>
                 <template slot="uploadFile" slot-scope="text, scoped">
-                  <div v-for="(i, index) in scoped.fileList" :key="index">
+                  <div class="flex-row-spacebetween" v-for="(i, index) in scoped.fileList" :key="index">
                     <span>{{ i.fileName }}</span
                     ><a-popconfirm
                       title="是否确定删除已上传文件?"

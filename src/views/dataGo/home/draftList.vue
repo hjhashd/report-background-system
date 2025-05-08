@@ -4,8 +4,16 @@
       <div class="flex">
         <div class="flex flex-center" style="margin-right: 20px">
           <div class="right-item-title">报告类型：</div>
-          <a-select v-model="draftTypeSelected" style="width: 200px" @change="selectChange" :allowClear="true">
+          <a-select v-model="draftTypeSelected" style="width: 150px" @change="selectChange" :allowClear="true">
             <a-select-option v-for="item in reportTypeList" :key="item.type" :value="item.type">
+              {{ item.name }}
+            </a-select-option>
+          </a-select>
+        </div>
+        <div class="flex flex-center" style="margin-right: 20px">
+          <div class="right-item-title">报告状态：</div>
+          <a-select v-model="draftStatus" style="width: 150px" @change="selectChange" :allowClear="true">
+            <a-select-option v-for="item in draftStatusList" :key="item.type" :value="item.type">
               {{ item.name }}
             </a-select-option>
           </a-select>
@@ -60,6 +68,7 @@
         <template slot="genStatus" slot-scope="text, scoped">
           <span v-if="text == 1" class="table-status status1">已完成</span>
           <span v-else-if="text == 0"> 生成中 </span>
+          <span v-else-if="text == 3"> 更新中 </span>
           <span class="table-status status4" v-else>生成失败</span>
           <a-badge
             :offset="[-3, 5]"
@@ -128,6 +137,24 @@ const reportTypeList = [
     name: '能耗分析报告',
   },
 ]
+const draftStatusList = [
+  {
+    type: 1,
+    name: '已完成',
+  },
+  {
+    type: 0,
+    name: '生成中',
+  },
+  {
+    type: 3,
+    name: '更新中',
+  },
+  {
+    type: 2,
+    name: '生成失败',
+  },
+]
 import { mapState } from 'vuex'
 import { reportList, deleteReport, batchDeleteReport } from '@/api/report'
 import { STable } from '@/components'
@@ -146,8 +173,10 @@ export default {
       udt: false,
       columns,
       draftTypeSelected: null,
+      draftStatus: null,
       search: null,
       reportTypeList,
+      draftStatusList,
       uploadTableList: [],
       expandedRowKeys: [],
       // 查询参数
@@ -161,6 +190,7 @@ export default {
           pageNum: parameter.pageNo,
           reportName: this.search,
           reportType: this.draftTypeSelected,
+          genStatus: this.draftStatus,
         })
         if (parameter.pageSize !== this.queryParam.pageSize) {
           requestParameters.pageNo = 1

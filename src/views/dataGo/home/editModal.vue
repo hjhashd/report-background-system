@@ -171,8 +171,7 @@
             >
             <a-popconfirm
               style="margin-left: 15px"
-              v-if="AIresponse"
-              :disabled="editLoading"
+              :disabled="!AIresponse"
               placement="top"
               ok-text="确定"
               cancel-text="取消"
@@ -181,8 +180,8 @@
               <template slot="title">
                 <div>是否将AI内容替换到修改编辑内容中?</div>
               </template>
-              <a-button class="normal-btn" @click="transfromText"
-                ><img style="width: 22px; height: 25px" src="@/assets/images/AI-icon.png" alt="dark" />替换</a-button
+              <a-button :disabled="!AIresponse"
+                ><img style="width: 20px; height: 20px" src="@/assets/images/cy.png" alt="dark" />替换</a-button
               >
             </a-popconfirm>
           </div>
@@ -493,7 +492,8 @@ export default {
     },
     saveAs() {
       // 另存的逻辑，例如创建新的版本记录
-      const { $notification } = this
+      const { $notification, $confirm } = this
+      const _this = this
       // 内容
       if (!this.contentTitle) {
         $notification['info']({
@@ -520,28 +520,73 @@ export default {
         versionName: this.contentTitle,
         versionDesc: this.contentDesc,
       }
-      this.saveLoading = true
-      saveReportContent(query)
-        .then((res) => {
-          this.setContentPop = false
-          $notification['success']({
-            message: '通知：',
-            description: '操作成功',
-            duration: 8,
-          })
-          this.saveLoading = false
-          this.getModalContent()
+      // 判断是否已存在改版本名称
+      const pipeiM = this.modalContentList.findIndex((u) => {
+        return u.versionName == this.contentTitle
+      })
+      if (pipeiM !== -1) {
+        $confirm({
+          title: '另存为提醒',
+          content: `检测历史版本存在同名，请问是否覆盖另存？`,
+          okText: '确定',
+          cancelText: '取消',
+          onOk: () => {
+            _this.saveLoading = true
+            query.id = _this.modalContentList[pipeiM].id
+            saveReportContent(query)
+              .then((res) => {
+                _this.setContentPop = false
+                $notification['success']({
+                  message: '通知：',
+                  description: '操作成功',
+                  duration: 8,
+                })
+                _this.saveLoading = false
+                _this.getModalContent()
+              })
+              .catch((err) => {
+                _this.saveLoading = true
+                $notification['error']({
+                  message: '通知：',
+                  description: `操作失败：${err}`,
+                  duration: 8,
+                })
+                _this.saveLoading = false
+                _this.getModalContent()
+              })
+          },
+          onCancel() {
+            $notification['info']({
+              message: '通知：',
+              description: '当前版本名称已被占用，请更改后再提交。',
+              duration: 8,
+            })
+          },
         })
-        .catch((err) => {
-          this.saveLoading = true
-          $notification['error']({
-            message: '通知：',
-            description: `操作失败：${err}`,
-            duration: 8,
+      } else {
+        _this.saveLoading = true
+        query.id = saveReportContent(query)
+          .then((res) => {
+            _this.setContentPop = false
+            $notification['success']({
+              message: '通知：',
+              description: '操作成功',
+              duration: 8,
+            })
+            _this.saveLoading = false
+            _this.getModalContent()
           })
-          this.saveLoading = false
-          this.getModalContent()
-        })
+          .catch((err) => {
+            _this.saveLoading = true
+            $notification['error']({
+              message: '通知：',
+              description: `操作失败：${err}`,
+              duration: 8,
+            })
+            _this.saveLoading = false
+            _this.getModalContent()
+          })
+      }
     },
     deleteVersion(item) {
       const { $notification } = this
