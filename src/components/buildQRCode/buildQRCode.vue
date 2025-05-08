@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-19 16:51:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-05-06 16:56:45
+ * @LastEditTime: 2025-05-08 14:57:49
  * @FilePath: /report-background-system/src/components/buildQRCode/buildQRCode.vue
  * @Description: 
  * 
@@ -32,20 +32,11 @@
               </a-select-option>
             </a-select>
           </div>
-          <div class="form-item">
-            <a-select
-              showSearch
-              style="width: 80%"
-              placeholder="选择客户"
-              @change="uploadCustomerHandle"
-              :filter-option="filterOption"
-            >
-              <a-select-option :value="item.userId" v-for="item in customerList" :key="item.userId">
-                {{ item.userName }}
-              </a-select-option>
-            </a-select>
-          </div>
           <div v-if="activeTab === 1" class="tab-content">
+            <div class="form-item">
+              <a-input class="ant-select-selection" style="width: 80%" placeholder="输入企业名称" v-model="showCompany">
+              </a-input>
+            </div>
             <div class="data-need">
               <label>需求数据：</label>
               <div>
@@ -56,6 +47,19 @@
             </div>
           </div>
           <div v-if="activeTab === 2" class="tab-content">
+            <div class="form-item">
+              <a-select
+                showSearch
+                style="width: 80%"
+                placeholder="选择客户"
+                @change="uploadCustomerHandle"
+                :filter-option="filterOption"
+              >
+                <a-select-option :value="item.userId" v-for="item in customerList" :key="item.userId">
+                  {{ item.userName }}
+                </a-select-option>
+              </a-select>
+            </div>
             <div class="form-item">
               <a-select style="width: 80%" placeholder="选择上传数据" @change="uploadTypeHandle" mode="multiple">
                 <a-select-option :value="item.id" v-for="item in dataType" :key="item.id">
@@ -109,6 +113,10 @@
           <label>银行</label>
           <span>{{ reD.bankName1 }}-{{ reD.bankName2 }}</span>
         </a-col>
+        <a-col :span="24" class="qr-info-item" v-if="reD.showCompany">
+          <label>企业名称</label>
+          <span>{{ reD.showCompany }}</span>
+        </a-col>
         <a-col :span="24" class="qr-info-item">
           <label>用途</label>
           <span>{{ reD.useRemark | yongtuShow(this) }}</span>
@@ -160,6 +168,7 @@ export default {
       activeTab: 1,
       bank: '',
       usage: '',
+      showCompany: '',
       uploadData: [],
       dataTypes,
       selectedDataTypes: [],
@@ -237,6 +246,7 @@ export default {
         bankName2: this.userInfo.bankName2,
         bankId1: this.userInfo.bankId1,
         bankId2: this.userInfo.bankId2,
+        showCompany: this.showCompany || '',
       }
       if (this.activeTab === 2) {
         if (!(this.customer || this.usage || this.uploadData.length)) {

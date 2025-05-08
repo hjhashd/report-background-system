@@ -9,7 +9,7 @@
           <div class="p-1">数据编辑需要先上传证明材料</div>
           <div class="p-1 p-2">为确保数据的真实性和可靠性，编辑自动采集的数据需要先上传相关证明材料。</div>
           <div class="flex-row-spacebetween p-1 p-2">
-            <span>支持的文件格式：PDF、Word文档、JPG/PNG图片（最大10MB）</span>
+            <span>支持的文件格式：PDF、Word文档、JPG/PNG图片（最大100MB）</span>
             <a-button
               :class="{ inouticon: !collapseCard }"
               type="link"
@@ -149,11 +149,11 @@ export default {
       const { $notification } = this
       const { file, filename, onSuccess, onError } = options
       if (file) {
-        const maxSize = 10 * 1024 * 1024 // 10MB
+        const maxSize = 100 * 1024 * 1024 // 10MB
         if (file.size > maxSize) {
           $notification['warning']({
             message: '消息提示：',
-            description: `您上传的文件${filename}大小超过了10M`,
+            description: `您上传的文件${filename}大小超过了100M`,
             duration: 8,
           })
         } else {

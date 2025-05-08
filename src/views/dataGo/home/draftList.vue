@@ -1,28 +1,42 @@
 <template>
   <page-header-wrapper>
     <div class="flex home-part-title-right flex-1">
-      <div class="flex flex-center">
-        <div class="right-item-title">报告类型：</div>
-        <a-select v-model="draftTypeSelected" style="width: 200px" @change="selectChange" :allowClear="true">
-          <a-select-option v-for="item in reportTypeList" :key="item.type" :value="item.type">
-            {{ item.name }}
-          </a-select-option>
-        </a-select>
+      <div class="flex">
+        <div class="flex flex-center" style="margin-right: 20px">
+          <div class="right-item-title">报告类型：</div>
+          <a-select v-model="draftTypeSelected" style="width: 200px" @change="selectChange" :allowClear="true">
+            <a-select-option v-for="item in reportTypeList" :key="item.type" :value="item.type">
+              {{ item.name }}
+            </a-select-option>
+          </a-select>
+        </div>
+        <div class="flex flex-center">
+          <div class="right-item-title">报告查询：</div>
+          <a-input
+            v-model="search"
+            style="width: 200px"
+            placeholder="输入报告名称"
+            @blur="selectChange"
+            @pressEnter="selectChange"
+            :allowClear="true"
+          />
+        </div>
       </div>
-      <div class="flex flex-center">
-        <div class="right-item-title">报告查询：</div>
-        <a-input
-          v-model="search"
-          style="width: 200px"
-          placeholder="输入报告名称"
-          @blur="selectChange"
-          @pressEnter="selectChange"
-          :allowClear="true"
-        />
-      </div>
+      <a-popconfirm title="是否删除已选中二维码?" ok-text="是" cancel-text="否" @confirm="deleteMutil">
+        <a-button>批量删除</a-button>
+      </a-popconfirm>
     </div>
     <div class="table-contant tab-table">
-      <s-table ref="table" rowKey="key" :data="loadData" :columns="columns">
+      <s-table
+        ref="table"
+        :rowKey="(record) => record.id"
+        :data="loadData"
+        :columns="columns"
+        :row-selection="{
+          selectedRowKeys: expandedRowKeys,
+          onChange: rowChange,
+        }"
+      >
         <template slot="id" slot-scope="txt, scoped, index">{{
           (queryParam.pageNum - 1) * queryParam.pageSize + index + 1
         }}</template>
@@ -115,7 +129,7 @@ const reportTypeList = [
   },
 ]
 import { mapState } from 'vuex'
-import { reportList, deleteReport } from '@/api/report'
+import { reportList, deleteReport, batchDeleteReport } from '@/api/report'
 import { STable } from '@/components'
 import { baseMixin } from '@/store/app-mixin'
 import { columns } from './util'
@@ -135,6 +149,7 @@ export default {
       search: null,
       reportTypeList,
       uploadTableList: [],
+      expandedRowKeys: [],
       // 查询参数
       queryParam: {
         pageNum: 1,
@@ -195,6 +210,38 @@ export default {
     },
     selectChange() {
       this.$refs.table.refresh()
+    },
+    rowChange(_, selectedRows) {
+      this.expandedRowKeys = selectedRows.map((u) => u.id)
+    },
+    deleteMutil() {
+      const { $notification } = this
+      if (!this.expandedRowKeys.length) {
+        $notification['info']({
+          message: '通知：',
+          description: '未选中删除项',
+          duration: 8,
+        })
+        return
+      }
+      batchDeleteReport(this.expandedRowKeys).then((i) => {
+        if (i.code == 200) {
+          $notification['success']({
+            message: '通知：',
+            description: '删除成功',
+            duration: 8,
+          })
+          this.expandedRowKeys = []
+          this.$refs.table.refresh()
+        } else {
+          $notification['error']({
+            message: '通知：',
+            description: '删除失败' + i.msg,
+            duration: 8,
+          })
+          this.$refs.table.refresh()
+        }
+      })
     },
     deleteChat(v) {
       const { $notification } = this

@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-29 20:44:52
+ * @LastEditTime: 2025-05-08 13:42:36
  * @FilePath: /report-background-system/src/api/report.js
  * @Description: 
  * 
@@ -59,7 +59,8 @@ const reportAPI = {
     deleteProofFile: '/report/v2/entity/delete/proof/file/',
     getProofFile: '/report/v2/entity/proof/file/list',
     deleteReport: '/report/entity/',
-    getAIType: '/report/v2/entity/ai/content/type?creditCode='
+    getAIType: '/report/v2/entity/ai/content/type?creditCode=',
+    batchDeleteReport: '/report/entity/batch/delete'
 }
 
 // 获取证明材料
@@ -117,6 +118,14 @@ export function deleteSearchContent(id) {
     return request({
         url: reportAPI.deleteSearchContent + id,
         method: 'delete',
+    })
+}
+// 删除
+export function batchDeleteReport(ids) {
+    return request({
+        url: reportAPI.batchDeleteReport,
+        method: 'delete',
+        data: ids
     })
 }
 export function getAppFileList(parameter) {

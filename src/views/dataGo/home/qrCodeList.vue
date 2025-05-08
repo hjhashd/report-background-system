@@ -9,10 +9,24 @@
           </a-select-option>
         </a-select>
       </div>
-      <a-button @click="toDealFun">新增数据申请</a-button>
+      <div>
+        <a-button style="margin-right: 20px" @click="toDealFun">新增数据申请</a-button>
+        <a-popconfirm title="是否删除已选中二维码?" ok-text="是" cancel-text="否" @confirm="deleteMutil">
+          <a-button>批量删除</a-button>
+        </a-popconfirm>
+      </div>
     </div>
     <div class="table-contant tab-table">
-      <s-table ref="table" rowKey="key" :data="loadData" :columns="qrColumns">
+      <s-table
+        ref="table"
+        :rowKey="(record) => record.id"
+        :data="loadData"
+        :columns="qrColumns"
+        :row-selection="{
+          selectedRowKeys: expandedRowKeys,
+          onChange: rowChange,
+        }"
+      >
         <template slot="id" slot-scope="txt, scoped, index">{{
           (queryParam.pageNum - 1) * queryParam.pageSize + index + 1
         }}</template>
@@ -39,7 +53,7 @@
         <template slot="action" slot-scope="text, scoped">
           <!-- 这里可以定义操作列的具体内容，例如按钮 -->
           <a-popconfirm title="是否删除该二维码?" ok-text="是" cancel-text="否" @confirm="deleteQrCode(scoped)">
-            <a-tooltip v-if="scoped.status === 1">
+            <a-tooltip>
               <template slot="title">
                 <span>删除</span>
               </template>
@@ -69,7 +83,7 @@ const reportTypeList = [
   },
 ]
 import { mapState, mapActions } from 'vuex'
-import { getQRCodeList, deleteQr } from '@/api/qrcode'
+import { getQRCodeList, deleteQr, batchDelete } from '@/api/qrcode'
 import { STable } from '@/components'
 import { baseMixin } from '@/store/app-mixin'
 import { qrColumns } from './util'
@@ -89,6 +103,7 @@ export default {
       search: null,
       showImgUrl: null,
       reportTypeList,
+      expandedRowKeys: [],
       // 查询参数
       queryParam: {
         pageNum: 1,
@@ -141,6 +156,38 @@ export default {
   },
   methods: {
     ...mapActions(['changeBuildQrCodePop']),
+    rowChange(_, selectedRows) {
+      this.expandedRowKeys = selectedRows.map((u) => u.id)
+    },
+    deleteMutil() {
+      const { $notification } = this
+      if (!this.expandedRowKeys.length) {
+        $notification['info']({
+          message: '通知：',
+          description: '未选中删除项',
+          duration: 8,
+        })
+        return
+      }
+      batchDelete(this.expandedRowKeys).then((i) => {
+        if (i.code == 200) {
+          $notification['success']({
+            message: '通知：',
+            description: '删除成功',
+            duration: 8,
+          })
+          this.expandedRowKeys = []
+          this.$refs.table.refresh()
+        } else {
+          $notification['error']({
+            message: '通知：',
+            description: '删除失败' + i.msg,
+            duration: 8,
+          })
+          this.$refs.table.refresh()
+        }
+      })
+    },
     handleChat(v) {
       const { $router } = this
       $router.push({ path: `/homePage/viewReport/` + v.id })
