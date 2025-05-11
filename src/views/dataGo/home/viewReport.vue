@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-05-11 12:16:16
+ * @LastEditTime: 2025-05-11 18:52:52
  * @FilePath: \report-background-system\src\views\dataGo\home\viewReport.vue
  * @Description: 报告预览
  * 
@@ -522,6 +522,7 @@ export default {
             this.reportName = this.otherSaveReportName
           })
           this.$refs.editorR.refreshEditor()
+          this.startDownload()
           $notification['success']({
             message: '通知：',
             description: `发布成功`,
@@ -623,6 +624,19 @@ export default {
       this.udt = true
     },
     downloadReport() {
+      const { $confirm } = this
+      const _this = this
+      $confirm({
+        title: '下载提醒',
+        content: `是否将报告发布后进行下载？`,
+        okText: '确定',
+        cancelText: '取消',
+        onOk: () => {
+          this.applyReport()
+        },
+      })
+    },
+    startDownload() {
       const url = this.reportDetail.fileUrl
       const name = this.reportDetail.fileUrl.split('/')
       const filename = `${name[name.length - 1]}`

@@ -198,8 +198,16 @@ export default {
       }
       this.loadingb = true
       uploadProof(formData).then((res) => {
-        this.loadingb = false
-        this.hasUploadFile = true
+        $notification['success']({
+          message: '消息提示：',
+          description: `上传成功`,
+          duration: 8,
+        })
+        setTimeout(()=>{
+          this.loadingb = false
+          this.hasUploadFile = true
+          this.collapseCard = !this.collapseCard
+        }, 500)
       })
     },
   },

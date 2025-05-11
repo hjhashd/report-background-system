@@ -179,7 +179,7 @@
               @cancel="transfromText"
             >
               <template slot="title">
-                <div>是否将AI内容替换到修改编辑内容中?</div>
+                <div>是否将AI内容另存当前版本?</div>
               </template>
               <a-button :disabled="!AIresponse"
                 ><img style="width: 20px; height: 20px" src="@/assets/images/cy.png" alt="dark" />替换</a-button
