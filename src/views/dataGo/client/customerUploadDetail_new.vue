@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-04-27 11:52:54
  * @LastEditors: bekon
- * @LastEditTime: 2025-05-11 14:05:42
+ * @LastEditTime: 2025-05-11 16:19:40
  * @FilePath: \report-background-system\src\views\dataGo\client\customerUploadDetail_new.vue
  * @Description: 
  * 
@@ -51,49 +51,31 @@
         </div>
         <div slot="tool" slot-scope="text, scope">
           <div class="flex">
-            <a-tooltip v-if="scope.status === 1 && scope.dataType == 'crwal'">
+            <a-tooltip v-if="scope.dataType == 'crwal'">
               <template slot="title">
                 <span>查看编辑</span>
               </template>
               <a-button
+                :disabled="scope.status !== 1"
                 @click="toSeeChangeTable(scope)"
                 :style="{ color: '#7fbbf1', border: 'none', padding: 0, 'padding-right': '5px' }"
               >
                 <img style="width: 28px; height: 28px" src="@/assets/images/see.png" alt="dark" /><span>查看编辑</span>
               </a-button>
             </a-tooltip>
-            <a-tooltip v-else-if="scope.status === 1">
+            <a-tooltip v-else>
               <template slot="title">
                 <span>查看</span>
               </template>
               <a-button
+                :disabled="scope.status !== 1"
                 @click="toSeeTable(scope)"
                 :style="{ color: '#7fbbf1', border: 'none', padding: 0, 'padding-right': '5px' }"
               >
                 <img style="width: 28px; height: 28px" src="@/assets/images/see.png" alt="dark" /><span>查看</span>
               </a-button>
             </a-tooltip>
-            <a-tooltip v-if="scope.dataType === 'upload'" style="margin-right: 10px">
-              <template slot="title">
-                <span v-if="scope.status == 1">重新上传</span>
-                <span v-else>上传</span>
-              </template>
-              <a-button
-                @click="uploadItem(scope)"
-                :style="{ color: '#7fbbf1', border: 'none', padding: 0, 'padding-right': '5px' }"
-              >
-                <img
-                  v-if="scope.status == 1"
-                  style="width: 27px; height: 22px"
-                  src="@/assets/images/re-upload.png"
-                  alt="dark"
-                />
-                <img v-else style="width: 27px; height: 22px" src="@/assets/images/upload.png" alt="dark" />
-                <span v-if="scope.status == 1">重新上传</span>
-                <span v-else>上传</span>
-              </a-button>
-            </a-tooltip>
-            <a-tooltip v-else-if="scope.dataType !== 'upload'" style="margin-right: 10px">
+            <a-tooltip v-if="scope.dataType !== 'upload'" style="margin-right: 10px">
               <template slot="title">
                 <span>{{ scope.status == 0 ? '授权' : '重新采集' }}</span>
               </template>
@@ -119,6 +101,26 @@
                 <img style="width: 20px; height: 22px" src="@/assets/images/download-modal.png" alt="dark" /><span
                   >下载模板</span
                 >
+              </a-button>
+            </a-tooltip>
+            <a-tooltip v-if="scope.dataType === 'upload'">
+              <template slot="title">
+                <span v-if="scope.status == 1">重新上传</span>
+                <span v-else>上传</span>
+              </template>
+              <a-button
+                @click="uploadItem(scope)"
+                :style="{ color: '#7fbbf1', border: 'none', padding: 0, 'padding-right': '5px' }"
+              >
+                <img
+                  v-if="scope.status == 1"
+                  style="width: 27px; height: 22px"
+                  src="@/assets/images/re-upload.png"
+                  alt="dark"
+                />
+                <img v-else style="width: 22px; height: 18px" src="@/assets/images/upload.png" alt="dark" />
+                <span v-if="scope.status == 1">重新上传</span>
+                <span v-else>上传</span>
               </a-button>
             </a-tooltip>
           </div>

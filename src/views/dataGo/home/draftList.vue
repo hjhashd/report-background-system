@@ -67,8 +67,8 @@
         </span>
         <template slot="genStatus" slot-scope="text, scoped">
           <span v-if="text == 1" class="table-status status1">已完成</span>
-          <span v-else-if="text == 0"> 生成中 </span>
-          <span v-else-if="text == 3"> 更新中 </span>
+          <span v-else-if="text == 0" class="table-status"> 生成中 </span>
+          <span v-else-if="text == 3" class="table-status"> 更新中 </span>
           <span class="table-status status4" v-else>生成失败</span>
           <a-badge
             :offset="[-3, 5]"
@@ -88,11 +88,12 @@
         </span>
         <template slot="action" slot-scope="text, scoped">
           <!-- 这里可以定义操作列的具体内容，例如按钮 -->
-          <a-tooltip v-if="scoped.genStatus == 1">
+          <a-tooltip>
             <template slot="title">
               <span>查看</span>
             </template>
             <a-button
+              :disabled="scoped.genStatus !== 1"
               @click="handleChat(scoped)"
               :style="{ color: '#7fbbf1', border: 'none', padding: 0, margin: '0 5px' }"
             >
