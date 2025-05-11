@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-03-23 11:53:48
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-27 17:26:14
- * @FilePath: /report-background-system/src/components/dataGoTable/util.js
+ * @LastEditTime: 2025-05-11 09:19:42
+ * @FilePath: \report-background-system\src\components\dataGoTable\util.js
  * @Description: 
  * 
  */
@@ -37,7 +37,7 @@ export function dealTable(data, isCanEdit = false) {
         }
 
         if (isCanEdit) {
-            columns.push({
+            columns.unshift({
                 width: '100px',
                 title: '操作',
                 dataIndex: 'tool',

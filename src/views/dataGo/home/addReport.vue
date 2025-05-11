@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-29 20:30:17
- * @FilePath: /report-background-system/src/views/dataGo/home/addReport.vue
+ * @LastEditTime: 2025-05-11 09:30:39
+ * @FilePath: \report-background-system\src\views\dataGo\home\addReport.vue
  * @Description: 
  * 
 -->
@@ -41,7 +41,7 @@
                   </a-tooltip>
                 </div>
                 <div style="margin-top: 20px; max-height: 360px; overflow-x: hidden; overflow-y: scroll">
-                  <a-radio-group v-model="chooseCustomer">
+                  <a-radio-group v-model="chooseCustomer" @change="chooseChange">
                     <a-radio v-for="(cu, index) in customers" :value="cu" :key="index">
                       <a-tooltip placement="top">
                         <template slot="title">
@@ -119,7 +119,7 @@ export default {
     return {
       tabs: [
         { type: 2, name: '选择客户' },
-        { type: 1, name: '选择模板' },
+        { type: 1, name: '选择模块' },
       ],
       tabA: 2,
       reportType: null,
@@ -146,6 +146,11 @@ export default {
       this.getReportModal()
       this.getCustomerList()
       this.getModalInfo()
+    },
+    chooseChange(v) {
+      setTimeout(() => {
+        this.tabA = 1
+      }, 500)
     },
     changeTab(v) {
       this.chooseModal = []

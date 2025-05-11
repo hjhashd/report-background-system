@@ -175,7 +175,8 @@
               placement="top"
               ok-text="确定"
               cancel-text="取消"
-              @confirm="transfromText"
+              @confirm="confirmText"
+              @cancel="transfromText"
             >
               <template slot="title">
                 <div>是否将AI内容替换到修改编辑内容中?</div>
@@ -351,6 +352,10 @@ export default {
     transfromText() {
       this.changeContent = this.AIresponse
     },
+    confirmText() {
+      this.changeContent = this.AIresponse
+      this.setContentPop = true
+    },
     menuChoose(v) {
       this.aiType = v.item.value
       const parameter = {
@@ -375,17 +380,17 @@ export default {
       this.clickInAI = true
       const reD = await getAIConfig(parameter)
       let countdown = 10
-      const intervalId = setInterval(() => {
-        if (countdown > 0) {
-          countdown--
-          this.processNum = (10 - countdown) * 10
-        } else {
-          this.AIresponse = reD.data
-          this.clickInAI = false
-          this.processNum = 0
-          clearInterval(intervalId)
-        }
-      }, 1000)
+      // const intervalId = setInterval(() => {
+      //   if (countdown > 0) {
+      //     countdown--
+      //     this.processNum = (10 - countdown) * 10
+      //   } else {
+      this.AIresponse = reD.data
+      this.clickInAI = false
+      this.processNum = 0
+      clearInterval(intervalId)
+      //   }
+      // }, 1000)
     },
     toAI() {
       const { $notification } = this

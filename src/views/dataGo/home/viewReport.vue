@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-05-08 17:45:51
- * @FilePath: /report-background-system/src/views/dataGo/home/viewReport.vue
+ * @LastEditTime: 2025-05-11 09:33:43
+ * @FilePath: \report-background-system\src\views\dataGo\home\viewReport.vue
  * @Description: 报告预览
  * 
 -->
@@ -407,10 +407,10 @@ export default {
     },
     updateReportData() {
       // 更新数据
-      const { $notification, $confirm } = this
+      const { $notification, $confirm, $router } = this
       $confirm({
         title: '更新报告提醒',
-        content: `是否对当前报告进行更新，更新后内容可能较之前发生变化。`,
+        content: `是否对当前报告进行更新，更新后内容可能较之前发生变化。数据更新将退出查阅模式进行内容更新，待内容更新完毕，可在草稿箱再次查看。`,
         okText: '确定',
         cancelText: '取消',
         onOk: () => {
@@ -430,8 +430,12 @@ export default {
                 duration: 6,
               })
               this.pageLoading = false
-              this.init()
-              this.$refs.editorR.refreshEditor()
+              // this.init()
+              // this.$refs.editorR.refreshEditor()
+              setTimeout(() => {
+                // 去草稿
+                $router.push({ path: '/homePage/draftList' })
+              }, 500)
             }
           })
         },
@@ -471,7 +475,6 @@ export default {
       }
     },
     openDataYCFun(v) {
-      console.log(v)
       this.openDataYC = true
     },
     saveAsDraft() {

@@ -289,6 +289,11 @@ export const qrColumns = [
         scopedSlots: { customRender: 'status' },
     },
     {
+        title: '二维码企业名称',
+        dataIndex: 'showCompany',
+        key: 'showCompany',
+    },
+    {
         title: '授权企业名称',
         dataIndex: 'appUser',
         key: 'appUser',

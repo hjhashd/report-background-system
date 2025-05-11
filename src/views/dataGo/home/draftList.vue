@@ -30,7 +30,7 @@
           />
         </div>
       </div>
-      <a-popconfirm title="是否删除已选中二维码?" ok-text="是" cancel-text="否" @confirm="deleteMutil">
+      <a-popconfirm title="是否删除已选中的草稿报告?" ok-text="是" cancel-text="否" @confirm="deleteMutil">
         <a-button>批量删除</a-button>
       </a-popconfirm>
     </div>

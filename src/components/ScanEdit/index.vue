@@ -13,12 +13,12 @@
             <a-button
               :class="{ inouticon: !collapseCard }"
               type="link"
-              icon="down"
+              icon="up"
               style="color: #3149ad"
               @click="collapseCard = !collapseCard"
             />
           </div>
-          <div :class="{ closeCard: collapseCard }">
+          <div :class="{ closeCard: !collapseCard }">
             <a-upload
               :name="clickItem?.dataItem || ''"
               :customRequest="uploadFile"
@@ -36,7 +36,7 @@
                 <div class="upload-txt-2">或拖放文件到此处</div>
               </div>
             </a-upload>
-            <div class="flex uploaded-show" :class="{ closeCard: collapseCard }" v-if="fileList.length">
+            <div class="flex uploaded-show" :class="{ closeCard: !collapseCard }" v-if="fileList.length">
               <div class="flex-1">
                 <div class="uploaded-file" v-for="(i, index) in fileList" :key="index">
                   <div class="ppp">

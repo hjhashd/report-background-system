@@ -2,7 +2,7 @@
   <page-header-wrapper>
     <div class="flex home-part-title-right flex-1">
       <div class="flex">
-        <div class="flex flex-center">
+        <div class="flex flex-center" style="margin-right: 20px;">
           <div class="right-item-title">报告类型：</div>
           <a-select v-model="draftTypeSelected" style="width: 200px" @change="selectChange" :allowClear="true">
             <a-select-option v-for="item in reportTypeList" :key="item.type" :value="item.type">
@@ -22,7 +22,7 @@
           />
         </div>
       </div>
-      <a-popconfirm title="是否删除已选中二维码?" ok-text="是" cancel-text="否" @confirm="deleteMutil">
+      <a-popconfirm title="是否删除已选中的报告?" ok-text="是" cancel-text="否" @confirm="deleteMutil">
         <a-button>批量删除</a-button>
       </a-popconfirm>
     </div>
