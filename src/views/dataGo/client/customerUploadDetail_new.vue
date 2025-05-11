@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-04-27 11:52:54
  * @LastEditors: bekon
- * @LastEditTime: 2025-05-06 13:58:09
- * @FilePath: /report-background-system/src/views/dataGo/client/customerUploadDetail_new.vue
+ * @LastEditTime: 2025-05-11 14:05:42
+ * @FilePath: \report-background-system\src\views\dataGo\client\customerUploadDetail_new.vue
  * @Description: 
  * 
 -->
@@ -14,10 +14,10 @@
         <div class="icon-btn flex" @click="toDealFun('redo')">
           <img style="width: 18px; height: 20px; margin-right: 3px" src="@/assets/images/dun.jpg" alt="dark" />批量授权
         </div>
-        <!-- <div class="icon-btn flex" @click="mutilUploads">
+        <div class="icon-btn flex" @click="mutilUploads" v-if="selectTab == 'upload'">
           <img style="width: 18px; height: 20px; margin-right: 3px" src="@/assets/images/mutil-upload.png" alt="dark" />
           批量上传
-        </div> -->
+        </div>
         <div class="icon-btn flex" @click="mutilDownLoadModalPop = true">
           <img
             style="width: 18px; height: 20px; margin-right: 3px"
@@ -155,12 +155,12 @@
       ></scan-edit>
     </a-modal>
     <!-- 批量上传 -->
-    <a-modal :dialogStyle="{ top: '5vh' }" v-model="mutilUploading" width="85vw" title="批量上传" :footer="null">
-      <mutil-upload
+    <a-modal :dialogStyle="{ top: '5vh' }" v-model="mutilUploading" width="60vw" title="批量上传" :footer="null">
+      <mutil-upload-new
         :customerInfo="customerInfo"
         :customerUploadList="uploadMutilData"
         @cancelPop="mutilUploading = false"
-      ></mutil-upload>
+      ></mutil-upload-new>
     </a-modal>
     <!-- 批量下载模板 -->
     <a-modal
@@ -188,7 +188,7 @@
 </template>
 
 <script>
-import MutilUpload from '../client/mutilUpload.vue'
+import MutilUploadNew from '../client/mutilUpload_new.vue'
 import MutilDownloadModal from '../client/mutilDownloadModal.vue'
 import AppDataDownload from '../client/appDataDownload.vue'
 import { DataGoTable, UploadFileTab, ScanEdit } from '@/components'
@@ -196,7 +196,7 @@ import { graftFun, newColumns, classifyDataByClassName } from './util'
 import { mapActions } from 'vuex'
 export default {
   name: 'CustomerUploadDetailNew',
-  components: { DataGoTable, MutilUpload, MutilDownloadModal, AppDataDownload, UploadFileTab, ScanEdit },
+  components: { DataGoTable, MutilUploadNew, MutilDownloadModal, AppDataDownload, UploadFileTab, ScanEdit },
   props: {
     customerInfo: {
       type: Object,
@@ -204,6 +204,10 @@ export default {
     },
     customerUploadList: {
       type: Array,
+      required: true,
+    },
+    selectTab: {
+      type: String,
       required: true,
     },
   },

@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-06 13:27:40
- * @FilePath: /report-background-system/src/views/dataGo/home/index.vue
+ * @LastEditTime: 2025-05-11 12:50:31
+ * @FilePath: \report-background-system\src\views\dataGo\home\index.vue
  * @Description: 主页
  * 
 -->
@@ -26,14 +26,17 @@
         <div class="p-20 tab-table">
           <s-table ref="table" rowKey="key" :data="loadData" :columns="tabColumns">
             <div slot="reportName" slot-scope="text, scoped">
-              <span class="report-name" @click="handleChat(scoped)">{{ text }}</span>
-              <a-tooltip placement="right" v-if="scoped.status != 1">
-                <template slot="title">
-                  <span v-if="scoped.dataStatus == 2">未完成数据授权，数据上传</span>
-                  <span v-else-if="scoped.dataStatus == 3">已完成数据授权，数据上传，正在制作报告</span>
-                </template>
-                <a-icon type="bell" theme="filled" style="color: #c92c1f" />
-              </a-tooltip>
+              <div class="flex" style="align-items: center;">
+                <a-tooltip placement="right" v-if="scoped.status != 1">
+                  <template slot="title">
+                    <span v-if="scoped.dataStatus == 2">未完成数据授权，数据上传</span>
+                    <span v-else-if="scoped.dataStatus == 3">已完成数据授权，数据上传，正在制作报告</span>
+                  </template>
+                  <div class="ball"></div>
+                  <!-- <a-icon type="bell" theme="filled" style="color: #c92c1f" /> -->
+                </a-tooltip>
+                <span class="report-name" @click="handleChat(scoped)">{{ text }}</span>
+              </div>
             </div>
             <span slot="status" slot-scope="text">
               <!-- // 0 草稿 1 已完成 2 数据未授权 3 数据已授权 -->
@@ -285,7 +288,7 @@ export default {
     color: #0a69ef;
     border-bottom: 1px solid #0a69ef;
   }
-} 
+}
 /* 去除表格行的鼠标悬停高亮效果 */
 .tab-table {
   /deep/ .ant-table-tbody > tr:hover > td {
@@ -294,5 +297,13 @@ export default {
   /deep/ .ant-table-small > .ant-table-content > .ant-table-body {
     margin: 0;
   }
+}
+.ball {
+  margin-right: 5px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  color: #c92c1f;
+  background-color: #c92c1f;
 }
 </style>

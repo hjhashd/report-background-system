@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-05-08 13:42:36
- * @FilePath: /report-background-system/src/api/report.js
+ * @LastEditTime: 2025-05-11 15:02:31
+ * @FilePath: \report-background-system\src\api\report.js
  * @Description: 
  * 
  */
@@ -60,7 +60,49 @@ const reportAPI = {
     getProofFile: '/report/v2/entity/proof/file/list',
     deleteReport: '/report/entity/',
     getAIType: '/report/v2/entity/ai/content/type?creditCode=',
-    batchDeleteReport: '/report/entity/batch/delete'
+    batchDeleteReport: '/report/entity/batch/delete',
+    uploadTableUpload: '/report/v2/entity/uploadtable/file/upload',
+
+    // 上传数据
+    getUploadsFile: '/report/v2/entity/uploadtable/file/list',
+    getAutoFiles: '/report/v2/entity/proof/file/list',
+    getDYFiles: '/report/v2/entity/all/customer/abnormal/file/list'
+}
+
+// 获取指定用户所有调研结果上传的文件
+export function getDYFiles(parameter) {
+    return request({
+        url: reportAPI.getDYFiles,
+        method: 'post',
+        data: parameter
+    })
+}
+
+// 获取自动采集的表证明文件列表
+export function getAutoFiles(parameter) {
+    return request({
+        url: reportAPI.getAutoFiles,
+        method: 'post',
+        data: parameter
+    })
+}
+
+// 获取上传数据的表证明文件列表
+export function getUploadsFile(parameter) {
+    return request({
+        url: reportAPI.getUploadsFile,
+        method: 'post',
+        data: parameter
+    })
+}
+
+// 批量上传
+export function uploadTableUpload(parameter) {
+    return request({
+        url: reportAPI.uploadTableUpload,
+        method: 'post',
+        data: parameter
+    })
 }
 
 // 获取证明材料

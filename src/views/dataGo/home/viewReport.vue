@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-05-11 09:33:43
+ * @LastEditTime: 2025-05-11 12:16:16
  * @FilePath: \report-background-system\src\views\dataGo\home\viewReport.vue
  * @Description: 报告预览
  * 
@@ -79,12 +79,14 @@
             </a-tooltip>
             <a-tooltip>
               <template slot="title">
-                <span>发布应用</span>
+                <span>下载报告</span>
               </template>
-              <div class="btn-item" @click="openSetName('apply')">
-                <div class="icon-box">
+              <!-- <div class="btn-item" @click="openSetName('apply')"> -->
+              <div class="btn-item" @click="downloadReport">
+                <div class="icon-box"><a-icon style="color: rgb(87, 135, 238)" type="download" /></div>
+                <!-- <div class="icon-box">
                   <a-avatar :size="32" :src="applyIcon" />
-                </div>
+                </div> -->
               </div>
             </a-tooltip>
           </div>
@@ -619,6 +621,26 @@ export default {
     lookUploadModal(v) {
       this.uploadTableList = this.reportDetail.tableChangeInfos
       this.udt = true
+    },
+    downloadReport() {
+      const url = this.reportDetail.fileUrl
+      const name = this.reportDetail.fileUrl.split('/')
+      const filename = `${name[name.length - 1]}`
+      const xhr = new XMLHttpRequest()
+      xhr.open('GET', url, true)
+      xhr.responseType = 'blob'
+      xhr.onload = function () {
+        if (xhr.status === 200) {
+          const blob = xhr.response
+          const urlObject = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = urlObject
+          a.download = filename
+          a.click()
+          URL.revokeObjectURL(urlObject)
+        }
+      }
+      xhr.send()
     },
   },
 }

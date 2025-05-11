@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-27 11:58:23
- * @FilePath: /report-background-system/src/views/dataGo/uploadData/index.vue
+ * @LastEditTime: 2025-05-11 16:05:36
+ * @FilePath: \report-background-system\src\views\dataGo\uploadData\index.vue
  * @Description: 数据上传
  * 
 -->
@@ -64,10 +64,15 @@
           </div>
         </div>
         <customer-upload-detail-new
+          v-if="selectTab !== 'materialList'"
           @updateData="getCustomerData"
+          :selectTab="selectTab"
           :customerUploadList="customerUploadList"
           :customerInfo="customerInfo"
         ></customer-upload-detail-new>
+        <div class="item-content" v-else>
+          <metiral-list :customerInfo="customerInfo"></metiral-list>
+        </div>
       </div>
     </a-spin>
   </page-header-wrapper>
@@ -77,6 +82,7 @@
 import { getCustomerList, customerData } from '@/api/report'
 import { mapActions } from 'vuex'
 import CustomerUploadDetailNew from '../client/customerUploadDetail_new.vue'
+import MetiralList from './metiralList.vue'
 const tableType = [
   // 新增dataType字段，crwal 自动采集 upload 上传数据 other 其他授权
   {
@@ -91,10 +97,14 @@ const tableType = [
     name: '其他授权',
     value: 'other',
   },
+  {
+    name: '材料列表',
+    value: 'materialList',
+  },
 ]
 
 export default {
-  components: { CustomerUploadDetailNew },
+  components: { CustomerUploadDetailNew, MetiralList },
   data() {
     return {
       tableType,
@@ -131,7 +141,9 @@ export default {
     },
     changeTab(v) {
       this.selectTab = v.value
-      this.getCustomerData()
+      if (v.value !== 'materialList') {
+        this.getCustomerData()
+      }
     },
     customerHandle(v) {
       this.customerInfo = this.customers[v]
