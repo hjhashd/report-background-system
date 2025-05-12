@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-04-27 11:52:54
  * @LastEditors: bekon
- * @LastEditTime: 2025-05-11 16:19:40
+ * @LastEditTime: 2025-05-12 21:46:52
  * @FilePath: \report-background-system\src\views\dataGo\client\customerUploadDetail_new.vue
  * @Description: 
  * 
@@ -16,7 +16,7 @@
         </div>
         <div class="icon-btn flex" @click="mutilUploads" v-if="selectTab == 'upload'">
           <img style="width: 18px; height: 20px; margin-right: 3px" src="@/assets/images/mutil-upload.png" alt="dark" />
-          批量上传
+          上传证明材料
         </div>
         <div class="icon-btn flex" @click="mutilDownLoadModalPop = true">
           <img

@@ -87,29 +87,42 @@
           <span v-else>{{ text }}</span>
         </span>
         <template slot="action" slot-scope="text, scoped">
-          <!-- 这里可以定义操作列的具体内容，例如按钮 -->
-          <a-tooltip>
-            <template slot="title">
-              <span>查看</span>
-            </template>
-            <a-button
-              :disabled="scoped.genStatus !== 1"
-              @click="handleChat(scoped)"
-              :style="{ color: '#7fbbf1', border: 'none', padding: 0, margin: '0 5px' }"
-            >
-              <img style="width: 28px; height: 28px" src="@/assets/images/see.png" alt="dark" />
-            </a-button>
-          </a-tooltip>
-          <a-popconfirm title="是否确定删除该报告?" ok-text="确定" cancel-text="取消" @confirm="deleteChat(scoped)">
-            <a-tooltip>
+          <div class="flex">
+            <!-- 这里可以定义操作列的具体内容，例如按钮 -->
+            <a-tooltip v-if="scoped.genStatus == 2">
               <template slot="title">
-                <span>删除</span>
+                <span>更新数据</span>
               </template>
-              <a-button :style="{ color: '#7fbbf1', border: 'none', padding: 0, margin: '0 5px' }">
-                <img style="width: 22px; height: 22px" src="@/assets/images/delete.png" alt="dark" />
+              <a-button
+                @click="updateReportData(scoped)"
+                :style="{ color: '#7fbbf1', border: 'none', padding: 0, margin: '0 8px' }"
+              >
+                <a-icon style="font-size: 22px" type="redo" />
               </a-button>
             </a-tooltip>
-          </a-popconfirm>
+            <a-tooltip v-else>
+              <template slot="title">
+                <span>查看</span>
+              </template>
+              <a-button
+                :disabled="scoped.genStatus !== 1"
+                @click="handleChat(scoped)"
+                :style="{ color: '#7fbbf1', border: 'none', padding: 0, margin: '0 5px' }"
+              >
+                <img style="width: 28px; height: 28px" src="@/assets/images/see.png" alt="dark" />
+              </a-button>
+            </a-tooltip>
+            <a-popconfirm title="是否确定删除该报告?" ok-text="确定" cancel-text="取消" @confirm="deleteChat(scoped)">
+              <a-tooltip>
+                <template slot="title">
+                  <span>删除</span>
+                </template>
+                <a-button :style="{ color: '#7fbbf1', border: 'none', padding: 0, margin: '0 5px' }">
+                  <img style="width: 22px; height: 22px" src="@/assets/images/delete.png" alt="dark" />
+                </a-button>
+              </a-tooltip>
+            </a-popconfirm>
+          </div>
         </template>
       </s-table>
     </div>
@@ -157,7 +170,7 @@ const draftStatusList = [
   },
 ]
 import { mapState } from 'vuex'
-import { reportList, deleteReport, batchDeleteReport } from '@/api/report'
+import { reportList, deleteReport, batchDeleteReport, updateReport } from '@/api/report'
 import { STable } from '@/components'
 import { baseMixin } from '@/store/app-mixin'
 import { columns } from './util'
@@ -288,6 +301,35 @@ export default {
     lookUploadModal(v) {
       this.uploadTableList = v.tableChangeInfos
       this.udt = true
+    },
+    updateReportData(v) {
+      // 更新数据
+      const { $notification, $confirm, $router } = this
+      $confirm({
+        title: '更新报告提醒',
+        content: `是否对当前报告进行更新，更新后内容可能较之前发生变化。数据更新将退出查阅模式进行内容更新，待内容更新完毕，可在草稿箱再次查看。`,
+        okText: '确定',
+        cancelText: '取消',
+        onOk: () => {
+          updateReport(v.id).then((res) => {
+            if (res.code != 200) {
+              this.pageLoading = false
+              $notification['error']({
+                message: '错误通知：',
+                description: res.msg,
+                duration: 8,
+              })
+            } else {
+              $notification['success']({
+                message: '通知：',
+                description: `正在生成，请在草稿列表查看进度`,
+                duration: 6,
+              })
+              this.$refs.table.refresh()
+            }
+          })
+        },
+      })
     },
   },
 }

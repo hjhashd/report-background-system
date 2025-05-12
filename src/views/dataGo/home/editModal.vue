@@ -109,7 +109,7 @@
           <div v-if="aiExspend">
             <div class="ai-expend" v-show="isExpend">
               <div class="flex-row-spacebetween btn-part">
-                <div class="flex flex-1" v-for="(item, index) in aiTypeList" :key="index">
+                <!-- <div class="flex flex-1" v-for="(item, index) in aiTypeList" :key="index">
                   <div class="flex-1">
                     <a-button
                       class="ai-btn"
@@ -119,13 +119,21 @@
                       }"
                       @click="chooseAI(item.value)"
                     >
-                      <!-- <a-icon
+                      <a-icon
                         class="ai-icon"
                         :type="item.icon"
                         :style="{ background: item.value == aiType ? item.bcAction : item.bc }"
-                      /> -->
+                      />
                       {{ item.value }}</a-button
                     >
+                  </div>
+                </div> -->
+                <div style="padding: 0 10px" class="line-item flex-row-spacebetween flex-1">
+                  <div v-for="(item, index) in aiTypeList" :key="index" @click="chooseAI(item.value)">
+                    <div class="item">
+                      <div class="dott" :class="{ active: item.value === aiType }"></div>
+                      <div class="ai-item-title">{{ item.value }}</div>
+                    </div>
                   </div>
                 </div>
                 <a-dropdown>
@@ -140,7 +148,7 @@
               <div class="ai-response" v-if="AIresponse">
                 <div class="ai-title">{{ aiType }}</div>
                 <a-textarea
-                  style="height: calc(70vh - 140px)"
+                  style="height: calc(70vh - 160px)"
                   v-model="AIresponse"
                   :auto-size="true"
                   :disabled="true"
@@ -380,17 +388,17 @@ export default {
       this.clickInAI = true
       const reD = await getAIConfig(parameter)
       let countdown = 10
-      // const intervalId = setInterval(() => {
-      //   if (countdown > 0) {
-      //     countdown--
-      //     this.processNum = (10 - countdown) * 10
-      //   } else {
-      this.AIresponse = reD.data
-      this.clickInAI = false
-      this.processNum = 0
-      clearInterval(intervalId)
-      //   }
-      // }, 1000)
+      const intervalId = setInterval(() => {
+        if (countdown > 0) {
+          countdown--
+          this.processNum = (10 - countdown) * 10
+        } else {
+          this.AIresponse = reD.data
+          this.clickInAI = false
+          this.processNum = 0
+          clearInterval(intervalId)
+        }
+      }, 1000)
     },
     toAI() {
       const { $notification } = this
@@ -818,7 +826,7 @@ export default {
     font-size: 14px;
     color: #000;
     font-weight: bold;
-    padding-bottom: 15px;
+    padding-bottom: 3px;
   }
 }
 .footer-btns {
@@ -827,6 +835,43 @@ export default {
   justify-content: flex-end;
   .ai-btn {
     margin-left: 10px;
+  }
+}
+.line-item {
+  position: relative;
+  &::before {
+    position: absolute;
+    content: '';
+    height: 5px;
+    width: calc(100% - 4em);
+    background-color: #e5e7eb;
+    top: 6px;
+    left: 2em;
+    transform: translateY(-50%);
+  }
+  .item {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .dott {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #2563eb;
+    margin-bottom: 8px;
+    z-index: 1;
+    &.active {
+      width: 16px;
+      height: 16px;
+      background-color: #fff;
+      border: 2px solid #2563eb;
+    }
+  }
+  .ai-item-title {
+    font-size: 12px;
+    color: #2563eb;
   }
 }
 </style>

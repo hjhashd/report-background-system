@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2022-10-10 22:31:07
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-26 22:22:18
- * @FilePath: /report-background-system/src/store/getters.js
+ * @LastEditTime: 2025-05-12 21:39:15
+ * @FilePath: \report-background-system\src\store\getters.js
  * @Description: 
  * 
  */
@@ -20,7 +20,7 @@ const getters = {
   userInfo: state => state.user.info,
   addRouters: state => state.permission.addRouters,
   multiTab: state => state.app.multiTab,
-  buildQrCodePop: state => state.app.buildQrCodePop,
+  buildQrCodePop: state => state.user.buildQrCodePop,
   overview: state => state.user.overview,
   collapsed: state => state.user.collapsed,
 }

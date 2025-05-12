@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-05-08 19:02:57
- * @FilePath: /report-background-system/src/views/dataGo/anomaly/innerContent.vue
+ * @LastEditTime: 2025-05-12 21:44:13
+ * @FilePath: \report-background-system\src\views\dataGo\anomaly\innerContent.vue
  * @Description: 
  * 
 -->
@@ -214,6 +214,7 @@
         <div>
           <a-button class="pop-btn" @click="tableUploadPop = false"> 取消 </a-button>
           <a-button
+            :loading="uploadConfirmFileStatus"
             style="margin-left: 20px; background-color: #528bfb; color: #fff"
             class="pop-btn"
             @click="dUploadFileFun"
@@ -307,6 +308,7 @@ export default {
       currentChangeItem: null,
       tableUploadPop: false,
       changeResearch: false,
+      uploadConfirmFileStatus: false,
       clickItem: null,
       searchInfoContent: '',
       activeKey: [],
@@ -492,8 +494,10 @@ export default {
           })
         : ''
       formData.append('clientFiles', appChooseList ? JSON.stringify(appChooseList) : '')
+      this.uploadConfirmFileStatus = true
       dUploadFile(formData).then((res) => {
         this.tableUploadPop = false
+        this.uploadConfirmFileStatus = false
         if (res.code && res.code == 200) {
           $notification['success']({
             message: '上传通知：',
@@ -504,6 +508,7 @@ export default {
           this.showAppChooseFile = []
           this.getAbnormalData()
         } else {
+          this.uploadConfirmFileStatus = false
           $notification['error']({
             message: '上传通知：',
             description: `${res.msg}`,

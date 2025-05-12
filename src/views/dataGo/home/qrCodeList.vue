@@ -149,9 +149,19 @@ export default {
       }
     },
   },
+  watch: {
+    buildQrCodePop: {
+      handler(newVal, oldVal) {
+        if (!newVal) {
+          this.$refs.table.refresh()
+        }
+      },
+    },
+  },
   computed: {
     ...mapState({
       overview: (state) => state.user.overview,
+      buildQrCodePop: (state) => state.user.buildQrCodePop,
     }),
   },
   methods: {
