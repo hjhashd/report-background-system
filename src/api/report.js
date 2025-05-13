@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-05-11 15:02:31
+ * @LastEditTime: 2025-05-13 22:18:28
  * @FilePath: \report-background-system\src\api\report.js
  * @Description: 
  * 
@@ -57,6 +57,7 @@ const reportAPI = {
     uploadProof: '/report/v2/entity/proof/file/upload',
     updateTable: '/report/v2/entity/update/table/data',
     deleteProofFile: '/report/v2/entity/delete/proof/file/',
+    deleteUploadFile: '/report/v2/entity/delete/uploadtable/file/',
     getProofFile: '/report/v2/entity/proof/file/list',
     deleteReport: '/report/entity/',
     getAIType: '/report/v2/entity/ai/content/type?creditCode=',
@@ -144,6 +145,14 @@ export function deleteReport(id) {
 export function deleteProofFile(id) {
     return request({
         url: reportAPI.deleteProofFile + id,
+        method: 'delete',
+    })
+}
+
+// 删除指标验证文件
+export function deleteUploadFile(id) {
+    return request({
+        url: reportAPI.deleteUploadFile + id,
         method: 'delete',
     })
 }

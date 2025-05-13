@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-05-12 21:44:13
+ * @LastEditTime: 2025-05-13 22:53:54
  * @FilePath: \report-background-system\src\views\dataGo\anomaly\innerContent.vue
  * @Description: 
  * 
@@ -150,7 +150,7 @@
       </div>
       <div class="pop-box">
         <a-upload
-          v-if="tabSelect == '选择本地文件'"
+          v-if="tabSelect == '上传文件'"
           :name="clickItem?.dataItem || ''"
           :customRequest="uploadFile"
           :showUploadList="false"
@@ -163,11 +163,29 @@
             <a-button class="choose-file">选择文件</a-button>
           </div>
         </a-upload>
-        <div v-else-if="tabSelect == '选择APP文件'">
+        <div v-else-if="tabSelect == '选择本地文件'">
           <div class="app-border">
-            <div class="title">选择APP文件</div>
+            <div class="title">选择本地文件</div>
             <div class="choose-box">
-              <a-checkbox-group @change="mutilSelectChange" v-if="appfileList.length">
+              <a-checkbox-group @change="mutilSelectChangeL" v-if="localfileList.length">
+                <a-row class="group-check">
+                  <a-col class="p-5" :span="24" v-for="item in localfileList" :key="item.id">
+                    <a-checkbox :value="item"> {{ item.fileName }} </a-checkbox>
+                  </a-col>
+                </a-row>
+              </a-checkbox-group>
+              <empty v-else />
+            </div>
+            <div class="flex" style="justify-content: flex-end; padding: 5px 10px">
+              <a-button class="a-pop-btn" @click="chooseLFiles"> 选择文件 </a-button>
+            </div>
+          </div>
+        </div>
+        <div v-else-if="tabSelect == '选择APP/小程序文件'">
+          <div class="app-border">
+            <div class="title">选择APP/小程序文件</div>
+            <div class="choose-box">
+              <a-checkbox-group v-model="appChooseFileList" @change="mutilSelectChange" v-if="appfileList.length">
                 <a-row class="group-check">
                   <a-col class="p-5" :span="24" v-for="item in appfileList" :key="item.id">
                     <a-checkbox :value="item"> {{ item.fileName }} </a-checkbox>
@@ -181,7 +199,7 @@
             </div>
           </div>
         </div>
-        <div class="upload-list-show" v-if="fileList.length || showAppChooseFile.length">
+        <div class="upload-list-show" v-if="fileList.length || showAppChooseFile.length || showLocalChooseFile.length">
           <div class="name-title">已上传文件列表：</div>
           <div v-for="(i, index) in fileList" :key="index">
             <span>{{ i.name }}</span
@@ -196,10 +214,23 @@
               </a-button>
             </a-popconfirm>
           </div>
+          <div v-for="(i, index) in showLocalChooseFile" :key="index">
+            <span>{{ i.fileName }}</span
+            ><a-popconfirm
+              title="是否确定删除已选择的文件?"
+              ok-text="确定"
+              cancel-text="取消"
+              @confirm="deleteLocalFile(i)"
+            >
+              <a-button :style="{ color: '#7fbbf1', border: 'none', padding: 0 }">
+                <img style="width: 16px; height: 18px" src="@/assets/images/delete.png" alt="dark" />
+              </a-button>
+            </a-popconfirm>
+          </div>
           <div v-for="(i, index) in showAppChooseFile" :key="index">
             <span>{{ i.fileName }}</span
             ><a-popconfirm
-              title="是否确定删除已上传文件?"
+              title="是否确定删除已选择的文件?"
               ok-text="确定"
               cancel-text="取消"
               @confirm="deleteAppFile(i)"
@@ -236,7 +267,7 @@
   
   <script>
 import { Empty } from 'ant-design-vue'
-const uploadTab = ['选择本地文件', '选择APP文件']
+const uploadTab = ['上传文件', '选择本地文件', '选择APP/小程序文件']
 const reportTypeList = [
   {
     type: 1,
@@ -283,6 +314,9 @@ import {
   getAppFileList,
   deleteFile,
   deleteSearchContent,
+  getUploadsFile,
+  getAutoFiles,
+  getDYFiles,
 } from '@/api/report'
 import { DataGoTabs } from '@/components'
 import { dealColumnsNew } from './util'
@@ -316,8 +350,11 @@ export default {
       tableData: [],
       fileList: [],
       appfileList: [],
+      localfileList: [],
       appChooseFileList: [],
+      localChooseFileList: [],
       showAppChooseFile: [],
+      showLocalChooseFile: [],
     }
   },
   created() {
@@ -356,8 +393,14 @@ export default {
     mutilSelectChange(v) {
       this.appChooseFileList = v
     },
+    mutilSelectChangeL(v) {
+      this.localChooseFileList = v
+    },
     chooseFiles() {
       this.showAppChooseFile = this.appChooseFileList
+    },
+    chooseLFiles() {
+      this.showLocalChooseFile = this.localChooseFileList
     },
     changeTab(v) {
       switch (v) {
@@ -424,6 +467,7 @@ export default {
             })
             this.fileList = []
             this.showAppChooseFile = []
+            this.showLocalChooseFile = []
             this.getAbnormalData()
           } else {
             $notification['error']({
@@ -453,6 +497,7 @@ export default {
             })
             this.fileList = []
             this.showAppChooseFile = []
+            this.showLocalChooseFile = []
             this.getAbnormalData()
           } else {
             $notification['error']({
@@ -476,6 +521,9 @@ export default {
     deleteAppFile(i) {
       this.showAppChooseFile = this.showAppChooseFile.filter((v) => v.id !== i.id)
     },
+    deleteLocalFile(i) {
+      this.showLocalChooseFile = this.showLocalChooseFile.filter((v) => v.id !== i.id)
+    },
     dUploadFileFun() {
       const { $notification } = this
       const formData = new FormData()
@@ -485,6 +533,7 @@ export default {
       this.fileList.forEach((fileItem) => {
         formData.append('files', fileItem)
       })
+      let clientFiles = []
       const appChooseList = this.showAppChooseFile.length
         ? this.showAppChooseFile.map((u) => {
             return {
@@ -492,8 +541,17 @@ export default {
               fileUrl: u.fileUrl,
             }
           })
-        : ''
-      formData.append('clientFiles', appChooseList ? JSON.stringify(appChooseList) : '')
+        : []
+      const localChooseList = this.showLocalChooseFile.length
+        ? this.showLocalChooseFile.map((u) => {
+            return {
+              fileName: u.fileName,
+              fileUrl: u.fileUrl,
+            }
+          })
+        : []
+      clientFiles = [...appChooseList, ...localChooseList]
+      formData.append('clientFiles', clientFiles.length ? JSON.stringify(clientFiles) : '')
       this.uploadConfirmFileStatus = true
       dUploadFile(formData).then((res) => {
         this.tableUploadPop = false
@@ -506,6 +564,10 @@ export default {
           })
           this.fileList = []
           this.showAppChooseFile = []
+          this.showLocalChooseFile = []
+          this.appfileList = []
+          this.localfileList = []
+          this.tabSelect = uploadTab[0]
           this.getAbnormalData()
         } else {
           this.uploadConfirmFileStatus = false
@@ -525,6 +587,15 @@ export default {
           this.appfileList = res.data
         })
       }
+      if (!this.localfileList.length) {
+        this.getLocalFiles()
+      }
+    },
+    async getLocalFiles() {
+      const re1 = await getUploadsFile({ appUserId: this.selectedCustomer })
+      const re2 = await getAutoFiles({ appUserId: this.selectedCustomer })
+      const re3 = await getDYFiles({ appUserId: this.selectedCustomer })
+      this.localfileList = [...re1.data, ...re2.data, ...re3.data]
     },
     updateSearchInfo() {
       const { $notification } = this

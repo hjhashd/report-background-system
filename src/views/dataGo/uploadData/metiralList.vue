@@ -28,19 +28,27 @@
         <a-table :columns="defaultColumns" :data-source="item.data" :bordered="true" :pagination="false">
           <div slot="id" slot-scope="i, scoped, index">{{ index + 1 }}</div>
           <template slot="action" slot-scope="text, scoped">
-            <a-tooltip>
-              <template slot="title">
-                <span>下载文件</span>
-              </template>
-              <a-button
-                @click="downloadModal(scoped)"
-                :style="{ color: '#7fbbf1', border: 'none', padding: 0, 'padding-right': '5px' }"
-              >
-                <img style="width: 20px; height: 22px" src="@/assets/images/download-modal.png" alt="dark" /><span
-                  >下载文件</span
+            <a-popconfirm
+              v-if="item.icon != 'user'"
+              title="是否确定删除该文件?"
+              ok-text="确定"
+              cancel-text="取消"
+              @confirm="deleteChat(item, scoped)"
+            >
+              <a-button :style="{ color: '#7fbbf1', border: 'none', padding: 0, 'margin-right': '10px' }">
+                <img style="width: 22px; height: 22px" src="@/assets/images/delete.png" alt="dark" /><span
+                  >删除文件</span
                 >
               </a-button>
-            </a-tooltip>
+            </a-popconfirm>
+            <a-button
+              @click="downloadModal(scoped)"
+              :style="{ color: '#7fbbf1', border: 'none', padding: 0, 'padding-right': '5px' }"
+            >
+              <img style="width: 20px; height: 22px" src="@/assets/images/download-modal.png" alt="dark" /><span
+                >下载文件</span
+              >
+            </a-button>
           </template>
         </a-table>
       </a-collapse-panel>
@@ -51,7 +59,15 @@
 <script>
 import { webCollapseList, appCollapseList, defaultColumns } from './util'
 import { mapState } from 'vuex'
-import { getAppFileList, getUploadsFile, getAutoFiles, getDYFiles } from '@/api/report'
+import {
+  getAppFileList,
+  getUploadsFile,
+  getAutoFiles,
+  getDYFiles,
+  deleteFile,
+  deleteProofFile,
+  deleteUploadFile,
+} from '@/api/report'
 const uploadTab = ['Web端', '小程序/APP端']
 export default {
   props: {
@@ -127,6 +143,95 @@ export default {
       getDYFiles({ appUserId: this.customerInfo.appUserId }).then((res) => {
         this.webCollapseList[2].data = res.data
       })
+    },
+    deleteChat(v, item) {
+      const { $notification } = this
+      switch (v.icon) {
+        case 'upload':
+          // 删除上传数据文件
+          deleteUploadFile(item.id)
+            .then((res) => {
+              if (res.code && res.code == 200) {
+                $notification['success']({
+                  message: '通知：',
+                  description: `删除成功`,
+                  duration: 6,
+                })
+                this.initData()
+              } else {
+                $notification['error']({
+                  message: '通知：',
+                  description: `${res.msg}`,
+                  duration: 6,
+                })
+              }
+            })
+            .catch((err) => {
+              $notification['error']({
+                message: '通知：',
+                description: `${err}`,
+                duration: 6,
+              })
+            })
+          break
+        case 'sync':
+          // 删除自动采集文件
+          deleteProofFile(item.id)
+            .then((res) => {
+              if (res.code && res.code == 200) {
+                $notification['success']({
+                  message: '通知：',
+                  description: `删除成功`,
+                  duration: 6,
+                })
+                this.initData()
+              } else {
+                $notification['error']({
+                  message: '通知：',
+                  description: `${res.msg}`,
+                  duration: 6,
+                })
+              }
+            })
+            .catch((err) => {
+              $notification['error']({
+                message: '通知：',
+                description: `${err}`,
+                duration: 6,
+              })
+            })
+          break
+        case 'check-square':
+          // 删除指标验证文件
+          deleteFile(item.id)
+            .then((res) => {
+              if (res.code && res.code == 200) {
+                $notification['success']({
+                  message: '通知：',
+                  description: `删除成功`,
+                  duration: 6,
+                })
+                this.initData()
+              } else {
+                $notification['error']({
+                  message: '通知：',
+                  description: `${res.msg}`,
+                  duration: 6,
+                })
+              }
+            })
+            .catch((err) => {
+              $notification['error']({
+                message: '通知：',
+                description: `${err}`,
+                duration: 6,
+              })
+            })
+          break
+        case 'user':
+          // 删除客户上传文件
+          break
+      }
     },
     downloadModal(v) {
       const url = v.fileUrl
