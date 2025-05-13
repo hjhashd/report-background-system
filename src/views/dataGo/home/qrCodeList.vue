@@ -45,8 +45,8 @@
         <span slot="bankNameInfo" slot-scope="text, scoped">
           <span>{{ scoped | showCompany }}</span>
         </span>
-        <template slot="codeUrl" slot-scope="text">
-          <div class="pointer" @click="showImg(text)">
+        <template slot="codeUrl" slot-scope="text, scoped">
+          <div class="pointer" @click="showImg(scoped)">
             <img style="width: 40px; height: 40px" :src="text" alt="dark" />
           </div>
         </template>
@@ -65,7 +65,33 @@
     </div>
     <a-modal class="qr-modal" v-model="qrCodePop" :footer="null">
       <div style="text-align: center; padding: 20px">
-        <img style="width: 200px; height: 200px" :src="showImgUrl" alt="dark" />
+        <a-row>
+          <a-col :span="12" class="qr-info-item">
+            <label>营业员</label>
+            <span>{{ userInfo?.userName }}</span>
+          </a-col>
+          <a-col :span="12" class="qr-info-item">
+            <label>员工号</label>
+            <span>{{ userInfo?.jobNumber }}</span>
+          </a-col>
+          <a-col :span="24" class="qr-info-item">
+            <label>银行</label>
+            <span>{{ showInfo?.bankName1 }}-{{ showInfo?.bankName2 }}</span>
+          </a-col>
+          <a-col :span="24" class="qr-info-item" v-if="showInfo && showInfo.showCompany">
+            <label>企业名称</label>
+            <span>{{ showInfo?.showCompany }}</span>
+          </a-col>
+          <a-col :span="24" class="qr-info-item" v-if="showInfo && showInfo.appUser">
+            <label>授权企业名称</label>
+            <span>{{ showInfo | showCompany }}</span>
+          </a-col>
+          <a-col :span="24" class="qr-info-item">
+            <label>用途</label>
+            <span>{{ showInfo?.useRemark | yongtuShow(this) }}</span>
+          </a-col>
+        </a-row>
+        <img style="width: 160px; height: 160px" :src="showInfo.codeUrl" alt="dark" />
       </div>
     </a-modal>
   </page-header-wrapper>
@@ -83,6 +109,7 @@ const reportTypeList = [
   },
 ]
 import { mapState, mapActions } from 'vuex'
+import { yongtu } from '@/config/constants'
 import { getQRCodeList, deleteQr, batchDelete } from '@/api/qrcode'
 import { STable } from '@/components'
 import { baseMixin } from '@/store/app-mixin'
@@ -101,7 +128,8 @@ export default {
       qrColumns,
       draftTypeSelected: null,
       search: null,
-      showImgUrl: null,
+      yongtu,
+      showInfo: {},
       reportTypeList,
       expandedRowKeys: [],
       // 查询参数
@@ -136,6 +164,11 @@ export default {
     }
   },
   filters: {
+    yongtuShow(v, that) {
+      if (!v) return ''
+      const i = that.yongtu.find((item) => item.id == v)
+      return i.name
+    },
     dealTime(v) {
       let time = parseInt(v)
       return Math.ceil(time / 3600)
@@ -160,9 +193,13 @@ export default {
   },
   computed: {
     ...mapState({
+      userInfo: (state) => state.user.info,
       overview: (state) => state.user.overview,
       buildQrCodePop: (state) => state.user.buildQrCodePop,
     }),
+  },
+  created() {
+    console.log(this.userInfo)
   },
   methods: {
     ...mapActions(['changeBuildQrCodePop']),
@@ -205,8 +242,8 @@ export default {
     selectChange() {
       this.$refs.table.refresh()
     },
-    showImg(url) {
-      this.showImgUrl = url
+    showImg(info) {
+      this.showInfo = info
       this.qrCodePop = true
     },
     deleteQrCode(v) {
@@ -295,6 +332,20 @@ export default {
   }
   /deep/ .ant-table-small > .ant-table-content > .ant-table-body {
     margin: 0;
+  }
+}
+.qr-info-item {
+  font-family: PingFangSC-Regular;
+  font-size: 18px;
+  color: #3d4566;
+  letter-spacing: 0;
+  font-weight: 400;
+  display: flex;
+  margin: 10px 0;
+  label {
+    width: 120px;
+    margin-right: 15px;
+    text-align: right;
   }
 }
 </style>

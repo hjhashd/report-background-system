@@ -128,7 +128,7 @@
                     >
                   </div>
                 </div> -->
-                <div style="padding: 0 10px" class="line-item flex-row-spacebetween flex-1">
+                <div style="padding: 0 10px; z-index: 1000" class="line-item flex-row-spacebetween flex-1">
                   <div v-for="(item, index) in aiTypeList" :key="index" @click="chooseAI(item.value)">
                     <div class="item">
                       <div class="dott" :class="{ active: item.value === aiType }"></div>
