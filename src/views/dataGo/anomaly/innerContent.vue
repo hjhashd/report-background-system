@@ -2,8 +2,13 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
+<<<<<<< HEAD
  * @LastEditTime: 2025-05-13 22:53:54
  * @FilePath: \report-background-system\src\views\dataGo\anomaly\innerContent.vue
+=======
+ * @LastEditTime: 2025-05-13 14:28:44
+ * @FilePath: /report-background-system/src/views/dataGo/anomaly/innerContent.vue
+>>>>>>> 57e55c6fd3f8a8b8d5f358f91457d2a5b3b1d371
  * @Description: 
  * 
 -->
@@ -59,7 +64,7 @@
               <template slot="header">
                 <div class="flex">
                   <span>{{ item.year }}年数据</span>
-                  <div class="icon" v-if="!index">最新</div>
+                  <!-- <div class="icon" v-if="!index">最新</div> -->
                 </div>
               </template>
               <a-table
@@ -445,7 +450,7 @@ export default {
           this.tableData = reObjN.reData
           this.columns = reObjN.columns
         }
-        if (this.tabSelected !== '财务基础指标' && this.columns.length) {
+        if (this.tabSelected !== '财务基础指标' && this.columns.length && !this.activeKey.length) {
           this.activeKey = [this.columns[0].year]
         }
         this.tableLoading = false
