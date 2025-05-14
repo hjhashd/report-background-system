@@ -138,7 +138,7 @@
                 </div>
                 <a-dropdown>
                   <a-menu slot="overlay" @click="menuChoose">
-                    <a-menu-item v-for="(item, index) in aiType" :key="index" :value="item">
+                    <a-menu-item v-for="(item, index) in aiTypes" :key="index" :value="item">
                       {{ item }}
                     </a-menu-item>
                   </a-menu>
@@ -314,7 +314,7 @@ export default {
         content: '',
       },
       aiTypeList,
-      aiType: null,
+      aiTypes: null,
       processNum: 0,
       clickInAI: false,
       AIresponse: null,
@@ -329,7 +329,7 @@ export default {
   },
   created() {
     getAIType(this.reportDetail.creditCode).then((res) => {
-      this.aiType = res.data
+      this.aiTypes = res.data
     })
   },
   mounted() {
