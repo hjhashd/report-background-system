@@ -177,19 +177,21 @@ export default {
     }
   },
   filters: {
-    dealTime(seconds) {
-      const oneHour = 60 * 60
-      const oneMin = 60
-      const hours = Math.floor(seconds / oneHour)
-      const ddMinute = seconds % oneHour
-      const min = Math.floor(ddMinute / oneMin)
-      const llseconds = seconds % oneMin
-      let str = ''
-      str += hours ? `${hours} 小时 ` : ''
-      str += min ? `${min} 分钟` : ''
-      str += llseconds ? `${llseconds} 秒` : ''
+    dealTime(minutes) {
+      const oneDay = 24 * 60;
+      const oneHour = 60;
 
-      return str
+      const days = Math.floor(minutes / oneDay);
+      const remainingMinutes = minutes % oneDay;
+      const hours = Math.floor(remainingMinutes / oneHour);
+      const mins = remainingMinutes % oneHour;
+
+      let str = '';
+      str += days ? `${days} 天 ` : '';
+      str += hours ? `${hours} 小时 ` : '';
+      str += mins ? `${mins} 分钟` : '';
+
+      return str || '0 分钟';
     },
   },
   computed: {
