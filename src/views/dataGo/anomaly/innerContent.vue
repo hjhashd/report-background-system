@@ -2,13 +2,6 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
-<<<<<<< HEAD
- * @LastEditTime: 2025-05-13 22:53:54
- * @FilePath: \report-background-system\src\views\dataGo\anomaly\innerContent.vue
-=======
- * @LastEditTime: 2025-05-13 14:28:44
- * @FilePath: /report-background-system/src/views/dataGo/anomaly/innerContent.vue
->>>>>>> 57e55c6fd3f8a8b8d5f358f91457d2a5b3b1d371
  * @Description: 
  * 
 -->
@@ -32,14 +25,20 @@
       </div>
       <div class="p-20">
         <div v-if="tabSelected === '财务基础指标'">
-          <div class="tab-list flex">
-            <div
-              :class="{ 'one-tab': true, 'tab-active': item.value == secondLevel }"
-              v-for="(item, index) in caiwuList"
-              :key="index"
-              @click="secondLevel = item.value"
-            >
-              <a-icon :type="item.icon" /><span>{{ item.name }}</span>
+          <div class="flex-row-spacebetween">
+            <div class="tab-list flex">
+              <div
+                :class="{ 'one-tab': true, 'tab-active': item.value == secondLevel }"
+                v-for="(item, index) in caiwuList"
+                :key="index"
+                @click="secondLevel = item.value"
+              >
+                <a-icon :type="item.icon" /><span>{{ item.name }}</span>
+              </div>
+            </div>
+            <div>
+              <span v-if="secondLevel">数值单位:万元；比率:实际数值</span
+              ><span v-else>单位:万元；环比单位:实际值</span>
             </div>
           </div>
           <a-table
