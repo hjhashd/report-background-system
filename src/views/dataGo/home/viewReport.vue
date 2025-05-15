@@ -513,7 +513,7 @@ export default {
     applyReport() {
       const { $notification } = this
       this.pageLoading = true
-      this.reportName = null
+      this.reportName = ''
       applyReport(this.reportDetail.id, this.otherSaveReportName)
         .then((res) => {
           this.pageLoading = false
