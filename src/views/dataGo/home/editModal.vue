@@ -378,6 +378,7 @@ export default {
       this.aiType = value
       const parameter = {
         aiType: this.aiType,
+        reportId: this.reportDetail.id,
         reportType: this.reportDetail.reportType,
         creditCode: this.reportDetail.appUser.enterprise.enterpriseCreditCode,
         title: this.selectModal.title,
@@ -425,6 +426,14 @@ export default {
     changModalShow(v) {
       this.isFirstLoading = true
       this.currentModalSelect = v
+      // 重置一下ai内容
+      this.aiTypes = null
+      this.processNum = 0
+      this.clickInAI = false
+      this.aiExspend = false
+      this.isExpend = false
+      this.AIresponse = null
+      this.aiType = []
       this.getModalContent()
     },
     getModalContent() {

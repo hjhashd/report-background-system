@@ -2,14 +2,14 @@
  * @Author: bekon
  * @Date: 2025-02-26 11:22:54
  * @LastEditors: bekon
- * @LastEditTime: 2025-05-06 14:36:32
- * @FilePath: /report-background-system/src/views/dataGo/home/viewCustomerData.vue
+ * @LastEditTime: 2025-05-18 08:43:53
+ * @FilePath: \report-background-system\src\views\dataGo\home\viewCustomerData.vue
  * @Description: 
  * 
 -->
 <template>
   <page-header-wrapper>
-    <div>
+    <a-spin :spinning="pageLoading">
       <!-- <div class="page-title">客户数据详情</div> -->
       <div class="search-item item-content">
         <div class="flex ll">
@@ -51,9 +51,15 @@
       </div>
       <div class="upload-data-box" :style="{ height: '58vh' }" v-if="customerUploadList">
         <customer-upload-detail-new
+          v-if="selectTab !== 'materialList'"
+          @updateData="initData"
+          :selectTab="selectTab"
           :customerUploadList="customerUploadList"
           :customerInfo="queryParams"
         ></customer-upload-detail-new>
+        <div class="item-content" v-else>
+          <metiral-list :customerInfo="queryParams"></metiral-list>
+        </div>
       </div>
       <div class="button-group">
         <a-button
@@ -65,7 +71,7 @@
         >
         <a-button v-if="buildReportId" style="width: 25%; height: 40px" @click="reviewReport">报告预览</a-button>
       </div>
-    </div>
+    </a-spin>
     <a-modal
       class="qr-modal"
       v-model="setReportName"
@@ -84,8 +90,10 @@
 
 <script>
 import { customerData } from '@/api/report'
+import { mapState } from 'vuex'
 import CustomerUploadDetailNew from '../client/customerUploadDetail_new.vue'
 import { buildReport } from '@/api/report'
+import MetiralList from '../uploadData/metiralList.vue'
 import { getCurrentDate, getCurrentTime } from './util'
 const tableType = [
   // 新增dataType字段，crwal 自动采集 upload 上传数据 other 其他授权
@@ -101,12 +109,17 @@ const tableType = [
     name: '其他授权',
     value: 'other',
   },
+  {
+    name: '材料列表',
+    value: 'materialList',
+  },
 ]
 export default {
   name: 'viewCustomerData',
-  components: { CustomerUploadDetailNew },
+  components: { CustomerUploadDetailNew, MetiralList },
   data() {
     return {
+      pageLoading: true,
       tableType,
       selectTab: tableType[0].value,
       customers: [],
@@ -118,6 +131,12 @@ export default {
       buildReportId: null,
       reportName: '',
     }
+  },
+  computed: {
+    ...mapState({
+      // 动态主路由
+      userInfo: (state) => state.user.info,
+    }),
   },
   created() {
     this.queryParams = this.$route.query
@@ -147,9 +166,11 @@ export default {
       }
       customerData(query)
         .then((res) => {
+          this.pageLoading = false
           this.customerUploadList = res.data
         })
         .catch((err) => {
+          this.pageLoading = false
           this.$message.error('获取客户数据:' + err)
         })
     },

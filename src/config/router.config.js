@@ -29,8 +29,8 @@ export const asyncRouterMap = [
             meta: { title: 'menu.qrCodeList', icon: 'qrcode', keepAlive: false, permission: ['home'] }
           },
           {
-            path: '/clientPage/index',
-            name: 'clientPage',
+            path: '/uploadData/index',
+            name: 'uploadData',
             component: () => import('@/views/dataGo/uploadData'),
             // component: () => import('@/views/dataGo/client'),
             meta: { title: 'menu.client', keepAlive: false, icon: 'team', permission: ['client'] }
