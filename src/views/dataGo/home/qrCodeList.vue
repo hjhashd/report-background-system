@@ -32,8 +32,8 @@
         }}</template>
         <span slot="status" slot-scope="text">
           <!-- // 0 草稿 1 已完成 2 数据未授权 3 数据已授权 -->
-          <span v-if="text == 1" :class="['table-status', 'status' + text]">已失效</span>
-          <span v-if="text == 0" :class="['table-status', 'status' + text]">生效中</span>
+          <span v-if="text == 1" :class="['table-status', 'status' + text]">已使用</span>
+          <span v-if="text == 0" :class="['table-status', 'status' + text]">未使用</span>
         </span>
         <span slot="codeType" slot-scope="text">
           {{ text == 1 ? '数据申请' : '数据上传' }}
