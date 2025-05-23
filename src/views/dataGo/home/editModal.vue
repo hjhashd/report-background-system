@@ -387,7 +387,8 @@ export default {
     },
     async getAIConfig(parameter) {
       this.clickInAI = true
-      const reD = await getAIConfig(parameter)
+      // const reD = await getAIConfig(parameter)
+      const reD = await toAi({ content: this.changeContent, aiType: this.aiType })
       let countdown = 10
       const intervalId = setInterval(() => {
         if (countdown > 0) {
