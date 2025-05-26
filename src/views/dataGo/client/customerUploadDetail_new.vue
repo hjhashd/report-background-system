@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-04-27 11:52:54
  * @LastEditors: bekon
- * @LastEditTime: 2025-05-12 21:46:52
- * @FilePath: \report-background-system\src\views\dataGo\client\customerUploadDetail_new.vue
+ * @LastEditTime: 2025-05-26 11:52:13
+ * @FilePath: /report-background-system/src/views/dataGo/client/customerUploadDetail_new.vue
  * @Description: 
  * 
 -->
@@ -248,6 +248,11 @@ export default {
         if (!v) {
           this.$refs.scanEdit.hasUploadFile = false
         }
+      },
+    },
+    customerUploadList: {
+      handler(v) {
+        this.uploadMutilData = classifyDataByClassName(v)
       },
     },
   },

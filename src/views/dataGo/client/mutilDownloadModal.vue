@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 16:45:11
  * @LastEditors: bekon
- * @LastEditTime: 2025-03-24 15:12:54
+ * @LastEditTime: 2025-05-26 11:52:34
  * @FilePath: /report-background-system/src/views/dataGo/client/mutilDownloadModal.vue
  * @Description: 
  * 
@@ -63,6 +63,13 @@ export default {
       checkAll: false,
       showCustomerList: [],
     }
+  },
+  watch: {
+    customerUploadList: {
+      handler(v) {
+        this.showCustomerList = v
+      },
+    },
   },
   mounted() {
     this.showCustomerList = this.customerUploadList

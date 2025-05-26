@@ -388,12 +388,19 @@ export default {
     async getAIConfig(parameter) {
       this.clickInAI = true
       // const reD = await getAIConfig(parameter)
-      const reD = await toAi({ content: this.changeContent, aiType: this.aiType })
-      let countdown = 10
-      const intervalId = setInterval(() => {
+      let countdown = 20
+      let reD = null
+      const intervalId = setInterval(async () => {
         if (countdown > 0) {
-          countdown--
-          this.processNum = (10 - countdown) * 10
+          if (!reD) {
+            countdown = countdown == 1 ? 1 : countdown - 1
+            this.processNum = (20 - countdown) * 5
+          } else {
+            this.AIresponse = reD.data
+            this.clickInAI = false
+            this.processNum = 0
+            clearInterval(intervalId)
+          }
         } else {
           this.AIresponse = reD.data
           this.clickInAI = false
@@ -401,6 +408,7 @@ export default {
           clearInterval(intervalId)
         }
       }, 1000)
+      reD = await toAi({ content: this.changeContent, aiType: this.aiType })
     },
     toAI() {
       const { $notification } = this
