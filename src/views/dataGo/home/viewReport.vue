@@ -296,7 +296,7 @@ export default {
       typeFrom: null,
       reportName: null,
       setType: null,
-      otherSaveReportName: null,
+      otherSaveReportName: '',
       setReportName: false,
       openDataYC: false,
       popTitle: null,
