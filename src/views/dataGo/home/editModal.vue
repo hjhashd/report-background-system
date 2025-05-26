@@ -386,6 +386,7 @@ export default {
       this.getAIConfig(parameter)
     },
     async getAIConfig(parameter) {
+      const { $notification } = this
       this.clickInAI = true
       // const reD = await getAIConfig(parameter)
       let countdown = 20
@@ -399,12 +400,26 @@ export default {
             this.AIresponse = reD.data
             this.clickInAI = false
             this.processNum = 0
+            if (reD.code !== 200) {
+              $notification['error']({
+                message: '错误通知：',
+                description: `${reD.msg}`,
+                duration: 8,
+              })
+            }
             clearInterval(intervalId)
           }
         } else {
           this.AIresponse = reD.data
           this.clickInAI = false
           this.processNum = 0
+          if (reD.code !== 200) {
+            $notification['error']({
+              message: '错误通知：',
+              description: `${reD.msg}`,
+              duration: 8,
+            })
+          }
           clearInterval(intervalId)
         }
       }, 1000)
