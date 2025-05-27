@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-03-12 13:54:33
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-27 21:13:28
+ * @LastEditTime: 2025-05-27 18:53:37
  * @FilePath: /report-background-system/src/views/dataGo/anomaly/util.js
  * @Description: 
  * 
@@ -270,7 +270,9 @@ export function dealColumnsNew(data, type, secondLevel) {
                 if (!yearList.includes(item.recordDate)) yearList.push(item.recordDate);
                 const fIndex = valueList.findIndex((i) => i.dataItem === item.dataItem)
                 if (item.dataItem.includes('异常等级')) {
-                    levelLists[item.recordDate + item.dataItem] = item.dataValue
+                    if (item.dataValue && item.dataValue !== '正常' && item.dataValue !== '过滤') {
+                        levelLists[item.recordDate + item.dataItem] = item.dataValue
+                    }
                 } else {
                     if (item.researchList && item.researchList.length) {
                         yearResearchInfo = item.researchList[0]
