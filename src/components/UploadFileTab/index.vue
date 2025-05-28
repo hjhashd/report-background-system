@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-04-26 13:52:52
  * @LastEditors: bekon
- * @LastEditTime: 2025-05-06 13:51:51
+ * @LastEditTime: 2025-05-28 12:35:21
  * @FilePath: /report-background-system/src/components/UploadFileTab/index.vue
  * @Description: 
  * 
@@ -115,7 +115,7 @@
         </div>
         <div class="flex footer-btn">
           <a-button class="pop-btn" @click="preStep"> 返回调整 </a-button>
-          <a-button class="pop-btn green-style" @click="importToDatabase"> 导入 </a-button>
+          <a-button :loading="uploadCStatus" class="pop-btn green-style" @click="importToDatabase"> 导入 </a-button>
         </div>
       </div>
     </a-spin>
@@ -143,6 +143,7 @@ export default {
     return {
       tabType,
       tabLoading: false,
+      uploadCStatus: false,
       selectTab: tabType[0],
       fileList: [],
       columns,
@@ -246,8 +247,10 @@ export default {
       const item = this.clickItem
       formData.append('file', this.fileList[0])
       formData.append('appUserId', this.customerInfo.appUserId)
+      this.uploadCStatus = true
       pullTableData(item, formData, this.pickFieldsData, this.mapping)
         .then((res) => {
+          this.uploadCStatus = false
           if (res.code == 200) {
             $notification['success']({
               message: '通知：',
@@ -266,6 +269,7 @@ export default {
           }
         })
         .catch((err) => {
+          this.uploadCStatus = false
           $notification['error']({
             message: '提醒：',
             description: err,
