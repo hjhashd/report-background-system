@@ -101,7 +101,7 @@
       <a-row :gutter="[10]" v-if="modalContentList">
         <a-col :span="11" class="un-edit-pass">
           <a-textarea
-            :style="{ height: !isExpend ? '68vh' : '28px' }"
+            :style="{ height: !isExpend && !isColorExpend ? '68vh' : '28px' }"
             v-model="useContent.content"
             :auto-size="true"
             :disabled="true"
@@ -109,25 +109,6 @@
           <div v-if="aiExspend">
             <div class="ai-expend" v-show="isExpend">
               <div class="flex-row-spacebetween btn-part">
-                <!-- <div class="flex flex-1" v-for="(item, index) in aiTypeList" :key="index">
-                  <div class="flex-1">
-                    <a-button
-                      class="ai-btn"
-                      :style="{
-                        color: item.value == aiType ? '#fff' : item.defaultColor,
-                        background: item.value == aiType ? item.btBc : 'transparent',
-                      }"
-                      @click="chooseAI(item.value)"
-                    >
-                      <a-icon
-                        class="ai-icon"
-                        :type="item.icon"
-                        :style="{ background: item.value == aiType ? item.bcAction : item.bc }"
-                      />
-                      {{ item.value }}</a-button
-                    >
-                  </div>
-                </div> -->
                 <div style="padding: 0 10px; z-index: 1000" class="line-item flex-row-spacebetween flex-1">
                   <div v-for="(item, index) in aiTypeList" :key="index" @click="chooseAI(item.value)">
                     <div class="item">
@@ -173,13 +154,69 @@
               />
             </div>
           </div>
+          <div v-if="aiColorExspend">
+            <div class="ai-expend" v-show="isColorExpend">
+              <div class="flex-row-spacebetween btn-part">
+                <div style="padding: 0 10px; z-index: 1000" class="flex-1">
+                  <a-checkbox-group v-model="aiColorType" @change="chooseAIColor">
+                    <div class="flex">
+                      <div v-for="(item, index) in aiColorList" :key="index" :value="item">
+                        <a-checkbox :value="item" v-if="index < 3">
+                          {{ item }}
+                        </a-checkbox>
+                      </div>
+                    </div>
+                  </a-checkbox-group>
+                </div>
+                <a-dropdown>
+                  <a-checkbox-group style="background-color: #fff; padding: 5px;border: 1px solid #f5f5f5;" slot="overlay" v-model="aiColorType" @change="chooseAIColor">
+                    <a-row v-for="(item, index) in aiColorList" :key="index" :value="item">
+                      <a-checkbox :value="item">
+                        {{ item }}
+                      </a-checkbox>
+                    </a-row>
+                  </a-checkbox-group>
+                  <a-button style="padding: 0 5px"> 更多 </a-button>
+                </a-dropdown>
+                <a-button style="padding: 0 5px; margin-left: 10px" @click="confirmAIColor"> 确定 </a-button>
+              </div>
+              <div class="ai-response" v-if="AIresponseColor">
+                <a-textarea
+                  style="height: calc(70vh - 160px)"
+                  v-model="AIresponseColor"
+                  :auto-size="true"
+                  :disabled="true"
+                />
+              </div>
+            </div>
+            <div class="loading-zezao" v-if="clickInAIColor">
+              <div class="top-t w100 flex-row-spacebetween">
+                <span>正在进行AI润色...</span>
+                <span>{{ processNum }}%</span>
+              </div>
+              <a-progress :showInfo="false" strokeColor="#64ceea" :percent="processNum" status="active" />
+              <div class="detail">AI正在分析报告内容</div>
+            </div>
+            <div class="ex-icon">
+              <a-icon
+                theme="filled"
+                style="font-size: 20px"
+                :class="{ 'close-icon': !isColorExpend }"
+                type="up-circle"
+                @click="isColorExpend = !isColorExpend"
+              />
+            </div>
+          </div>
           <div class="footer-btns">
-            <a-button class="normal-btn" @click="toAI"
+            <a-button class="normal-btn" @click="toAIColor"
+              ><img style="width: 22px; height: 25px" src="@/assets/images/ai-r.png" alt="dark" />AI润色</a-button
+            >
+            <a-button style="margin-left: 15px" class="normal-btn" @click="toAI"
               ><img style="width: 22px; height: 25px" src="@/assets/images/AI-icon.png" alt="dark" />AI生成</a-button
             >
             <a-popconfirm
               style="margin-left: 15px"
-              :disabled="!AIresponse"
+              :disabled="(isColorExpend && !AIresponseColor) || (isExpend && !AIresponse)"
               placement="top"
               ok-text="确定"
               cancel-text="取消"
@@ -189,7 +226,7 @@
               <template slot="title">
                 <div>是否将AI内容另存当前版本?</div>
               </template>
-              <a-button :disabled="!AIresponse"
+              <a-button :disabled="(isColorExpend && !AIresponseColor) || (isExpend && !AIresponse)"
                 ><img style="width: 20px; height: 20px" src="@/assets/images/cy.png" alt="dark" />替换</a-button
               >
             </a-popconfirm>
@@ -288,6 +325,8 @@ import {
   toAi,
   getAIConfig,
   getAIType,
+  getAiColor,
+  aiColor,
 } from '@/api/report'
 import { colorList } from '@/config/constants'
 import { aiTypeList } from './util'
@@ -325,11 +364,20 @@ export default {
       aiExspend: false,
       isExpend: false,
       aiType: [],
+      aiColorList: [],
+      aiColorType: [],
+      aiColorExspend: false,
+      isColorExpend: false,
+      AIresponseColor: null,
+      clickInAIColor: false,
     }
   },
   created() {
     getAIType(this.reportDetail.creditCode).then((res) => {
       this.aiTypes = res.data
+    })
+    getAiColor().then((res) => {
+      this.aiColorList = res.data
     })
   },
   mounted() {
@@ -361,7 +409,11 @@ export default {
       this.changeContent = this.AIresponse
     },
     confirmText() {
-      this.changeContent = this.AIresponse
+      if (this.isExpend) {
+        this.changeContent = this.AIresponse
+      } else {
+        this.changeContent = this.AIresponseColor
+      }
       this.setContentPop = true
     },
     menuChoose(v) {
@@ -373,6 +425,55 @@ export default {
         title: this.selectModal.title,
       }
       this.getAIConfig(parameter)
+    },
+    chooseAIColor(value) {
+      this.aiColorType = value
+    },
+    menuChooseColor(v) {
+      this.aiColorType = v.item.value
+    },
+    async confirmAIColor() {
+      const { $notification } = this
+      this.clickInAIColor = true
+      // const reD = await getAIConfig(parameter)
+      let countdown = 20
+      let reD = null
+      const intervalId = setInterval(async () => {
+        if (countdown > 0) {
+          if (!reD) {
+            countdown = countdown == 1 ? 1 : countdown - 1
+            this.processNum = (20 - countdown) * 5
+          } else {
+            this.AIresponseColor = reD.data
+            this.clickInAIColor = false
+            this.processNum = 0
+            if (reD.code !== 200) {
+              $notification['error']({
+                message: '错误通知：',
+                description: `${reD.msg}`,
+                duration: 8,
+              })
+            }
+            clearInterval(intervalId)
+          }
+        } else {
+          this.AIresponseColor = reD.data
+          this.clickInAIColor = false
+          this.processNum = 0
+          if (reD.code !== 200) {
+            $notification['error']({
+              message: '错误通知：',
+              description: `${reD.msg}`,
+              duration: 8,
+            })
+          }
+          clearInterval(intervalId)
+        }
+      }, 1000)
+      reD = await aiColor({
+        content: this.changeContent,
+        types: this.aiColorType,
+      })
     },
     chooseAI(value) {
       this.aiType = value
@@ -430,19 +531,15 @@ export default {
       // ai
       this.aiExspend = true
       this.isExpend = true
-      // toAi({ content: this.changeContent }).then((result) => {
-      //   this.editLoading = false
-      //   if (result.code != 200) {
-      //     $notification['error']({
-      //       message: '错误通知：',
-      //       description: `${result.msg}`,
-      //       duration: 8,
-      //     })
-      //     return
-      //   } else {
-      //     this.changeContent = result.data
-      //   }
-      // })
+      this.aiColorExspend = false
+      this.isColorExpend = false
+    },
+    toAIColor() {
+      const { $notification } = this
+      this.aiExspend = false
+      this.isExpend = false
+      this.aiColorExspend = true
+      this.isColorExpend = true
     },
     addModalResult() {
       this.changeContent = ''
@@ -451,12 +548,14 @@ export default {
       this.isFirstLoading = true
       this.currentModalSelect = v
       // 重置一下ai内容
-      this.aiTypes = null
       this.processNum = 0
       this.clickInAI = false
       this.aiExspend = false
       this.isExpend = false
       this.AIresponse = null
+      this.aiColorExspend = false
+      this.isColorExpend = false
+      this.AIresponseColor = null
       this.aiType = []
       this.getModalContent()
     },

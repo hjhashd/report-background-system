@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-05-13 22:18:28
- * @FilePath: \report-background-system\src\api\report.js
+ * @LastEditTime: 2025-06-06 09:53:10
+ * @FilePath: /report-background-system/src/api/report.js
  * @Description: 
  * 
  */
@@ -67,7 +67,11 @@ const reportAPI = {
     // 上传数据
     getUploadsFile: '/report/v2/entity/uploadtable/file/list',
     getAutoFiles: '/report/v2/entity/proof/file/list',
-    getDYFiles: '/report/v2/entity/all/customer/abnormal/file/list'
+    getDYFiles: '/report/v2/entity/all/customer/abnormal/file/list',
+
+    // ai润色
+    getAiColor: '/report/v2/entity/ai/retouch/type',
+    aiColor: '/report/v2/entity/ai/content/retouch'
 }
 
 // 获取指定用户所有调研结果上传的文件
@@ -526,5 +530,20 @@ export function getIndustryReportConfig(id) {
     return request({
         url: `${reportAPI.getIndustryReportConfig}${id}`,
         method: 'get',
+    })
+}
+
+export function getAiColor() {
+    return request({
+        url: reportAPI.getAiColor,
+        method: 'get',
+    })
+}
+
+export function aiColor(parameter) {
+    return request({
+        url: reportAPI.aiColor,
+        method: 'post',
+        data: parameter
     })
 }
