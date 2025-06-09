@@ -101,122 +101,133 @@
       <a-row :gutter="[10]" v-if="modalContentList">
         <a-col :span="11" class="un-edit-pass">
           <a-textarea
-            :style="{ height: !isExpend && !isColorExpend ? '68vh' : '28px' }"
+            :style="{
+              height: !isExpend && !isColorExpend ? '68vh' : '0px',
+              display: !isExpend && !isColorExpend ? 'inline-block' : 'none',
+            }"
             v-model="useContent.content"
             :auto-size="true"
             :disabled="true"
           />
-          <div v-if="aiExspend">
-            <div class="ai-expend" v-show="isExpend">
-              <div class="flex-row-spacebetween btn-part">
-                <div style="padding: 0 10px; z-index: 1000" class="line-item flex-row-spacebetween flex-1">
-                  <div v-for="(item, index) in aiTypeList" :key="index" @click="chooseAI(item.value)">
-                    <div class="item">
-                      <div class="dott" :class="{ active: item.value === aiType }"></div>
-                      <div class="ai-item-title">{{ item.value }}</div>
-                    </div>
-                  </div>
-                </div>
-                <a-dropdown>
-                  <a-menu slot="overlay" @click="menuChoose">
-                    <a-menu-item v-for="(item, index) in aiTypes" :key="index" :value="item">
-                      {{ item }}
-                    </a-menu-item>
-                  </a-menu>
-                  <a-button style="padding: 0 5px"> <a-icon type="ellipsis" /> </a-button>
-                </a-dropdown>
-              </div>
-              <div class="ai-response" v-if="AIresponse">
-                <div class="ai-title">{{ aiType }}</div>
-                <a-textarea
-                  style="height: calc(70vh - 160px)"
-                  v-model="AIresponse"
-                  :auto-size="true"
-                  :disabled="true"
-                />
-              </div>
-            </div>
-            <div class="loading-zezao" v-if="clickInAI">
-              <div class="top-t w100 flex-row-spacebetween">
-                <span>正在补充{{ aiType }}...</span>
-                <span>{{ processNum }}%</span>
-              </div>
-              <a-progress :showInfo="false" strokeColor="#64ceea" :percent="processNum" status="active" />
-              <div class="detail">AI正在分析报告内容</div>
-            </div>
-            <div class="ex-icon">
-              <a-icon
-                theme="filled"
-                style="font-size: 20px"
-                :class="{ 'close-icon': !isExpend }"
-                type="up-circle"
-                @click="isExpend = !isExpend"
-              />
-            </div>
-          </div>
-          <div v-if="aiColorExspend">
-            <div class="ai-expend" v-show="isColorExpend">
-              <div class="flex-row-spacebetween btn-part">
-                <div style="padding: 0 10px; z-index: 1000" class="flex-1">
-                  <a-checkbox-group v-model="aiColorType" @change="chooseAIColor">
-                    <div class="flex">
-                      <div v-for="(item, index) in aiColorList" :key="index" :value="item">
-                        <a-checkbox :value="item" v-if="index < 3">
-                          {{ item }}
-                        </a-checkbox>
+          <a-collapse @change="getKey" accordion v-if="isExpend" :style="{ height: isExpend ? '68vh' : '0px' }">
+            <a-collapse-panel key="1" header="内容生产">
+              <div class="ai-expend">
+                <div class="flex-row-spacebetween btn-part">
+                  <div style="padding: 0 10px; z-index: 1000" class="line-item flex-row-spacebetween flex-1">
+                    <div v-for="(item, index) in aiTypeList" :key="index" @click="chooseAI(item.value)">
+                      <div class="item">
+                        <div class="dott" :class="{ active: item.value === aiType }"></div>
+                        <div class="ai-item-title">{{ item.value }}</div>
                       </div>
                     </div>
-                  </a-checkbox-group>
-                </div>
-                <a-dropdown>
-                  <a-checkbox-group style="background-color: #fff; padding: 5px;border: 1px solid #f5f5f5;" slot="overlay" v-model="aiColorType" @change="chooseAIColor">
-                    <a-row v-for="(item, index) in aiColorList" :key="index" :value="item">
-                      <a-checkbox :value="item">
+                  </div>
+                  <a-dropdown>
+                    <a-menu slot="overlay" @click="menuChoose">
+                      <a-menu-item v-for="(item, index) in aiTypes" :key="index" :value="item">
                         {{ item }}
-                      </a-checkbox>
-                    </a-row>
-                  </a-checkbox-group>
-                  <a-button style="padding: 0 5px"> 更多 </a-button>
-                </a-dropdown>
-                <a-button style="padding: 0 5px; margin-left: 10px" @click="confirmAIColor"> 确定 </a-button>
+                      </a-menu-item>
+                    </a-menu>
+                    <a-button style="padding: 0 5px"> <a-icon type="ellipsis" /> </a-button>
+                  </a-dropdown>
+                </div>
+                <div class="ai-response" v-if="AIresponse">
+                  <!-- <div class="ai-title">{{ aiType }}</div> -->
+                  <a-textarea
+                    style="height: calc(68vh - 185px)"
+                    v-model="AIresponse"
+                    :auto-size="true"
+                    :disabled="true"
+                  />
+                </div>
               </div>
-              <div class="ai-response" v-if="AIresponseColor">
-                <a-textarea
-                  style="height: calc(70vh - 160px)"
-                  v-model="AIresponseColor"
-                  :auto-size="true"
-                  :disabled="true"
+              <div class="loading-zezao" v-if="clickInAI">
+                <div class="top-t w100 flex-row-spacebetween">
+                  <span>正在补充{{ aiType }}...</span>
+                  <span>{{ processNum }}%</span>
+                </div>
+                <a-progress :showInfo="false" strokeColor="#64ceea" :percent="processNum" status="active" />
+                <div class="detail">AI正在分析报告内容</div>
+              </div>
+              <div class="ex-icon">
+                <a-icon
+                  theme="filled"
+                  style="font-size: 20px"
+                  :class="{ 'close-icon': !isExpend }"
+                  type="up-circle"
+                  @click="isExpend = !isExpend"
                 />
               </div>
-            </div>
-            <div class="loading-zezao" v-if="clickInAIColor">
-              <div class="top-t w100 flex-row-spacebetween">
-                <span>正在进行AI润色...</span>
-                <span>{{ processNum }}%</span>
+            </a-collapse-panel>
+            <a-collapse-panel key="2" header="内容润色">
+              <div class="ai-expend">
+                <div class="flex-row-spacebetween btn-part">
+                  <div style="padding: 0 10px; z-index: 1000" class="flex-1">
+                    <a-checkbox-group v-model="aiColorType" @change="chooseAIColor">
+                      <div class="flex">
+                        <div v-for="(item, index) in aiColorList" :key="index" :value="item">
+                          <a-checkbox :value="item" v-if="index < 3">
+                            {{ item }}
+                          </a-checkbox>
+                        </div>
+                      </div>
+                    </a-checkbox-group>
+                  </div>
+                  <a-dropdown>
+                    <a-checkbox-group
+                      style="background-color: #fff; padding: 5px; border: 1px solid #f5f5f5"
+                      slot="overlay"
+                      v-model="aiColorType"
+                      @change="chooseAIColor"
+                    >
+                      <a-row v-for="(item, index) in aiColorList" :key="index" :value="item">
+                        <a-checkbox :value="item">
+                          {{ item }}
+                        </a-checkbox>
+                      </a-row>
+                    </a-checkbox-group>
+                    <a-button style="padding: 0 5px"> 更多 </a-button>
+                  </a-dropdown>
+                  <a-button style="padding: 0 5px; margin-left: 10px" @click="confirmAIColor"> 确定 </a-button>
+                </div>
+                <div class="ai-response" v-if="AIresponseColor">
+                  <a-textarea
+                    style="height: calc(68vh - 185px)"
+                    v-model="AIresponseColor"
+                    :auto-size="true"
+                    :disabled="true"
+                  />
+                </div>
               </div>
-              <a-progress :showInfo="false" strokeColor="#64ceea" :percent="processNum" status="active" />
-              <div class="detail">AI正在分析报告内容</div>
-            </div>
-            <div class="ex-icon">
-              <a-icon
-                theme="filled"
-                style="font-size: 20px"
-                :class="{ 'close-icon': !isColorExpend }"
-                type="up-circle"
-                @click="isColorExpend = !isColorExpend"
-              />
-            </div>
+              <div class="loading-zezao" v-if="clickInAIColor">
+                <div class="top-t w100 flex-row-spacebetween">
+                  <span>正在进行AI润色...</span>
+                  <span>{{ processNum }}%</span>
+                </div>
+                <a-progress :showInfo="false" strokeColor="#64ceea" :percent="processNum" status="active" />
+                <div class="detail">AI正在分析报告内容</div>
+              </div>
+            </a-collapse-panel>
+          </a-collapse>
+          <div class="ex-icon">
+            <a-icon
+              theme="filled"
+              style="font-size: 20px"
+              :class="{ 'close-icon': !isExpend }"
+              type="up-circle"
+              @click="isExpend = !isExpend"
+            />
           </div>
+
           <div class="footer-btns">
-            <a-button class="normal-btn" @click="toAIColor"
+            <!-- <a-button class="normal-btn" @click="toAIColor"
               ><img style="width: 22px; height: 25px" src="@/assets/images/ai-r.png" alt="dark" />AI润色</a-button
-            >
+            > -->
             <a-button style="margin-left: 15px" class="normal-btn" @click="toAI"
               ><img style="width: 22px; height: 25px" src="@/assets/images/AI-icon.png" alt="dark" />AI生成</a-button
             >
             <a-popconfirm
               style="margin-left: 15px"
-              :disabled="(isColorExpend && !AIresponseColor) || (isExpend && !AIresponse)"
+              :disabled="!isExpend || !collapseKey || (collapseKey == '2' && !AIresponseColor) || (collapseKey == '1' && !AIresponse)"
               placement="top"
               ok-text="确定"
               cancel-text="取消"
@@ -226,7 +237,7 @@
               <template slot="title">
                 <div>是否将AI内容另存当前版本?</div>
               </template>
-              <a-button :disabled="(isColorExpend && !AIresponseColor) || (isExpend && !AIresponse)"
+              <a-button :disabled="!isExpend || !collapseKey || (collapseKey == '2' && !AIresponseColor) || (collapseKey == '1' && !AIresponse)"
                 ><img style="width: 20px; height: 20px" src="@/assets/images/cy.png" alt="dark" />替换</a-button
               >
             </a-popconfirm>
@@ -272,28 +283,6 @@
             </a-popconfirm>
           </div>
         </a-col>
-        <!-- <a-col :span="6" class="history-box">
-          <div class="history-title">历史版本</div>
-          <div
-            v-for="(version, index) in modalContentList"
-            :key="index"
-            class="version-item"
-            :class="{ 'version-active': version.id == selectModal.id }"
-            @click="changeSelect(version)"
-          >
-            <div class="version-id" :style="{ 'background-color': colorList[index] }">{{ index }}</div>
-            <div class="version-number">版本{{ version.version }}</div>
-            <div class="version-date">{{ version.updateTime.split(' ')[0] }}</div>
-            <a-popconfirm
-              title="是否确定该模块结论?"
-              ok-text="确定"
-              cancel-text="取消"
-              @confirm="deleteVersion(version)"
-            >
-              <a-button style="color: #ec6342" type="link" size="small" icon="delete"></a-button>
-            </a-popconfirm>
-          </div>
-        </a-col> -->
       </a-row>
     </div>
     <a-modal
@@ -370,6 +359,7 @@ export default {
       isColorExpend: false,
       AIresponseColor: null,
       clickInAIColor: false,
+      collapseKey: null,
     }
   },
   created() {
@@ -405,11 +395,14 @@ export default {
     },
   },
   methods: {
+    getKey(e) {
+      this.collapseKey = e
+    },
     transfromText() {
       this.changeContent = this.AIresponse
     },
     confirmText() {
-      if (this.isExpend) {
+      if (this.collapseKey == '1') {
         this.changeContent = this.AIresponse
       } else {
         this.changeContent = this.AIresponseColor
@@ -438,42 +431,48 @@ export default {
       // const reD = await getAIConfig(parameter)
       let countdown = 20
       let reD = null
-      const intervalId = setInterval(async () => {
-        if (countdown > 0) {
-          if (!reD) {
-            countdown = countdown == 1 ? 1 : countdown - 1
-            this.processNum = (20 - countdown) * 5
-          } else {
-            this.AIresponseColor = reD.data
-            this.clickInAIColor = false
-            this.processNum = 0
-            if (reD.code !== 200) {
-              $notification['error']({
-                message: '错误通知：',
-                description: `${reD.msg}`,
-                duration: 8,
-              })
-            }
-            clearInterval(intervalId)
-          }
-        } else {
-          this.AIresponseColor = reD.data
-          this.clickInAIColor = false
-          this.processNum = 0
-          if (reD.code !== 200) {
-            $notification['error']({
-              message: '错误通知：',
-              description: `${reD.msg}`,
-              duration: 8,
-            })
-          }
-          clearInterval(intervalId)
-        }
-      }, 1000)
-      reD = await aiColor({
-        content: this.changeContent,
-        types: this.aiColorType,
-      })
+      this.AIresponseColor = `广州信安数据有限公司于 2016 年 11 月 15 日成立，注册资本 22569800 元，是员工规模 100-499 人的中型企业，专注于软件和信息技术服务业，展现出一定发展潜力。虽成立时间不长，但资本规模与人员配置体现了一定资源积累及发展空间，结合行业趋势，具备较强市场适应与技术创新潜力。
+    从工商变更记录看，企业经历了多次变更， 2018 年变更频繁，涉及高级管理人员备案、章程备案及投资人变更等，反映初期组织架构与股权结构优化。后续几年变更频率降低，但投资人变更仍较活跃，如 2021 年变更 3 次，同时经营范围与地址变更显示业务拓展和区域布局变化，体现市场适应能力，不过频繁投资人变更或对稳定性有影响。
+    司法信用信息方面，近三年公司无经营异常、行政处罚、失信被执行及刑事案件记录，合规性和法律风险表现良好，关联的 2 件司法案件暂未见明显负面影响。综合来看，工商变更记录反映企业适应市场环境调整，但部分变更可能影响稳定性。
+    基于企业的发展潜力与行业前景，建议关注其资本运作稳定性及管理团队持续性，优化内部管理结构、强化风险控制机制，以提升抗风险能力，为合作奠定基础。`
+      this.clickInAIColor = false
+      console.log((this.collapseKey == '2' && !this.AIresponseColor) || (this.collapseKey == '1' && !this.AIresponse))
+      // const intervalId = setInterval(async () => {
+      //   if (countdown > 0) {
+      //     if (!reD) {
+      //       countdown = countdown == 1 ? 1 : countdown - 1
+      //       this.processNum = (20 - countdown) * 5
+      //     } else {
+      //       this.AIresponseColor = reD.data
+      //       this.clickInAIColor = false
+      //       this.processNum = 0
+      //       if (reD.code !== 200) {
+      //         $notification['error']({
+      //           message: '错误通知：',
+      //           description: `${reD.msg}`,
+      //           duration: 8,
+      //         })
+      //       }
+      //       clearInterval(intervalId)
+      //     }
+      //   } else {
+      //     this.AIresponseColor = reD.data
+      //     this.clickInAIColor = false
+      //     this.processNum = 0
+      //     if (reD.code !== 200) {
+      //       $notification['error']({
+      //         message: '错误通知：',
+      //         description: `${reD.msg}`,
+      //         duration: 8,
+      //       })
+      //     }
+      //     clearInterval(intervalId)
+      //   }
+      // }, 1000)
+      // reD = await aiColor({
+      //   content: this.changeContent,
+      //   types: this.aiColorType,
+      // })
     },
     chooseAI(value) {
       this.aiType = value
@@ -492,39 +491,45 @@ export default {
       // const reD = await getAIConfig(parameter)
       let countdown = 20
       let reD = null
-      const intervalId = setInterval(async () => {
-        if (countdown > 0) {
-          if (!reD) {
-            countdown = countdown == 1 ? 1 : countdown - 1
-            this.processNum = (20 - countdown) * 5
-          } else {
-            this.AIresponse = reD.data
-            this.clickInAI = false
-            this.processNum = 0
-            if (reD.code !== 200) {
-              $notification['error']({
-                message: '错误通知：',
-                description: `${reD.msg}`,
-                duration: 8,
-              })
-            }
-            clearInterval(intervalId)
-          }
-        } else {
-          this.AIresponse = reD.data
-          this.clickInAI = false
-          this.processNum = 0
-          if (reD.code !== 200) {
-            $notification['error']({
-              message: '错误通知：',
-              description: `${reD.msg}`,
-              duration: 8,
-            })
-          }
-          clearInterval(intervalId)
-        }
-      }, 1000)
-      reD = await toAi({ content: this.changeContent, aiType: this.aiType })
+      this.AIresponse = `广州信安数据有限公司于 2016 年 11 月 15 日成立，注册资本 22569800 元，是员工规模 100-499 人的中型企业，专注于软件和信息技术服务业，展现出一定发展潜力。虽成立时间不长，但资本规模与人员配置体现了一定资源积累及发展空间，结合行业趋势，具备较强市场适应与技术创新潜力。
+    从工商变更记录看，企业经历了多次变更， 2018 年变更频繁，涉及高级管理人员备案、章程备案及投资人变更等，反映初期组织架构与股权结构优化。后续几年变更频率降低，但投资人变更仍较活跃，如 2021 年变更 3 次，同时经营范围与地址变更显示业务拓展和区域布局变化，体现市场适应能力，不过频繁投资人变更或对稳定性有影响。
+    司法信用信息方面，近三年公司无经营异常、行政处罚、失信被执行及刑事案件记录，合规性和法律风险表现良好，关联的 2 件司法案件暂未见明显负面影响。综合来看，工商变更记录反映企业适应市场环境调整，但部分变更可能影响稳定性。
+    基于企业的发展潜力与行业前景，建议关注其资本运作稳定性及管理团队持续性，优化内部管理结构、强化风险控制机制，以提升抗风险能力，为合作奠定基础。`
+      this.clickInAI = false
+      console.log((this.collapseKey == '2' && !this.AIresponseColor) || (this.collapseKey == '1' && !this.AIresponse))
+      // const intervalId = setInterval(async () => {
+      //   if (countdown > 0) {
+      //     if (!reD) {
+      //       countdown = countdown == 1 ? 1 : countdown - 1
+      //       this.processNum = (20 - countdown) * 5
+      //     } else {
+      //       this.AIresponse = reD.data
+      //       this.clickInAI = false
+      //       this.processNum = 0
+      //       if (reD.code !== 200) {
+      //         $notification['error']({
+      //           message: '错误通知：',
+      //           description: `${reD.msg}`,
+      //           duration: 8,
+      //         })
+      //       }
+      //       clearInterval(intervalId)
+      //     }
+      //   } else {
+      //     this.AIresponse = reD.data
+      //     this.clickInAI = false
+      //     this.processNum = 0
+      //     if (reD.code !== 200) {
+      //       $notification['error']({
+      //         message: '错误通知：',
+      //         description: `${reD.msg}`,
+      //         duration: 8,
+      //       })
+      //     }
+      //     clearInterval(intervalId)
+      //   }
+      // }, 1000)
+      // reD = await toAi({ content: this.changeContent, aiType: this.aiType })
     },
     toAI() {
       const { $notification } = this
@@ -894,8 +899,8 @@ export default {
   position: relative;
   .ex-icon {
     position: absolute;
-    right: 5px;
-    top: 1px;
+    right: 10px;
+    top: 5px;
     z-index: 300;
     cursor: pointer;
   }
@@ -905,7 +910,6 @@ export default {
   }
   .ai-expend {
     background-color: #fff;
-    height: calc(68vh - 28px);
     width: 100%;
     border: 1px solid #e5e7eb;
   }
