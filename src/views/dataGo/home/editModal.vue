@@ -431,48 +431,42 @@ export default {
       // const reD = await getAIConfig(parameter)
       let countdown = 20
       let reD = null
-      this.AIresponseColor = `广州信安数据有限公司于 2016 年 11 月 15 日成立，注册资本 22569800 元，是员工规模 100-499 人的中型企业，专注于软件和信息技术服务业，展现出一定发展潜力。虽成立时间不长，但资本规模与人员配置体现了一定资源积累及发展空间，结合行业趋势，具备较强市场适应与技术创新潜力。
-    从工商变更记录看，企业经历了多次变更， 2018 年变更频繁，涉及高级管理人员备案、章程备案及投资人变更等，反映初期组织架构与股权结构优化。后续几年变更频率降低，但投资人变更仍较活跃，如 2021 年变更 3 次，同时经营范围与地址变更显示业务拓展和区域布局变化，体现市场适应能力，不过频繁投资人变更或对稳定性有影响。
-    司法信用信息方面，近三年公司无经营异常、行政处罚、失信被执行及刑事案件记录，合规性和法律风险表现良好，关联的 2 件司法案件暂未见明显负面影响。综合来看，工商变更记录反映企业适应市场环境调整，但部分变更可能影响稳定性。
-    基于企业的发展潜力与行业前景，建议关注其资本运作稳定性及管理团队持续性，优化内部管理结构、强化风险控制机制，以提升抗风险能力，为合作奠定基础。`
-      this.clickInAIColor = false
-      console.log((this.collapseKey == '2' && !this.AIresponseColor) || (this.collapseKey == '1' && !this.AIresponse))
-      // const intervalId = setInterval(async () => {
-      //   if (countdown > 0) {
-      //     if (!reD) {
-      //       countdown = countdown == 1 ? 1 : countdown - 1
-      //       this.processNum = (20 - countdown) * 5
-      //     } else {
-      //       this.AIresponseColor = reD.data
-      //       this.clickInAIColor = false
-      //       this.processNum = 0
-      //       if (reD.code !== 200) {
-      //         $notification['error']({
-      //           message: '错误通知：',
-      //           description: `${reD.msg}`,
-      //           duration: 8,
-      //         })
-      //       }
-      //       clearInterval(intervalId)
-      //     }
-      //   } else {
-      //     this.AIresponseColor = reD.data
-      //     this.clickInAIColor = false
-      //     this.processNum = 0
-      //     if (reD.code !== 200) {
-      //       $notification['error']({
-      //         message: '错误通知：',
-      //         description: `${reD.msg}`,
-      //         duration: 8,
-      //       })
-      //     }
-      //     clearInterval(intervalId)
-      //   }
-      // }, 1000)
-      // reD = await aiColor({
-      //   content: this.changeContent,
-      //   types: this.aiColorType,
-      // })
+      const intervalId = setInterval(async () => {
+        if (countdown > 0) {
+          if (!reD) {
+            countdown = countdown == 1 ? 1 : countdown - 1
+            this.processNum = (20 - countdown) * 5
+          } else {
+            this.AIresponseColor = reD.data
+            this.clickInAIColor = false
+            this.processNum = 0
+            if (reD.code !== 200) {
+              $notification['error']({
+                message: '错误通知：',
+                description: `${reD.msg}`,
+                duration: 8,
+              })
+            }
+            clearInterval(intervalId)
+          }
+        } else {
+          this.AIresponseColor = reD.data
+          this.clickInAIColor = false
+          this.processNum = 0
+          if (reD.code !== 200) {
+            $notification['error']({
+              message: '错误通知：',
+              description: `${reD.msg}`,
+              duration: 8,
+            })
+          }
+          clearInterval(intervalId)
+        }
+      }, 1000)
+      reD = await aiColor({
+        content: this.changeContent,
+        types: this.aiColorType,
+      })
     },
     chooseAI(value) {
       this.aiType = value
@@ -491,45 +485,39 @@ export default {
       // const reD = await getAIConfig(parameter)
       let countdown = 20
       let reD = null
-      this.AIresponse = `广州信安数据有限公司于 2016 年 11 月 15 日成立，注册资本 22569800 元，是员工规模 100-499 人的中型企业，专注于软件和信息技术服务业，展现出一定发展潜力。虽成立时间不长，但资本规模与人员配置体现了一定资源积累及发展空间，结合行业趋势，具备较强市场适应与技术创新潜力。
-    从工商变更记录看，企业经历了多次变更， 2018 年变更频繁，涉及高级管理人员备案、章程备案及投资人变更等，反映初期组织架构与股权结构优化。后续几年变更频率降低，但投资人变更仍较活跃，如 2021 年变更 3 次，同时经营范围与地址变更显示业务拓展和区域布局变化，体现市场适应能力，不过频繁投资人变更或对稳定性有影响。
-    司法信用信息方面，近三年公司无经营异常、行政处罚、失信被执行及刑事案件记录，合规性和法律风险表现良好，关联的 2 件司法案件暂未见明显负面影响。综合来看，工商变更记录反映企业适应市场环境调整，但部分变更可能影响稳定性。
-    基于企业的发展潜力与行业前景，建议关注其资本运作稳定性及管理团队持续性，优化内部管理结构、强化风险控制机制，以提升抗风险能力，为合作奠定基础。`
-      this.clickInAI = false
-      console.log((this.collapseKey == '2' && !this.AIresponseColor) || (this.collapseKey == '1' && !this.AIresponse))
-      // const intervalId = setInterval(async () => {
-      //   if (countdown > 0) {
-      //     if (!reD) {
-      //       countdown = countdown == 1 ? 1 : countdown - 1
-      //       this.processNum = (20 - countdown) * 5
-      //     } else {
-      //       this.AIresponse = reD.data
-      //       this.clickInAI = false
-      //       this.processNum = 0
-      //       if (reD.code !== 200) {
-      //         $notification['error']({
-      //           message: '错误通知：',
-      //           description: `${reD.msg}`,
-      //           duration: 8,
-      //         })
-      //       }
-      //       clearInterval(intervalId)
-      //     }
-      //   } else {
-      //     this.AIresponse = reD.data
-      //     this.clickInAI = false
-      //     this.processNum = 0
-      //     if (reD.code !== 200) {
-      //       $notification['error']({
-      //         message: '错误通知：',
-      //         description: `${reD.msg}`,
-      //         duration: 8,
-      //       })
-      //     }
-      //     clearInterval(intervalId)
-      //   }
-      // }, 1000)
-      // reD = await toAi({ content: this.changeContent, aiType: this.aiType })
+      const intervalId = setInterval(async () => {
+        if (countdown > 0) {
+          if (!reD) {
+            countdown = countdown == 1 ? 1 : countdown - 1
+            this.processNum = (20 - countdown) * 5
+          } else {
+            this.AIresponse = reD.data
+            this.clickInAI = false
+            this.processNum = 0
+            if (reD.code !== 200) {
+              $notification['error']({
+                message: '错误通知：',
+                description: `${reD.msg}`,
+                duration: 8,
+              })
+            }
+            clearInterval(intervalId)
+          }
+        } else {
+          this.AIresponse = reD.data
+          this.clickInAI = false
+          this.processNum = 0
+          if (reD.code !== 200) {
+            $notification['error']({
+              message: '错误通知：',
+              description: `${reD.msg}`,
+              duration: 8,
+            })
+          }
+          clearInterval(intervalId)
+        }
+      }, 1000)
+      reD = await toAi({ content: this.changeContent, aiType: this.aiType })
     },
     toAI() {
       const { $notification } = this
