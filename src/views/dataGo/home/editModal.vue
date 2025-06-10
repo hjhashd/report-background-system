@@ -179,11 +179,16 @@
                       v-model="aiColorType"
                       @change="chooseAIColor"
                     >
-                      <a-row v-for="(item, index) in aiColorList" :key="index" :value="item">
-                        <a-checkbox :value="item">
-                          {{ item }}
-                        </a-checkbox>
-                      </a-row>
+                      <div style="padding: 5px 0">
+                        <a-input placeholder="搜索润色方向" @change="sortRs" />
+                      </div>
+                      <div style="max-height: 40vh; overflow-y: scroll; overflow-x: hidden">
+                        <a-row v-for="(item, index) in showRsList" :key="index" :value="item">
+                          <a-checkbox :value="item">
+                            {{ item }}
+                          </a-checkbox>
+                        </a-row>
+                      </div>
                     </a-checkbox-group>
                     <a-button style="padding: 0 5px"> 更多 </a-button>
                   </a-dropdown>
@@ -227,7 +232,12 @@
             >
             <a-popconfirm
               style="margin-left: 15px"
-              :disabled="!isExpend || !collapseKey || (collapseKey == '2' && !AIresponseColor) || (collapseKey == '1' && !AIresponse)"
+              :disabled="
+                !isExpend ||
+                !collapseKey ||
+                (collapseKey == '2' && !AIresponseColor) ||
+                (collapseKey == '1' && !AIresponse)
+              "
               placement="top"
               ok-text="确定"
               cancel-text="取消"
@@ -237,7 +247,13 @@
               <template slot="title">
                 <div>是否将AI内容另存当前版本?</div>
               </template>
-              <a-button :disabled="!isExpend || !collapseKey || (collapseKey == '2' && !AIresponseColor) || (collapseKey == '1' && !AIresponse)"
+              <a-button
+                :disabled="
+                  !isExpend ||
+                  !collapseKey ||
+                  (collapseKey == '2' && !AIresponseColor) ||
+                  (collapseKey == '1' && !AIresponse)
+                "
                 ><img style="width: 20px; height: 20px" src="@/assets/images/cy.png" alt="dark" />替换</a-button
               >
             </a-popconfirm>
@@ -360,6 +376,7 @@ export default {
       AIresponseColor: null,
       clickInAIColor: false,
       collapseKey: null,
+      showRsList: [],
     }
   },
   created() {
@@ -368,6 +385,7 @@ export default {
     })
     getAiColor().then((res) => {
       this.aiColorList = res.data
+      this.showRsList = res.data
     })
   },
   mounted() {
@@ -398,8 +416,24 @@ export default {
     getKey(e) {
       this.collapseKey = e
     },
+    sortRs(es) {
+      const e = es.target.value
+      if (!e.trim()) {
+        this.showRsList = [...this.aiColorList]
+        return
+      }
+      const searchTerm = e.toLowerCase().trim()
+      this.showRsList = this.aiColorList.filter((option) => {
+        const valueToMatch = option.toString()?.toLowerCase() || ''
+        return valueToMatch.includes(searchTerm)
+      })
+    },
     transfromText() {
-      this.changeContent = this.AIresponse
+      if (this.collapseKey == '1') {
+        this.changeContent = this.AIresponse
+      } else {
+        this.changeContent = this.AIresponseColor
+      }
     },
     confirmText() {
       if (this.collapseKey == '1') {
