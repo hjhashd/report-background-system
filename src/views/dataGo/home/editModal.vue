@@ -110,7 +110,7 @@
             :disabled="true"
           />
           <a-collapse @change="getKey" accordion v-if="isExpend" :style="{ height: isExpend ? '68vh' : '0px' }">
-            <a-collapse-panel key="1" header="内容生产">
+            <a-collapse-panel key="1" header="内容生成">
               <div class="ai-expend">
                 <div class="flex-row-spacebetween btn-part">
                   <div style="padding: 0 10px; z-index: 1000" class="line-item flex-row-spacebetween flex-1">
