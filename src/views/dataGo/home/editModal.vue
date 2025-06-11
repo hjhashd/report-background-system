@@ -312,7 +312,14 @@
       <div class="set-name">
         <div class="set-name-title">另存为新版本</div>
         <div class="pop-tab-name">版本名称</div>
-        <a-input allowClear size="large" v-model="contentTitle"></a-input>
+        <a-auto-complete
+          v-model="contentTitle"
+          :dataSource="showModalList"
+          style="width: 100%"
+          size="large"
+          @search="handleSearch"
+          @select="handleSelect"
+        />
         <div class="pop-tab-name">版本描述</div>
         <a-textarea style="min-height: 200px" v-model="contentDesc" :auto-size="true" />
       </div>
@@ -321,6 +328,7 @@
 </template>
   
 <script>
+import { AutoComplete } from 'ant-design-vue'
 import {
   reportContentList,
   deleteReportContent,
@@ -336,6 +344,9 @@ import {
 import { colorList } from '@/config/constants'
 import { aiTypeList } from './util'
 export default {
+  components: {
+    [AutoComplete.name]: AutoComplete,
+  },
   props: {
     reportDetail: {
       type: Object,
@@ -352,6 +363,7 @@ export default {
       colorList,
       currentModalSelect: null,
       modalContentList: [],
+      showModalList: [],
       selectModal: null,
       selectModalId: null,
       useContent: {
@@ -364,7 +376,7 @@ export default {
       AIresponse: null,
       changeContent: null,
       setContentPop: false,
-      contentTitle: null,
+      contentTitle: '',
       contentDesc: null,
       aiExspend: false,
       isExpend: false,
@@ -413,6 +425,22 @@ export default {
     },
   },
   methods: {
+    handleSearch(value) {
+      // 模糊搜索逻辑
+      if (!value) {
+        this.showModalList = this.modalContentList.map((option) => option.value.toString())
+        return
+      }
+
+      this.showModalList = this.modalContentList
+        .filter((option) => option.value.toLowerCase().includes(value.toLowerCase()))
+        .map((option) => option.value)
+    },
+    handleSelect(value) {
+      // 选择选项时触发
+      this.selectedOption = this.modalContentList.find((option) => option.value === value)
+      this.value = value
+    },
     getKey(e) {
       this.collapseKey = e
     },
@@ -586,14 +614,17 @@ export default {
       this.aiType = []
       this.getModalContent()
     },
-    getModalContent() {
+    getModalContent(reId) {
       // 获取对应modal内容
       const query = {
         reportId: this.reportDetail.id,
         title: this.currentModalSelect,
       }
       reportContentList(query).then((res) => {
-        this.modalContentList = res.data
+        this.modalContentList = res.data.map((u) =>
+          Object.assign({ value: u.versionName ? u.versionName : `版本${u.version}-${u.updateTime.split(' ')[0]}` }, u)
+        )
+        this.showModalList = this.modalContentList.map((ii) => ii.value.toString())
         if (this.isFirstLoading) {
           res.data.forEach((v) => {
             if (v.isUse == 1) {
@@ -604,6 +635,10 @@ export default {
           this.isFirstLoading = false
           this.selectModal = this.useContent
           this.selectModalId = this.useContent.id
+        }
+        if (reId) {
+          this.selectModal = res.data.filter((i) => i.id == reId)[0]
+          this.selectModalId = reId
         }
       })
     },
@@ -714,7 +749,7 @@ export default {
                   duration: 8,
                 })
                 _this.saveLoading = false
-                _this.getModalContent()
+                _this.getModalContent(res.data)
               })
               .catch((err) => {
                 _this.saveLoading = true
@@ -746,7 +781,7 @@ export default {
               duration: 8,
             })
             _this.saveLoading = false
-            _this.getModalContent()
+            _this.getModalContent(res.data)
           })
           .catch((err) => {
             _this.saveLoading = true

@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2022-10-10 22:31:07
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-20 14:24:01
- * @FilePath: \report-background-system\src\main.js
+ * @LastEditTime: 2025-06-11 10:11:54
+ * @FilePath: /report-background-system/src/main.js
  * @Description: 
  * 
  */
