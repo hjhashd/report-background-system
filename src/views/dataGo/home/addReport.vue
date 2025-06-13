@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-05-11 09:30:39
- * @FilePath: \report-background-system\src\views\dataGo\home\addReport.vue
+ * @LastEditTime: 2025-06-13 10:13:17
+ * @FilePath: /report-background-system/src/views/dataGo/home/addReport.vue
  * @Description: 
  * 
 -->
@@ -20,7 +20,7 @@
                 :class="{ active: tabA == item.type }"
                 v-for="item in tabs"
                 :key="item.type"
-                @click="tabA = item.type"
+                @click="changeType(item)"
               >
                 {{ item.name }}
               </div>
@@ -62,7 +62,7 @@
                   <a-row>
                     <a-col :span="24" v-for="item in modalList" :key="item.templateName" style="margin-bottom: 10px">
                       <a-checkbox :value="item.templateName">
-                        <span class="modal-title hh">{{ item.templateName }}</span>
+                        <span class="modal-title hh">{{ item.templateNameJc }}</span>
                       </a-checkbox>
                     </a-col>
                   </a-row>
@@ -143,13 +143,23 @@ export default {
   },
   methods: {
     initData() {
-      this.getReportModal()
       this.getCustomerList()
       this.getModalInfo()
+    },
+    changeType(item) {
+      const { $notification, $message } = this
+      if (this.tabA == item.type) return
+      if (item.type == 1 && !this.chooseCustomer) {
+        // 未选中客户不给跳转
+        $message.warn('请先选择客户')
+        return
+      }
+      this.tabA = item.type
     },
     chooseChange(v) {
       setTimeout(() => {
         this.tabA = 1
+        this.getReportModal()
       }, 500)
     },
     changeTab(v) {
@@ -185,13 +195,15 @@ export default {
       })
     },
     getReportModal() {
-      getReportModal({ type: this.reportType }).then((res) => {
-        // 默认全选
-        this.modalList = res.data.map((v) => {
-          this.chooseModal.push(v.templateName)
-          return v
-        })
-      })
+      getReportModal({ type: this.reportType, creditCode: this.chooseCustomer.creditCode }).then(
+        (res) => {
+          // 默认全选
+          this.modalList = res.data.map((v) => {
+            this.chooseModal.push(v.templateName)
+            return v
+          })
+        }
+      )
     },
     searchCustomer(v) {
       const s = v.target.value
