@@ -72,7 +72,7 @@
       :maskClosable="false"
       @cancel="toClosePop"
     >
-      <build-q-r-code :userInfo="userInfo" @close="toClosePop"></build-q-r-code>
+      <build-q-r-code ref="buildQR" :userInfo="userInfo" @close="toClosePop"></build-q-r-code>
     </a-modal>
   </pro-layout>
 </template>
@@ -240,6 +240,7 @@ export default {
         event.preventDefault()
       }
       this.changeBuildQrCodePop(false)
+      this.$refs.buildQR.resetInfo()
     },
     logout() {
       Modal.confirm({

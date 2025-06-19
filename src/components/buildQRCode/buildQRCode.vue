@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-19 16:51:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-05-08 14:57:49
+ * @LastEditTime: 2025-06-19 18:59:26
  * @FilePath: /report-background-system/src/components/buildQRCode/buildQRCode.vue
  * @Description: 
  * 
@@ -210,6 +210,9 @@ export default {
     userInfo: (state) => state.user.info,
   }),
   methods: {
+    resetInfo() {
+      this.reD = null
+    },
     filterOption(input, option) {
       return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
     },
