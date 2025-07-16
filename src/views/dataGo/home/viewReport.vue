@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-05-11 18:52:52
- * @FilePath: \report-background-system\src\views\dataGo\home\viewReport.vue
+ * @LastEditTime: 2025-07-16 21:21:47
+ * @FilePath: /report-background-system/src/views/dataGo/home/viewReport.vue
  * @Description: 报告预览
  * 
 -->
@@ -213,12 +213,12 @@
       ></a-upload>
       <a-drawer
         v-if="typeFrom !== 'industryReport'"
-        title="报告结论编辑"
+        title=" "
         placement="right"
         :closable="true"
         :visible="visible"
         :maskClosable="false"
-        width="85vw"
+        width="90vw"
         @close="onClose"
       >
         <edit-modal :reportDetail="reportDetail" @refreshEdit="updateEdit"></edit-modal>

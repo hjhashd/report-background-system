@@ -1,276 +1,52 @@
 <template>
   <div class="edit-modal-body">
-    <div class="drawer-container">
-      <div class="select-item flex-row-spacebetween">
-        <div>
-          选择模块<a-select
-            v-model="currentModalSelect"
-            style="width: 250px; margin-left: 20px"
-            @change="changModalShow"
-          >
-            <a-select-option v-for="(i, index) in modalList" :key="index" :value="i">
-              {{ i }}
-            </a-select-option>
-          </a-select>
-          历史版本<a-select v-model="selectModalId" style="width: 250px; margin-left: 20px" @change="changeSelect">
-            <a-select-option v-for="(i, index) in modalContentList" :key="index" :value="i.id">
-              <span v-if="i.versionName">{{ i.versionName }}</span>
-              <span v-else>版本{{ i.version }}-{{ i.updateTime.split(' ')[0] }}</span>
-            </a-select-option>
-          </a-select>
-        </div>
-        <div>
-          <a-tooltip placement="top" style="margin-right: 10px">
-            <template slot="title">
-              <span>AI优化</span>
-            </template>
-            <!-- <a-popconfirm :disabled="editLoading" placement="left" ok-text="AI优化" cancel-text="取消" @confirm="toAI">
-              <template slot="title">
-                <div>是否通过AI对模板结论进行优化?</div>
-                <div>注意：进行AI优化会修改当前编辑框内容。</div>
-              </template>
-            </a-popconfirm> -->
-            <img class="ai-png" src="@/assets/images/ai.png" alt="dark" @click="toAI" />
-          </a-tooltip>
-          <a-tooltip placement="top" style="margin-right: 10px">
-            <template slot="title">
-              <span>新增结论</span>
-            </template>
-            <a-popconfirm
-              :disabled="editLoading"
-              placement="left"
-              ok-text="新增结论"
-              cancel-text="取消"
-              @confirm="addModalResult"
-            >
-              <template slot="title">
-                <div>是否新增模板结论?</div>
-                <div>注意：进行新增模板结论会清空当前编辑框内容。</div>
-              </template>
-              <a-button style="color: #6cbdf6; border: none; background-color: transparent" icon="plus" />
-            </a-popconfirm>
-          </a-tooltip>
-          <a-tooltip placement="top" style="margin-right: 10px">
-            <template slot="title">
-              <span>另存为</span>
-            </template>
-            <a-button
-              @click="setContentPop = true"
-              :loading="saveLoading"
-              style="color: #6cbdf6; border: none; background-color: transparent"
-              icon="save"
-            />
-          </a-tooltip>
-          <a-tooltip placement="top">
-            <template slot="title">
-              <span>应用</span>
-            </template>
-            <a-popconfirm
-              :disabled="editLoading"
-              placement="left"
-              ok-text="应用结论"
-              cancel-text="取消"
-              @confirm="applyChanges"
-            >
-              <template slot="title">
-                <div>是否应用?</div>
-              </template>
-              <a-button
-                style="color: #6cbdf6; border: none; background-color: transparent"
-                icon="check-circle"
-                :loading="applyLoading"
-              />
-            </a-popconfirm>
-          </a-tooltip>
+    <div class="drawer-left">
+      <div class="drawer-left-item-title">报告目录</div>
+      <div class="drawer-left-item-content">
+        <div
+          class="drawer-left-item-content-item"
+          :class="{ active: item === currentModalSelect }"
+          v-for="item in modalList"
+          :key="item.id"
+          @click="changModalShow(item)"
+        >
+          <div class="drawer-left-item-content-item-title">
+            <span>{{ item }}</span>
+          </div>
         </div>
       </div>
     </div>
-    <div class="report-container">
-      <a-row class="grid-box">
-        <a-col :span="11">
-          <div class="flex-row-spacebetween cant-edit-box">
-            <span class="red-dot status-tag">原报告内容</span>
-            <span>不可编辑</span>
+    <div class="drawer-right flex-1">
+      <div class="drawer-container">
+        <div class="select-item flex-row-spacebetween">
+          <div>
+            历史版本<a-select v-model="selectModalId" style="width: 250px; margin-left: 20px" @change="changeSelect">
+              <a-select-option v-for="(i, index) in modalContentList" :key="index" :value="i.id">
+                <span v-if="i.versionName">{{ i.versionName }}</span>
+                <span v-else>版本{{ i.version }}-{{ i.updateTime.split(' ')[0] }}</span>
+              </a-select-option>
+            </a-select>
           </div>
-        </a-col>
-        <a-col :span="11">
-          <span class="status-tag green-tag">修改编辑</span>
-        </a-col>
-        <!-- <a-col :span="6" class="flex flex-end"> </a-col> -->
-      </a-row>
-      <a-row :gutter="[10]" v-if="modalContentList">
-        <a-col :span="11" class="un-edit-pass">
-          <a-textarea
-            :style="{
-              height: !isExpend && !isColorExpend ? '68vh' : '0px',
-              display: !isExpend && !isColorExpend ? 'inline-block' : 'none',
-            }"
-            v-model="useContent.content"
-            :auto-size="true"
-            :disabled="true"
-          />
-          <a-collapse @change="getKey" accordion v-if="isExpend" :style="{ height: isExpend ? '68vh' : '0px' }">
-            <a-collapse-panel key="1" header="内容生成">
-              <div class="ai-expend">
-                <div class="flex-row-spacebetween btn-part">
-                  <div style="padding: 0 10px; z-index: 1000" class="line-item flex-row-spacebetween flex-1">
-                    <div v-for="(item, index) in aiTypeList" :key="index" @click="chooseAI(item.value)">
-                      <div class="item">
-                        <div class="dott" :class="{ active: item.value === aiType }"></div>
-                        <div class="ai-item-title">{{ item.value }}</div>
-                      </div>
-                    </div>
-                  </div>
-                  <a-dropdown>
-                    <a-menu slot="overlay" @click="menuChoose">
-                      <a-menu-item v-for="(item, index) in aiTypes" :key="index" :value="item">
-                        {{ item }}
-                      </a-menu-item>
-                    </a-menu>
-                    <a-button style="padding: 0 5px"> <a-icon type="ellipsis" /> </a-button>
-                  </a-dropdown>
-                </div>
-                <div class="ai-response" v-if="AIresponse">
-                  <!-- <div class="ai-title">{{ aiType }}</div> -->
-                  <a-textarea
-                    style="height: calc(68vh - 185px)"
-                    v-model="AIresponse"
-                    :auto-size="true"
-                    :disabled="true"
-                  />
-                </div>
-              </div>
-              <div class="loading-zezao" v-if="clickInAI">
-                <div class="top-t w100 flex-row-spacebetween">
-                  <span>正在补充{{ aiType }}...</span>
-                  <span>{{ processNum }}%</span>
-                </div>
-                <a-progress :showInfo="false" strokeColor="#64ceea" :percent="processNum" status="active" />
-                <div class="detail">AI正在分析报告内容</div>
-              </div>
-              <div class="ex-icon">
-                <a-icon
-                  theme="filled"
-                  style="font-size: 20px"
-                  :class="{ 'close-icon': !isExpend }"
-                  type="up-circle"
-                  @click="isExpend = !isExpend"
-                />
-              </div>
-            </a-collapse-panel>
-            <a-collapse-panel key="2" header="内容润色">
-              <div class="ai-expend">
-                <div class="flex-row-spacebetween btn-part">
-                  <div style="padding: 0 10px; z-index: 1000" class="flex-1">
-                    <a-checkbox-group v-model="aiColorType" @change="chooseAIColor">
-                      <div class="flex">
-                        <div v-for="(item, index) in aiColorList" :key="index" :value="item">
-                          <a-checkbox :value="item" v-if="index < 3">
-                            {{ item }}
-                          </a-checkbox>
-                        </div>
-                      </div>
-                    </a-checkbox-group>
-                  </div>
-                  <a-dropdown>
-                    <a-checkbox-group
-                      style="background-color: #fff; padding: 5px; border: 1px solid #f5f5f5"
-                      slot="overlay"
-                      v-model="aiColorType"
-                      @change="chooseAIColor"
-                    >
-                      <div style="padding: 5px 0">
-                        <a-input placeholder="搜索润色方向" @change="sortRs" />
-                      </div>
-                      <div style="max-height: 40vh; overflow-y: scroll; overflow-x: hidden">
-                        <a-row v-for="(item, index) in showRsList" :key="index" :value="item">
-                          <a-checkbox :value="item">
-                            {{ item }}
-                          </a-checkbox>
-                        </a-row>
-                      </div>
-                    </a-checkbox-group>
-                    <a-button style="padding: 0 5px"> 更多 </a-button>
-                  </a-dropdown>
-                  <a-button style="padding: 0 5px; margin-left: 10px" @click="confirmAIColor"> 确定 </a-button>
-                </div>
-                <div class="ai-response" v-if="AIresponseColor">
-                  <a-textarea
-                    style="height: calc(68vh - 185px)"
-                    v-model="AIresponseColor"
-                    :auto-size="true"
-                    :disabled="true"
-                  />
-                </div>
-              </div>
-              <div class="loading-zezao" v-if="clickInAIColor">
-                <div class="top-t w100 flex-row-spacebetween">
-                  <span>正在进行AI润色...</span>
-                  <span>{{ processNum }}%</span>
-                </div>
-                <a-progress :showInfo="false" strokeColor="#64ceea" :percent="processNum" status="active" />
-                <div class="detail">AI正在分析报告内容</div>
-              </div>
-            </a-collapse-panel>
-          </a-collapse>
-          <div class="ex-icon">
-            <a-icon
-              theme="filled"
-              style="font-size: 20px"
-              :class="{ 'close-icon': !isExpend }"
-              type="up-circle"
-              @click="isExpend = !isExpend"
-            />
-          </div>
-
-          <div class="footer-btns">
-            <!-- <a-button class="normal-btn" @click="toAIColor"
-              ><img style="width: 22px; height: 25px" src="@/assets/images/ai-r.png" alt="dark" />AI润色</a-button
-            > -->
-            <a-button style="margin-left: 15px" class="normal-btn" @click="toAI"
-              ><img style="width: 22px; height: 25px" src="@/assets/images/AI-icon.png" alt="dark" />AI生成</a-button
-            >
-            <a-popconfirm
-              style="margin-left: 15px"
-              :disabled="
-                !isExpend ||
-                !collapseKey ||
-                (collapseKey == '2' && !AIresponseColor) ||
-                (collapseKey == '1' && !AIresponse)
-              "
-              placement="top"
-              ok-text="确定"
-              cancel-text="取消"
-              @confirm="confirmText"
-              @cancel="transfromText"
-            >
+          <div>
+            <a-tooltip placement="top" style="margin-right: 10px">
               <template slot="title">
-                <div>是否将AI内容另存当前版本?</div>
+                <span>AI优化</span>
               </template>
-              <a-button
-                :disabled="
-                  !isExpend ||
-                  !collapseKey ||
-                  (collapseKey == '2' && !AIresponseColor) ||
-                  (collapseKey == '1' && !AIresponse)
-                "
-                ><img style="width: 20px; height: 20px" src="@/assets/images/cy.png" alt="dark" />替换</a-button
-              >
-            </a-popconfirm>
-          </div>
-        </a-col>
-        <a-col :span="11">
-          <a-spin :spinning="editLoading">
-            <a-textarea style="height: 68vh" v-model="changeContent" :auto-size="true" />
-          </a-spin>
-          <div class="footer-btns">
+              <!-- <a-popconfirm :disabled="editLoading" placement="left" ok-text="AI优化" cancel-text="取消" @confirm="toAI">
+                <template slot="title">
+                  <div>是否通过AI对模板结论进行优化?</div>
+                  <div>注意：进行AI优化会修改当前编辑框内容。</div>
+                </template>
+              </a-popconfirm> -->
+              <img class="ai-png" src="@/assets/images/ai.png" alt="dark" @click="toAI" />
+            </a-tooltip>
             <a-tooltip placement="top" style="margin-right: 10px">
               <template slot="title">
                 <span>新增结论</span>
               </template>
               <a-popconfirm
                 :disabled="editLoading"
-                placement="top"
+                placement="left"
                 ok-text="新增结论"
                 cancel-text="取消"
                 @confirm="addModalResult"
@@ -279,27 +55,260 @@
                   <div>是否新增模板结论?</div>
                   <div>注意：进行新增模板结论会清空当前编辑框内容。</div>
                 </template>
-                <a-button class="normal-btn">+ 新增</a-button>
+                <a-button style="color: #6cbdf6; border: none; background-color: transparent" icon="plus" />
               </a-popconfirm>
             </a-tooltip>
-            <a-button style="margin-right: 10px" class="normal-btn" icon="save" @click="setContentPop = true"
-              >另存版本</a-button
-            >
-            <a-popconfirm
-              :disabled="editLoading"
-              placement="top"
-              ok-text="应用结论"
-              cancel-text="取消"
-              @confirm="applyChanges"
-            >
+            <a-tooltip placement="top" style="margin-right: 10px">
               <template slot="title">
-                <div>是否应用?</div>
+                <span>另存为</span>
               </template>
-              <a-button class="normal-btn" icon="check">应用到报告</a-button>
-            </a-popconfirm>
+              <a-button
+                @click="setContentPop = true"
+                :loading="saveLoading"
+                style="color: #6cbdf6; border: none; background-color: transparent"
+                icon="save"
+              />
+            </a-tooltip>
+            <a-tooltip placement="top">
+              <template slot="title">
+                <span>应用</span>
+              </template>
+              <a-popconfirm
+                :disabled="editLoading"
+                placement="left"
+                ok-text="应用结论"
+                cancel-text="取消"
+                @confirm="applyChanges"
+              >
+                <template slot="title">
+                  <div>是否应用?</div>
+                </template>
+                <a-button
+                  style="color: #6cbdf6; border: none; background-color: transparent"
+                  icon="check-circle"
+                  :loading="applyLoading"
+                />
+              </a-popconfirm>
+            </a-tooltip>
           </div>
-        </a-col>
-      </a-row>
+        </div>
+      </div>
+      <div class="report-container">
+        <a-row class="grid-box">
+          <a-col :span="11">
+            <div class="flex-row-spacebetween cant-edit-box">
+              <span class="red-dot status-tag">原报告内容</span>
+              <span>不可编辑</span>
+            </div>
+          </a-col>
+          <a-col :span="11">
+            <span class="status-tag green-tag">修改编辑</span>
+          </a-col>
+          <!-- <a-col :span="6" class="flex flex-end"> </a-col> -->
+        </a-row>
+        <a-row :gutter="[10]" v-if="modalContentList">
+          <a-col :span="11" class="un-edit-pass">
+            <a-textarea
+              :style="{
+                height: !isExpend && !isColorExpend ? '68vh' : '0px',
+                display: !isExpend && !isColorExpend ? 'inline-block' : 'none',
+              }"
+              v-model="useContent.content"
+              :auto-size="true"
+              :disabled="true"
+            />
+            <a-collapse @change="getKey" accordion v-if="isExpend" :style="{ height: isExpend ? '68vh' : '0px' }">
+              <a-collapse-panel key="1" header="内容生成">
+                <div class="ai-expend">
+                  <div class="flex-row-spacebetween btn-part">
+                    <div style="padding: 0 10px; z-index: 1000" class="line-item flex-row-spacebetween flex-1">
+                      <div v-for="(item, index) in aiTypeList" :key="index" @click="chooseAI(item.value)">
+                        <div class="item">
+                          <div class="dott" :class="{ active: item.value === aiType }"></div>
+                          <div class="ai-item-title">{{ item.value }}</div>
+                        </div>
+                      </div>
+                    </div>
+                    <a-dropdown>
+                      <a-menu slot="overlay" @click="menuChoose">
+                        <a-menu-item v-for="(item, index) in aiTypes" :key="index" :value="item">
+                          {{ item }}
+                        </a-menu-item>
+                      </a-menu>
+                      <a-button style="padding: 0 5px"> <a-icon type="ellipsis" /> </a-button>
+                    </a-dropdown>
+                  </div>
+                  <div class="ai-response" v-if="AIresponse">
+                    <!-- <div class="ai-title">{{ aiType }}</div> -->
+                    <a-textarea
+                      style="height: calc(68vh - 185px)"
+                      v-model="AIresponse"
+                      :auto-size="true"
+                      :disabled="true"
+                    />
+                  </div>
+                </div>
+                <div class="loading-zezao" v-if="clickInAI">
+                  <div class="top-t w100 flex-row-spacebetween">
+                    <span>正在补充{{ aiType }}...</span>
+                    <span>{{ processNum }}%</span>
+                  </div>
+                  <a-progress :showInfo="false" strokeColor="#64ceea" :percent="processNum" status="active" />
+                  <div class="detail">AI正在分析报告内容</div>
+                </div>
+                <div class="ex-icon">
+                  <a-icon
+                    theme="filled"
+                    style="font-size: 20px"
+                    :class="{ 'close-icon': !isExpend }"
+                    type="up-circle"
+                    @click="isExpend = !isExpend"
+                  />
+                </div>
+              </a-collapse-panel>
+              <a-collapse-panel key="2" header="内容润色">
+                <div class="ai-expend">
+                  <div class="flex-row-spacebetween btn-part">
+                    <div style="padding: 0 10px; z-index: 1000" class="flex-1">
+                      <a-checkbox-group v-model="aiColorType" @change="chooseAIColor">
+                        <div class="flex">
+                          <div v-for="(item, index) in aiColorList" :key="index" :value="item">
+                            <a-checkbox :value="item" v-if="index < 3">
+                              {{ item }}
+                            </a-checkbox>
+                          </div>
+                        </div>
+                      </a-checkbox-group>
+                    </div>
+                    <a-dropdown>
+                      <a-checkbox-group
+                        style="background-color: #fff; padding: 5px; border: 1px solid #f5f5f5"
+                        slot="overlay"
+                        v-model="aiColorType"
+                        @change="chooseAIColor"
+                      >
+                        <div style="padding: 5px 0">
+                          <a-input placeholder="搜索润色方向" @change="sortRs" />
+                        </div>
+                        <div style="max-height: 40vh; overflow-y: scroll; overflow-x: hidden">
+                          <a-row v-for="(item, index) in showRsList" :key="index" :value="item">
+                            <a-checkbox :value="item">
+                              {{ item }}
+                            </a-checkbox>
+                          </a-row>
+                        </div>
+                      </a-checkbox-group>
+                      <a-button style="padding: 0 5px"> 更多 </a-button>
+                    </a-dropdown>
+                    <a-button style="padding: 0 5px; margin-left: 10px" @click="confirmAIColor"> 确定 </a-button>
+                  </div>
+                  <div class="ai-response" v-if="AIresponseColor">
+                    <a-textarea
+                      style="height: calc(68vh - 185px)"
+                      v-model="AIresponseColor"
+                      :auto-size="true"
+                      :disabled="true"
+                    />
+                  </div>
+                </div>
+                <div class="loading-zezao" v-if="clickInAIColor">
+                  <div class="top-t w100 flex-row-spacebetween">
+                    <span>正在进行AI润色...</span>
+                    <span>{{ processNum }}%</span>
+                  </div>
+                  <a-progress :showInfo="false" strokeColor="#64ceea" :percent="processNum" status="active" />
+                  <div class="detail">AI正在分析报告内容</div>
+                </div>
+              </a-collapse-panel>
+            </a-collapse>
+            <div class="ex-icon">
+              <a-icon
+                theme="filled"
+                style="font-size: 20px"
+                :class="{ 'close-icon': !isExpend }"
+                type="up-circle"
+                @click="isExpend = !isExpend"
+              />
+            </div>
+
+            <div class="footer-btns">
+              <!-- <a-button class="normal-btn" @click="toAIColor"
+                ><img style="width: 22px; height: 25px" src="@/assets/images/ai-r.png" alt="dark" />AI润色</a-button
+              > -->
+              <a-button style="margin-left: 15px" class="normal-btn" @click="toAI"
+                ><img style="width: 22px; height: 25px" src="@/assets/images/AI-icon.png" alt="dark" />AI生成</a-button
+              >
+              <a-popconfirm
+                style="margin-left: 15px"
+                :disabled="
+                  !isExpend ||
+                  !collapseKey ||
+                  (collapseKey == '2' && !AIresponseColor) ||
+                  (collapseKey == '1' && !AIresponse)
+                "
+                placement="top"
+                ok-text="确定"
+                cancel-text="取消"
+                @confirm="confirmText"
+                @cancel="transfromText"
+              >
+                <template slot="title">
+                  <div>是否将AI内容另存当前版本?</div>
+                </template>
+                <a-button
+                  :disabled="
+                    !isExpend ||
+                    !collapseKey ||
+                    (collapseKey == '2' && !AIresponseColor) ||
+                    (collapseKey == '1' && !AIresponse)
+                  "
+                  ><img style="width: 20px; height: 20px" src="@/assets/images/cy.png" alt="dark" />替换</a-button
+                >
+              </a-popconfirm>
+            </div>
+          </a-col>
+          <a-col :span="11">
+            <a-spin :spinning="editLoading">
+              <a-textarea style="height: 68vh" v-model="changeContent" :auto-size="true" />
+            </a-spin>
+            <div class="footer-btns">
+              <a-tooltip placement="top" style="margin-right: 10px">
+                <template slot="title">
+                  <span>新增结论</span>
+                </template>
+                <a-popconfirm
+                  :disabled="editLoading"
+                  placement="top"
+                  ok-text="新增结论"
+                  cancel-text="取消"
+                  @confirm="addModalResult"
+                >
+                  <template slot="title">
+                    <div>是否新增模板结论?</div>
+                    <div>注意：进行新增模板结论会清空当前编辑框内容。</div>
+                  </template>
+                  <a-button class="normal-btn">+ 新增</a-button>
+                </a-popconfirm>
+              </a-tooltip>
+              <a-button style="margin-right: 10px" class="normal-btn" icon="save" @click="setContentPop = true"
+                >另存版本</a-button
+              >
+              <a-popconfirm
+                :disabled="editLoading"
+                placement="top"
+                ok-text="应用结论"
+                cancel-text="取消"
+                @confirm="applyChanges"
+              >
+                <template slot="title">
+                  <div>是否应用?</div>
+                </template>
+                <a-button class="normal-btn" icon="check">应用到报告</a-button>
+              </a-popconfirm>
+            </div>
+          </a-col>
+        </a-row>
+      </div>
     </div>
     <a-modal
       class="qr-modal"
@@ -843,9 +852,41 @@ export default {
   }
 }
 .edit-modal-body {
+  display: flex;
+  .drawer-left {
+    margin-right: 12px;
+    width: 200px;
+    border-right: 1px solid #e5e7eb;
+    .drawer-left-item-title {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+    }
+  }
+  .drawer-right {
+    margin-top: 10px;
+  }
   /deep/ .ant-input-disabled {
     color: rgba(0, 0, 0, 0.75);
     background-color: #f5f5f5;
+  }
+}
+.drawer-left-item-content-item {
+  padding: 20px 0;
+  font-size: 18px;
+  line-height: 1;
+  color: #999999;
+  &:hover {
+    font-weight: bold;
+    color: #1789ff;
+    cursor: pointer;
+  }
+  &.active {
+    font-weight: bold;
+    color: #1789ff;
+    border-right: 2px solid #1789ff;
   }
 }
 .grid-box {
