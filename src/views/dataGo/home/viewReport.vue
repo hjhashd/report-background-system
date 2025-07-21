@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-07-16 21:21:47
+ * @LastEditTime: 2025-07-21 13:58:48
  * @FilePath: /report-background-system/src/views/dataGo/home/viewReport.vue
  * @Description: 报告预览
  * 
@@ -637,24 +637,28 @@ export default {
       })
     },
     startDownload() {
-      const url = this.reportDetail.fileUrl
-      const name = this.reportDetail.fileUrl.split('/')
-      const filename = `${name[name.length - 1]}`
-      const xhr = new XMLHttpRequest()
-      xhr.open('GET', url, true)
-      xhr.responseType = 'blob'
-      xhr.onload = function () {
-        if (xhr.status === 200) {
-          const blob = xhr.response
-          const urlObject = URL.createObjectURL(blob)
-          const a = document.createElement('a')
-          a.href = urlObject
-          a.download = filename
-          a.click()
-          URL.revokeObjectURL(urlObject)
+      getReportDetail(this.reportId).then((res) => {
+        this.reportDetail = res.data
+        this.reportName = res.data.reportName
+        const url = this.reportDetail.fileUrl
+        const name = this.reportDetail.fileUrl.split('/')
+        const filename = `${name[name.length - 1]}`
+        const xhr = new XMLHttpRequest()
+        xhr.open('GET', url, true)
+        xhr.responseType = 'blob'
+        xhr.onload = function () {
+          if (xhr.status === 200) {
+            const blob = xhr.response
+            const urlObject = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = urlObject
+            a.download = filename
+            a.click()
+            URL.revokeObjectURL(urlObject)
+          }
         }
-      }
-      xhr.send()
+        xhr.send()
+      })
     },
   },
 }
