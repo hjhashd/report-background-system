@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-06-13 10:13:17
- * @FilePath: /report-background-system/src/views/dataGo/home/addReport.vue
+ * @LastEditTime: 2025-07-26 12:47:19
+ * @FilePath: \report-background-system\src\views\dataGo\home\addReport.vue
  * @Description: 
  * 
 -->
@@ -58,6 +58,11 @@
                 </div>
               </div>
               <div v-else style="margin-top: 20px">
+                <a-radio-group v-model="reportTemplateClassify" style="margin-bottom: 16px" @change="reportTemplateChange">
+                  <a-radio-button v-for="item in reportTemplateClassifyList" :value="item.id" :key="item.id">
+                    {{ item.classifyName }}
+                  </a-radio-button>
+                </a-radio-group>
                 <a-checkbox-group v-model="chooseModal" @change="onChange">
                   <a-row>
                     <a-col :span="24" v-for="item in modalList" :key="item.templateName" style="margin-bottom: 10px">
@@ -111,7 +116,7 @@ const reportTypeList = [
   },
 ]
 import { AddCustomer, DataGoTabs } from '@/components'
-import { getCustomerList, getReportModal, getModalInfo } from '@/api/report'
+import { getCustomerList, getReportModal, getModalInfo, getReportTemplateClassify } from '@/api/report'
 export default {
   name: 'addReport',
   components: { AddCustomer, DataGoTabs },
@@ -134,6 +139,8 @@ export default {
       chooseCustomer: null,
       addLoading: false,
       addCustomerPop: false,
+      reportTemplateClassifyList: [],
+      reportTemplateClassify: null,
     }
   },
   created() {
@@ -145,6 +152,18 @@ export default {
     initData() {
       this.getCustomerList()
       this.getModalInfo()
+      this.getReportTemplateClassify()
+    },
+    getReportTemplateClassify() {
+      getReportTemplateClassify({ type: parseInt(this.reportType) }).then((res) => {
+        this.reportTemplateClassifyList = res.data
+        this.reportTemplateClassify = res.data[0].id
+      })
+    },
+    reportTemplateChange(item){
+      const v = item.target.value
+      this.reportTemplateClassify = v
+      this.getReportModal()
     },
     changeType(item) {
       const { $notification, $message } = this
@@ -195,15 +214,17 @@ export default {
       })
     },
     getReportModal() {
-      getReportModal({ type: this.reportType, creditCode: this.chooseCustomer.creditCode }).then(
-        (res) => {
-          // 默认全选
-          this.modalList = res.data.map((v) => {
-            this.chooseModal.push(v.templateName)
-            return v
-          })
-        }
-      )
+      getReportModal({
+        type: this.reportType,
+        creditCode: this.chooseCustomer.creditCode,
+        classifyId: this.reportTemplateClassify,
+      }).then((res) => {
+        // 默认全选
+        this.modalList = res.data.map((v) => {
+          this.chooseModal.push(v.templateName)
+          return v
+        })
+      })
     },
     searchCustomer(v) {
       const s = v.target.value

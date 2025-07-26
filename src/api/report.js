@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-06-06 09:53:10
- * @FilePath: /report-background-system/src/api/report.js
+ * @LastEditTime: 2025-07-26 12:39:39
+ * @FilePath: \report-background-system\src\api\report.js
  * @Description: 
  * 
  */
@@ -71,8 +71,13 @@ const reportAPI = {
 
     // ai润色
     getAiColor: '/report/v2/entity/ai/retouch/type',
-    aiColor: '/report/v2/entity/ai/content/retouch'
+    aiColor: '/report/v2/entity/ai/content/retouch',
+
+    // 报告模板类型
+    getReportTemplateClassify: '/report/entity/template/classify/list',
 }
+
+
 
 // 获取指定用户所有调研结果上传的文件
 export function getDYFiles(parameter) {
@@ -543,6 +548,14 @@ export function getAiColor() {
 export function aiColor(parameter) {
     return request({
         url: reportAPI.aiColor,
+        method: 'post',
+        data: parameter
+    })
+}
+
+export function getReportTemplateClassify(parameter) {
+    return request({
+        url: reportAPI.getReportTemplateClassify,
         method: 'post',
         data: parameter
     })
