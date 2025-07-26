@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-07-26 12:47:19
+ * @LastEditTime: 2025-07-26 13:08:13
  * @FilePath: \report-background-system\src\views\dataGo\home\addReport.vue
  * @Description: 
  * 
@@ -57,12 +57,17 @@
                   </a-radio-group>
                 </div>
               </div>
-              <div v-else style="margin-top: 20px">
-                <a-radio-group v-model="reportTemplateClassify" style="margin-bottom: 16px" @change="reportTemplateChange">
-                  <a-radio-button v-for="item in reportTemplateClassifyList" :value="item.id" :key="item.id">
-                    {{ item.classifyName }}
-                  </a-radio-button>
-                </a-radio-group>
+              <div v-else style="margin-top: 10px">
+                <div>
+                  <a-tabs :active-key="reportTemplateClassify" @change="reportTemplateChange">
+                    <a-tab-pane
+                      v-for="item in reportTemplateClassifyList"
+                      :value="item.id"
+                      :key="item.id"
+                      :tab="item.classifyName"
+                    ></a-tab-pane>
+                  </a-tabs>
+                </div>
                 <a-checkbox-group v-model="chooseModal" @change="onChange">
                   <a-row>
                     <a-col :span="24" v-for="item in modalList" :key="item.templateName" style="margin-bottom: 10px">
@@ -160,8 +165,7 @@ export default {
         this.reportTemplateClassify = res.data[0].id
       })
     },
-    reportTemplateChange(item){
-      const v = item.target.value
+    reportTemplateChange(v) {
       this.reportTemplateClassify = v
       this.getReportModal()
     },
