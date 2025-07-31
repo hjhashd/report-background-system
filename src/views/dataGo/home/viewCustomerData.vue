@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-02-26 11:22:54
  * @LastEditors: bekon
- * @LastEditTime: 2025-05-18 08:43:53
- * @FilePath: \report-background-system\src\views\dataGo\home\viewCustomerData.vue
+ * @LastEditTime: 2025-07-31 12:14:13
+ * @FilePath: /report-background-system/src/views/dataGo/home/viewCustomerData.vue
  * @Description: 
  * 
 -->
@@ -188,6 +188,7 @@ export default {
         enterpriseName: this.queryParams.enterpriseName,
         template: this.queryParams.template,
         reportName: this.reportName,
+        category: this.queryParams.category || '',
       }
 
       this.buildLoading = true

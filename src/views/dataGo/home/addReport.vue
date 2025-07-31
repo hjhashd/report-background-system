@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-07-26 13:08:13
- * @FilePath: \report-background-system\src\views\dataGo\home\addReport.vue
+ * @LastEditTime: 2025-07-31 12:12:31
+ * @FilePath: /report-background-system/src/views/dataGo/home/addReport.vue
  * @Description: 
  * 
 -->
@@ -146,6 +146,7 @@ export default {
       addCustomerPop: false,
       reportTemplateClassifyList: [],
       reportTemplateClassify: null,
+      reportTemplateClassifyName: '',
     }
   },
   created() {
@@ -163,10 +164,12 @@ export default {
       getReportTemplateClassify({ type: parseInt(this.reportType) }).then((res) => {
         this.reportTemplateClassifyList = res.data
         this.reportTemplateClassify = res.data[0].id
+        this.reportTemplateClassifyName = res.data[0].classifyName
       })
     },
     reportTemplateChange(v) {
       this.reportTemplateClassify = v
+      this.reportTemplateClassifyName = this.reportTemplateClassifyList.find((item) => item.id == v).classifyName
       this.getReportModal()
     },
     changeType(item) {
@@ -267,6 +270,7 @@ export default {
         enterpriseName: this.chooseCustomer.enterpriseName,
         template: JSON.stringify(this.chooseModal),
         creditCode: this.chooseCustomer.creditCode,
+        category: this.reportTemplateClassifyName,
       }
       // 去往查看数据页面
       $router.push({ path: '/homePage/viewCustomerData', query: paramsRequest })
