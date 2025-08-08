@@ -2,10 +2,10 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-07-26 12:39:39
- * @FilePath: \report-background-system\src\api\report.js
- * @Description: 
- * 
+ * @LastEditTime: 2025-06-06 09:53:10
+ * @FilePath: /report-background-system/src/api/report.js
+ * @Description:
+ *
  */
 import request from '@/utils/request'
 
@@ -75,9 +75,10 @@ const reportAPI = {
 
     // 报告模板类型
     getReportTemplateClassify: '/report/entity/template/classify/list',
+
+    // 特殊三表的字段获取
+    getSpecialFields: '/report/v2/entity/data/record'
 }
-
-
 
 // 获取指定用户所有调研结果上传的文件
 export function getDYFiles(parameter) {
@@ -223,9 +224,30 @@ export function getFields(clickItem) {
     }
 }
 
+// 获取更新后的灵活入库三表字段
+export function getNewSpecialFields(tableName) {
+    return request({
+      url: reportAPI.getSpecialFields,
+      method: 'get',
+      params: {"tableName": tableName}
+    })
+}
+
 // 导入数据文件
 export function pullTableData(clickItem, data, pickFieldsData, mapping) {
     const { tableNameZh, id } = clickItem
+
+    const specialTable = ['现金流量表', '利润表', '资产负债表']
+    if (specialTable.includes(tableNameZh)) {
+      // 过滤处理
+      mapping = Object.entries(mapping).reduce((acc, [key, value]) => {
+        if (value !== "--不匹配---") {
+          acc[key] = value;
+        }
+        return acc;
+      }, {});
+    }
+
     switch (tableNameZh) {
         case '现金流量表':
             data.append('mapping', JSON.stringify(mapping))
@@ -422,7 +444,7 @@ export function useReportContent(parameter) {
     })
 }
 
-// 更新报告数据文档 
+// 更新报告数据文档
 export function updateReportDate(parameter, id) {
     return request({
         url: reportAPI.updateReportDate + id,
@@ -447,7 +469,7 @@ export function getModalList(id) {
     })
 }
 
-// 更新报告 
+// 更新报告
 export function updateReport(id) {
     return request({
         url: reportAPI.updateReport + id,

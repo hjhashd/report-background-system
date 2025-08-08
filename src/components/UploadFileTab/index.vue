@@ -4,8 +4,8 @@
  * @LastEditors: bekon
  * @LastEditTime: 2025-05-28 12:35:21
  * @FilePath: /report-background-system/src/components/UploadFileTab/index.vue
- * @Description: 
- * 
+ * @Description:
+ *
 -->
 <template>
   <div>
@@ -124,7 +124,7 @@
 
 <script>
 import * as XLSX from 'xlsx'
-import { getFields, pullTableData } from '@/api/report'
+import { getFields, getNewSpecialFields, pullTableData } from '@/api/report'
 import { specialTableDeal, normalTableDeal, columns } from './util'
 const tabType = ['1.上传文件', '2.字段匹配', '3.验证结果']
 export default {
@@ -209,34 +209,77 @@ export default {
       if (this.fileList.length) {
         this.tabLoading = true
         await this.readXLSXcontent(this.fileList, this.clickItem)
-        // 获取表格字段
-        getFields(this.clickItem)
-          .then((res) => {
-            const reD = JSON.parse(JSON.stringify(res.data))
-            const uploadTableFiedls = []
-            this.tabLoading = false
-            const mapping = {}
-            reD.forEach((item) => {
-              if (typeof item == 'object') {
-                const fE = this.excelData.find((i) => i.fieldNameCh == item.fieldNameCh)
-                mapping[item.fieldNameCh] = fE ? fE.fieldNameCh : this.excelData[0].fieldNameCh
-                uploadTableFiedls.push(item)
-              } else {
-                const fE = this.excelData.find((i) => i.fieldNameCh == item)
-                mapping[item] = fE ? fE.fieldNameCh : this.excelData[0].fieldNameCh
-                uploadTableFiedls.push({
-                  fieldName: item,
-                  fieldNameCh: item,
-                })
-              }
+
+        const specialTable = ['现金流量表', '利润表', '资产负债表']
+        const { tableNameZh } = this.clickItem
+        if (specialTable.includes(tableNameZh)) {
+          getNewSpecialFields(tableNameZh)
+            .then((res) => {
+              const matchFields = {}
+              const mapping = {}
+              this.tabLoading = false
+              const uploadTableFiedls = []
+              res.data.forEach(item => {
+                matchFields[item.originRecord] = item.record
+              })
+
+
+
+              this.excelData.forEach(item => {
+                if(item.fieldName != null){
+                  uploadTableFiedls.push({
+                    fieldName: item.fieldNameCh,
+                    fieldNameCh: item.fieldNameCh,
+                  })
+                }
+
+                const fE = matchFields[item.fieldNameCh]
+                if(fE){
+                  mapping[item.fieldNameCh] = fE
+                }else{
+                  mapping[item.fieldNameCh] = this.excelData[0].fieldNameCh
+                }
+              })
+
+              this.uploadTableFiedls = uploadTableFiedls
+              this.mapping = mapping
+              this.selectTab = tabType[1]
+
+            }).catch((err) => {
+              console.log(err)
+              this.tabLoading = false
+          })
+        }else{
+          // 获取表格字段
+          getFields(this.clickItem)
+            .then((res) => {
+              const reD = JSON.parse(JSON.stringify(res.data))
+              const uploadTableFiedls = []
+              this.tabLoading = false
+              const mapping = {}
+              reD.forEach((item) => {
+                if (typeof item == 'object') {
+                  const fE = this.excelData.find((i) => i.fieldNameCh == item.fieldNameCh)
+                  mapping[item.fieldNameCh] = fE ? fE.fieldNameCh : this.excelData[0].fieldNameCh
+                  uploadTableFiedls.push(item)
+                } else {
+                  const fE = this.excelData.find((i) => i.fieldNameCh == item)
+                  mapping[item] = fE ? fE.fieldNameCh : this.excelData[0].fieldNameCh
+                  uploadTableFiedls.push({
+                    fieldName: item,
+                    fieldNameCh: item,
+                  })
+                }
+              })
+              this.uploadTableFiedls = uploadTableFiedls
+              this.mapping = mapping
+              this.selectTab = tabType[1]
             })
-            this.uploadTableFiedls = uploadTableFiedls
-            this.mapping = mapping
-            this.selectTab = tabType[1]
-          })
-          .catch((err) => {
-            this.tabLoading = false
-          })
+            .catch((err) => {
+              this.tabLoading = false
+            })
+        }
+
       } else {
         this.$message.warning('未获取到有效文件')
       }
