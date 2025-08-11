@@ -221,13 +221,6 @@ export const columns = [
         key: 'updateTime',
     },
     {
-        title: '处理时长',
-        dataIndex: 'avgOperationTime',
-        key: 'avgOperationTime',
-        width: '100px',
-        scopedSlots: { customRender: 'avgOperationTime' },
-    },
-    {
         title: '操作',
         key: 'action',
         width: '120px',

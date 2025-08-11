@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-06-06 09:53:10
+ * @LastEditTime: 2025-08-11 18:24:34
  * @FilePath: /report-background-system/src/api/report.js
  * @Description:
  *
@@ -77,7 +77,48 @@ const reportAPI = {
     getReportTemplateClassify: '/report/entity/template/classify/list',
 
     // 特殊三表的字段获取
-    getSpecialFields: '/report/v2/entity/data/record'
+    getSpecialFields: '/report/v2/entity/data/record',
+
+    // 初稿列表
+    getFirstDraftList: '/report/draft/list',
+    deleteFirstDraft: '/report/draft/delete/',
+    saveFirstDraft: '/report/draft/save/report',
+    batchDeleteFirstDraft: '/report/draft/batch/delete',
+}
+
+// 初稿列表
+export function getFirstDraftList(parameter) {
+    return request({
+        url: reportAPI.getFirstDraftList,
+        method: 'post',
+        data: parameter
+    })
+}
+
+// 删除初稿
+export function deleteFirstDraft(id) {
+    return request({
+        url: reportAPI.deleteFirstDraft + id,
+        method: 'delete',
+    })
+}
+
+// 批量删除初稿
+export function batchDeleteFirstDraft(ids) {
+    return request({
+        url: reportAPI.batchDeleteFirstDraft,
+        method: 'post',
+        data: ids
+    })
+}
+
+// 保存初稿
+export function saveFirstDraft(parameter) {
+    return request({
+        url: reportAPI.saveFirstDraft,
+        method: 'post',
+        data: parameter
+    })
 }
 
 // 获取指定用户所有调研结果上传的文件

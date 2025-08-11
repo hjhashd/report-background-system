@@ -1,0 +1,410 @@
+<template>
+  <page-header-wrapper>
+    <div class="flex home-part-title-right flex-1">
+      <div class="flex">
+        <div class="flex flex-center" style="margin-right: 20px">
+          <div class="right-item-title">报告类型：</div>
+          <a-select v-model="draftTypeSelected" style="width: 150px" @change="selectChange" :allowClear="true">
+            <a-select-option v-for="item in reportTypeList" :key="item.type" :value="item.type">
+              {{ item.name }}
+            </a-select-option>
+          </a-select>
+        </div>
+        <div class="flex flex-center" style="margin-right: 20px">
+          <div class="right-item-title">报告状态：</div>
+          <a-select v-model="draftStatus" style="width: 150px" @change="selectChange" :allowClear="true">
+            <a-select-option v-for="item in draftStatusList" :key="item.type" :value="item.type">
+              {{ item.name }}
+            </a-select-option>
+          </a-select>
+        </div>
+        <div class="flex flex-center">
+          <div class="right-item-title">报告查询：</div>
+          <a-input
+            v-model="search"
+            style="width: 200px"
+            placeholder="输入报告名称"
+            @blur="selectChange"
+            @pressEnter="selectChange"
+            :allowClear="true"
+          />
+        </div>
+      </div>
+      <a-popconfirm title="是否删除已选中的草稿报告?" ok-text="是" cancel-text="否" @confirm="deleteMutil">
+        <a-button>批量删除</a-button>
+      </a-popconfirm>
+    </div>
+    <div class="table-contant tab-table">
+      <s-table
+        ref="table"
+        :rowKey="(record) => record.id"
+        :data="loadData"
+        :columns="columns"
+        :row-selection="{
+          selectedRowKeys: expandedRowKeys,
+          onChange: rowChange,
+        }"
+      >
+        <template slot="id" slot-scope="txt, scoped, index">{{
+          (queryParam.pageNum - 1) * queryParam.pageSize + index + 1
+        }}</template>
+        <div slot="reportName" slot-scope="text, scoped">
+          <span>{{ text }}</span>
+          <!-- <a-tooltip placement="right" v-if="scoped.status != 1">
+            <template slot="title">
+              <span v-if="scoped.dataStatus == 2">未完成数据授权，数据上传</span>
+              <span v-else-if="scoped.dataStatus == 3">已完成数据授权，数据上传，正在制作报告</span>
+            </template>
+            <a-icon type="bell" theme="filled" style="color: #c92c1f" />
+          </a-tooltip> -->
+        </div>
+        <span slot="status" slot-scope="text">
+          <!-- // 0 草稿 1 已完成 2 数据未授权 3 数据已授权 -->
+          <span v-if="text == 0" :class="['table-status', 'status' + text]">草稿</span>
+          <span v-if="text == 1" :class="['table-status', 'status' + text]">已完成</span>
+          <span v-if="text == 2" :class="['table-status', 'status' + text]">数据未授权</span>
+          <span v-if="text == 3" :class="['table-status', 'status' + text]">数据已授权</span>
+        </span>
+        <template slot="genStatus" slot-scope="text, scoped">
+          <span v-if="text == 1" class="table-status status1">已完成</span>
+          <span v-else-if="text == 0" class="table-status"> 生成中 </span>
+          <span v-else-if="text == 3" class="table-status"> 更新中 </span>
+          <span class="table-status status4" v-else>生成失败</span>
+          <a-badge
+            :offset="[-3, 5]"
+            v-if="scoped.tableChangeInfos && scoped.tableChangeInfos.length"
+            :count="scoped.tableChangeInfos.length"
+          >
+            <a-button style="margin-left: 5px" icon="bell" type="link" @click="lookUploadModal(scoped)"></a-button>
+          </a-badge>
+          <a-progress v-if="text == 0" :percent="scoped.process" size="small" />
+        </template>
+        <span slot="reportType" slot-scope="text">
+          {{ text == 1 ? '信贷调查报告' : text == 2 ? '财务分析报告' : '能耗分析报告' }}
+        </span>
+        <span slot="avgOperationTime" slot-scope="text">
+          <span v-if="text">{{ text | dealTime }}</span>
+          <span v-else>{{ text }}</span>
+        </span>
+        <template slot="action" slot-scope="text, scoped">
+          <div class="flex">
+            <!-- 这里可以定义操作列的具体内容，例如按钮 -->
+            <a-tooltip v-if="scoped.genStatus == 2">
+              <template slot="title">
+                <span>更新数据</span>
+              </template>
+              <a-button
+                @click="updateReportData(scoped)"
+                :style="{ color: '#7fbbf1', border: 'none', padding: 0, margin: '0 8px' }"
+              >
+                <a-icon style="font-size: 22px" type="redo" />
+              </a-button>
+            </a-tooltip>
+            <a-tooltip v-else>
+              <template slot="title">
+                <span>查看</span>
+              </template>
+              <a-button
+                :disabled="scoped.genStatus !== 1"
+                @click="handleChat(scoped)"
+                :style="{ color: '#7fbbf1', border: 'none', padding: 0, margin: '0 5px' }"
+              >
+                <img style="width: 28px; height: 28px" src="@/assets/images/see.png" alt="dark" />
+              </a-button>
+            </a-tooltip>
+            <a-popconfirm title="是否确定删除该报告?" ok-text="确定" cancel-text="取消" @confirm="deleteChat(scoped)">
+              <a-tooltip>
+                <template slot="title">
+                  <span>删除</span>
+                </template>
+                <a-button :style="{ color: '#7fbbf1', border: 'none', padding: 0, margin: '0 5px' }">
+                  <img style="width: 22px; height: 22px" src="@/assets/images/delete.png" alt="dark" />
+                </a-button>
+              </a-tooltip>
+            </a-popconfirm>
+          </div>
+        </template>
+      </s-table>
+    </div>
+
+    <a-modal :footer="null" v-model="udt" title="数据更新提醒">
+      <div class="update-item-line" v-for="item in uploadTableList" :key="item.id">
+        <span class="update-item-title">{{ item.tableNameC }}</span>
+        <span class="update-item-time">{{ item.changeTime }}</span>
+      </div>
+    </a-modal>
+  </page-header-wrapper>
+</template>
+
+<script>
+const reportTypeList = [
+  {
+    type: 1,
+    name: '授信调查报告',
+  },
+  {
+    type: 2,
+    name: '财务分析报告',
+  },
+  {
+    type: 3,
+    name: '能耗分析报告',
+  },
+]
+const draftStatusList = [
+  {
+    type: 1,
+    name: '已完成',
+  },
+  {
+    type: 0,
+    name: '生成中',
+  },
+  {
+    type: 3,
+    name: '更新中',
+  },
+  {
+    type: 2,
+    name: '生成失败',
+  },
+]
+import { mapState } from 'vuex'
+import { getFirstDraftList, deleteFirstDraft, batchDeleteFirstDraft } from '@/api/report'
+import { STable } from '@/components'
+import { baseMixin } from '@/store/app-mixin'
+import { columns } from './util'
+
+export default {
+  name: 'Analysis',
+  mixins: [baseMixin],
+  components: {
+    STable,
+  },
+  data() {
+    return {
+      loading: true,
+      udt: false,
+      columns,
+      draftTypeSelected: null,
+      draftStatus: null,
+      search: null,
+      reportTypeList,
+      draftStatusList,
+      uploadTableList: [],
+      expandedRowKeys: [],
+      // 查询参数
+      queryParam: {
+        pageNum: 1,
+        pageSize: 10,
+        status: 0,
+      },
+      loadData: (parameter) => {
+        let requestParameters = Object.assign({}, this.queryParam, parameter, {
+          pageNum: parameter.pageNo,
+          reportName: this.search,
+          reportType: this.draftTypeSelected,
+          genStatus: this.draftStatus,
+        })
+        if (parameter.pageSize !== this.queryParam.pageSize) {
+          requestParameters.pageNo = 1
+          requestParameters.pageNum = 1
+        }
+        this.queryParam = JSON.parse(JSON.stringify(requestParameters))
+        return new Promise((resolve, reject) => {
+          getFirstDraftList(requestParameters).then((res) => {
+            const reD = {
+              pageSize: requestParameters.pageSize,
+              pageNo: requestParameters.pageNo,
+              totalCount: res.total,
+              totalPage: Math.ceil(res.total / requestParameters.pageSize),
+              data: res.rows,
+            }
+            resolve(reD)
+          })
+        })
+      },
+    }
+  },
+  filters: {
+    dealTime(minutes) {
+      const oneDay = 24 * 60;
+      const oneHour = 60;
+
+      const days = Math.floor(minutes / oneDay);
+      const remainingMinutes = minutes % oneDay;
+      const hours = Math.floor(remainingMinutes / oneHour);
+      const mins = remainingMinutes % oneHour;
+
+      let str = '';
+      str += days ? `${days} 天 ` : '';
+      str += hours ? `${hours} 小时 ` : '';
+      str += mins ? `${mins} 分钟` : '';
+
+      return str || '0 分钟';
+    },
+  },
+  computed: {
+    ...mapState({
+      overview: (state) => state.user.overview,
+    }),
+  },
+  methods: {
+    handleChat(v) {
+      const { $router } = this
+      $router.push({ path: `/homePage/viewReport/` + v.id })
+    },
+    selectChange() {
+      this.$refs.table.refresh()
+    },
+    rowChange(_, selectedRows) {
+      this.expandedRowKeys = selectedRows.map((u) => u.id)
+    },
+    deleteMutil() {
+      const { $notification } = this
+      if (!this.expandedRowKeys.length) {
+        $notification['info']({
+          message: '通知：',
+          description: '未选中删除项',
+          duration: 8,
+        })
+        return
+      }
+      batchDeleteFirstDraft(this.expandedRowKeys).then((i) => {
+        if (i.code == 200) {
+          $notification['success']({
+            message: '通知：',
+            description: '删除成功',
+            duration: 8,
+          })
+          this.expandedRowKeys = []
+          this.$refs.table.refresh()
+        } else {
+          $notification['error']({
+            message: '通知：',
+            description: '删除失败' + i.msg,
+            duration: 8,
+          })
+          this.$refs.table.refresh()
+        }
+      })
+    },
+    deleteChat(v) {
+      const { $notification } = this
+      deleteFirstDraft(v.id).then((res) => {
+        $notification['success']({
+          message: '通知：',
+          description: '删除成功',
+          duration: 8,
+        })
+        this.$refs.table.refresh()
+      })
+    },
+    lookUploadModal(v) {
+      this.uploadTableList = v.tableChangeInfos
+      this.udt = true
+    },
+    updateReportData(v) {
+      // 更新数据
+      const { $notification, $confirm, $router } = this
+      $confirm({
+        title: '更新报告提醒',
+        content: `是否对当前报告进行更新，更新后内容可能较之前发生变化。数据更新将退出查阅模式进行内容更新，待内容更新完毕，可在草稿箱再次查看。`,
+        okText: '确定',
+        cancelText: '取消',
+        onOk: () => {
+          updateReport(v.id).then((res) => {
+            if (res.code != 200) {
+              this.pageLoading = false
+              $notification['error']({
+                message: '错误通知：',
+                description: res.msg,
+                duration: 8,
+              })
+            } else {
+              $notification['success']({
+                message: '通知：',
+                description: `正在生成，请在草稿列表查看进度`,
+                duration: 6,
+              })
+              this.$refs.table.refresh()
+            }
+          })
+        },
+      })
+    },
+  },
+}
+</script>
+
+<style lang="less" scoped>
+.flex {
+  display: flex;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.top-card-content {
+  background-color: #fff;
+  padding: 16px;
+  margin-bottom: 24px;
+
+  .title {
+    font-size: 20px;
+    font-weight: bold;
+  }
+
+  .sum {
+    font-size: 16px;
+  }
+}
+
+.overview-card {
+  background-color: #fff;
+  padding: 10px;
+
+  .title {
+    font-size: 18px;
+  }
+}
+
+.table-contant {
+  background-color: #fff;
+}
+
+.table-status {
+  font-size: 12px;
+  &.status0 {
+    color: #666666;
+  }
+  &.status1 {
+    color: #25f021;
+  }
+  &.status2 {
+    color: #15dff1;
+  }
+  &.status3 {
+    color: #0a69ef;
+  }
+  &.status4 {
+    color: #ea2222;
+  }
+}
+.home-part-title-right {
+  padding: 10px;
+  margin-bottom: 20px;
+  background-color: #fff;
+  justify-content: space-between;
+}
+/* 去除表格行的鼠标悬停高亮效果 */
+.tab-table {
+  /deep/ .ant-table-tbody > tr:hover > td {
+    background: inherit !important;
+  }
+  /deep/ .ant-table-small > .ant-table-content > .ant-table-body {
+    margin: 0;
+  }
+}
+</style>
