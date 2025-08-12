@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-07-31 12:12:31
+ * @LastEditTime: 2025-08-12 18:42:40
  * @FilePath: /report-background-system/src/views/dataGo/home/addReport.vue
  * @Description: 
  * 
@@ -221,6 +221,7 @@ export default {
       })
     },
     getReportModal() {
+      this.chooseModal = []
       getReportModal({
         type: this.reportType,
         creditCode: this.chooseCustomer.creditCode,
