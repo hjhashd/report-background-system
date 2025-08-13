@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-08-12 18:42:40
+ * @LastEditTime: 2025-08-13 18:39:17
  * @FilePath: /report-background-system/src/views/dataGo/home/addReport.vue
  * @Description: 
  * 
@@ -264,12 +264,15 @@ export default {
         })
         return
       }
+      const chooseModal = this.modalList.filter((v) => {
+        return this.chooseModal.find((v2) => v2 == v.templateName) !== undefined
+      }).map((v) => v.templateName)
 
       const paramsRequest = {
         appUserId: this.chooseCustomer.appUserId,
         reportType: parseInt(this.reportType),
         enterpriseName: this.chooseCustomer.enterpriseName,
-        template: JSON.stringify(this.chooseModal),
+        template: JSON.stringify(chooseModal),
         creditCode: this.chooseCustomer.creditCode,
         category: this.reportTemplateClassifyName,
       }
