@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-08-11 18:24:34
+ * @LastEditTime: 2025-08-13 18:55:49
  * @FilePath: /report-background-system/src/api/report.js
  * @Description:
  *
@@ -109,15 +109,6 @@ export function batchDeleteFirstDraft(ids) {
         url: reportAPI.batchDeleteFirstDraft,
         method: 'post',
         data: ids
-    })
-}
-
-// 保存初稿
-export function saveFirstDraft(parameter) {
-    return request({
-        url: reportAPI.saveFirstDraft,
-        method: 'post',
-        data: parameter
     })
 }
 
@@ -381,7 +372,8 @@ export function customerData(parameter) {
 
 export function buildReport(parameter) {
     return request({
-        url: reportAPI.buildReport,
+        // url: reportAPI.buildReport,
+        url: reportAPI.saveFirstDraft,
         method: 'post',
         data: parameter
     })

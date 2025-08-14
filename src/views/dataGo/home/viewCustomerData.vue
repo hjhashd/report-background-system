@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-26 11:22:54
  * @LastEditors: bekon
- * @LastEditTime: 2025-07-31 12:14:13
+ * @LastEditTime: 2025-08-13 18:56:28
  * @FilePath: /report-background-system/src/views/dataGo/home/viewCustomerData.vue
  * @Description: 
  * 
@@ -210,7 +210,7 @@ export default {
               \n 正在用行业小模型生成报告，需要等待几分钟。`,
               duration: 8,
             })
-            $router.push({ path: `/homePage/draftList` })
+            $router.push({ path: `/homePage/firstDraft` })
             this.buildReportId = res.data
             this.buildLoading = false
           }

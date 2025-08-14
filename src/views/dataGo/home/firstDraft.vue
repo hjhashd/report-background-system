@@ -89,18 +89,7 @@
         <template slot="action" slot-scope="text, scoped">
           <div class="flex">
             <!-- 这里可以定义操作列的具体内容，例如按钮 -->
-            <a-tooltip v-if="scoped.genStatus == 2">
-              <template slot="title">
-                <span>更新数据</span>
-              </template>
-              <a-button
-                @click="updateReportData(scoped)"
-                :style="{ color: '#7fbbf1', border: 'none', padding: 0, margin: '0 8px' }"
-              >
-                <a-icon style="font-size: 22px" type="redo" />
-              </a-button>
-            </a-tooltip>
-            <a-tooltip v-else>
+            <a-tooltip v-if="scoped.genStatus != 2">
               <template slot="title">
                 <span>查看</span>
               </template>
@@ -228,20 +217,20 @@ export default {
   },
   filters: {
     dealTime(minutes) {
-      const oneDay = 24 * 60;
-      const oneHour = 60;
+      const oneDay = 24 * 60
+      const oneHour = 60
 
-      const days = Math.floor(minutes / oneDay);
-      const remainingMinutes = minutes % oneDay;
-      const hours = Math.floor(remainingMinutes / oneHour);
-      const mins = remainingMinutes % oneHour;
+      const days = Math.floor(minutes / oneDay)
+      const remainingMinutes = minutes % oneDay
+      const hours = Math.floor(remainingMinutes / oneHour)
+      const mins = remainingMinutes % oneHour
 
-      let str = '';
-      str += days ? `${days} 天 ` : '';
-      str += hours ? `${hours} 小时 ` : '';
-      str += mins ? `${mins} 分钟` : '';
+      let str = ''
+      str += days ? `${days} 天 ` : ''
+      str += hours ? `${hours} 小时 ` : ''
+      str += mins ? `${mins} 分钟` : ''
 
-      return str || '0 分钟';
+      return str || '0 分钟'
     },
   },
   computed: {
@@ -303,35 +292,6 @@ export default {
     lookUploadModal(v) {
       this.uploadTableList = v.tableChangeInfos
       this.udt = true
-    },
-    updateReportData(v) {
-      // 更新数据
-      const { $notification, $confirm, $router } = this
-      $confirm({
-        title: '更新报告提醒',
-        content: `是否对当前报告进行更新，更新后内容可能较之前发生变化。数据更新将退出查阅模式进行内容更新，待内容更新完毕，可在草稿箱再次查看。`,
-        okText: '确定',
-        cancelText: '取消',
-        onOk: () => {
-          updateReport(v.id).then((res) => {
-            if (res.code != 200) {
-              this.pageLoading = false
-              $notification['error']({
-                message: '错误通知：',
-                description: res.msg,
-                duration: 8,
-              })
-            } else {
-              $notification['success']({
-                message: '通知：',
-                description: `正在生成，请在草稿列表查看进度`,
-                duration: 6,
-              })
-              this.$refs.table.refresh()
-            }
-          })
-        },
-      })
     },
   },
 }
