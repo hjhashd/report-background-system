@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-08-17 00:58:56
+ * @LastEditTime: 2025-08-17 02:33:43
  * @FilePath: \report-background-system\src\views\dataGo\home\viewReportFirstDraft.vue
  * @Description: 报告预览
  * 
@@ -95,7 +95,14 @@
               @close="() => (showRightType = '')"
             ></AiContentGenerate>
           </div>
-          <div v-else-if="showRightType == 'ai-search'"></div>
+          <div v-else-if="showRightType == 'ai-search'">
+            <DraftRightAISearch
+              :firstDraftId="currentChose"
+              :chapterId="reportId"
+              :editorHeight="editorHeight"
+              @close="() => (showRightType = '')"
+            ></DraftRightAISearch>
+          </div>
         </div>
       </div>
       <a-upload
@@ -146,12 +153,13 @@ import AnomalyContent from '../anomaly/innerContent.vue'
 import { updateReportDate, updateReport, setDraftStatus, getFirstDraftChapter } from '@/api/report'
 import { OnlyOfficeEditorFD } from '@/components'
 import AiContentGenerate from './components/draftRightAISave.vue'
+import DraftRightAISearch from './components/draftRightAISearch.vue'
 import EditModal from './editModal.vue'
 import { getCurrentDate, getCurrentTime } from './util'
 import { classifyDataByClassName, classifyDataByTemplateName } from '../client/util'
 export default {
   name: 'addReport',
-  components: { OnlyOfficeEditorFD, EditModal, AnomalyContent, AiContentGenerate },
+  components: { OnlyOfficeEditorFD, EditModal, AnomalyContent, AiContentGenerate, DraftRightAISearch },
   data() {
     return {
       applyIcon: require('@/assets/images/apply.png'),
