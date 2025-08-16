@@ -241,7 +241,7 @@ export default {
   methods: {
     handleChat(v) {
       const { $router } = this
-      $router.push({ path: `/homePage/viewReport/` + v.id })
+      $router.push({ path: `/homePage/ViewReportFirstDraft/` + v.id, query: { reportName: v.reportName } })
     },
     selectChange() {
       this.$refs.table.refresh()

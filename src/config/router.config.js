@@ -95,6 +95,13 @@ export const asyncRouterMap = [
             meta: { title: 'menu.home.viewReport', keepAlive: false, permission: ['home'] }
           },
           {
+            path: '/homePage/viewReportFirstDraft/:reportId',
+            name: 'ViewReportFirstDraft',
+            hidden: true,
+            component: () => import('@/views/dataGo/home/viewReportFirstDraft'),
+            meta: { title: 'menu.home.viewReportFirstDraft', keepAlive: false, permission: ['home'] }
+          },
+          {
             path: '/homePage/viewCustomerData',
             name: 'viewCustomerData',
             hidden: true,

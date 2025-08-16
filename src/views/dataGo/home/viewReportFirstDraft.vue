@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-07-21 13:58:48
- * @FilePath: /report-background-system/src/views/dataGo/home/viewReport.vue
+ * @LastEditTime: 2025-08-17 00:58:56
+ * @FilePath: \report-background-system\src\views\dataGo\home\viewReportFirstDraft.vue
  * @Description: 报告预览
  * 
 -->
@@ -47,160 +47,55 @@
             </a-tooltip>
             <a-tooltip>
               <template slot="title">
-                <span>更新数据</span>
+                <span>AI生成</span>
+              </template>
+              <div class="btn-item" @click="openRight('ai-save')">
+                <div class="icon-box"><a-icon style="color: rgb(87, 135, 238)" type="star" /></div>
+              </div>
+            </a-tooltip>
+            <a-tooltip>
+              <template slot="title">
+                <span>AI搜索</span>
+              </template>
+              <div class="btn-item" @click="openRight('ai-search')">
+                <div class="icon-box"><a-icon style="color: rgb(87, 135, 238)" type="search" /></div>
+              </div>
+            </a-tooltip>
+            <a-tooltip>
+              <template slot="title">
+                <span>更新报告</span>
               </template>
               <div class="btn-item" @click="updateReportData">
                 <div class="icon-box"><a-icon style="color: rgb(87, 135, 238)" type="redo" /></div>
               </div>
             </a-tooltip>
-            <!-- <a-tooltip>
-              <template slot="title">
-                <span>数据验证</span>
-              </template>
-              <div class="btn-item" @click="isListCollapsed = false">
-                <div class="icon-box"><a-icon style="color: rgb(87, 135, 238)" type="eye" /></div>
-              </div>
-            </a-tooltip> -->
-            <a-tooltip>
-              <template slot="title">
-                <span>编辑</span>
-              </template>
-              <div class="btn-item" @click="showDrawer">
-                <div class="icon-box"><a-icon style="color: rgb(87, 135, 238)" type="edit" /></div>
-              </div>
-            </a-tooltip>
-            <a-tooltip>
-              <template slot="title">
-                <span>另存草稿</span>
-              </template>
-              <div class="btn-item" @click="openSetName('draft')">
-                <div class="icon-box"><a-icon style="color: rgb(87, 135, 238)" type="save" /></div>
-              </div>
-            </a-tooltip>
-            <a-tooltip>
-              <template slot="title">
-                <span>下载报告</span>
-              </template>
-              <!-- <div class="btn-item" @click="openSetName('apply')"> -->
-              <div class="btn-item" @click="downloadReport">
-                <div class="icon-box"><a-icon style="color: rgb(87, 135, 238)" type="download" /></div>
-                <!-- <div class="icon-box">
-                  <a-avatar :size="32" :src="applyIcon" />
-                </div> -->
-              </div>
-            </a-tooltip>
           </div>
         </div>
       </div>
-      <div class="flex flex-1">
-        <div ref="editorContainerRef" class="editor-container">
-          <OnlyOfficeEditor ref="editorR" :typeFrom="typeFrom" :reportId="reportId" :editorHeight="editorHeight" />
+      <div class="flex flex-1" :style="{ height: editorHeight }">
+        <div class="left-content" v-if="draftTemplateList.length">
+          <a-menu mode="inline" :open-keys="templateOptions" :selectedKeys="currentOption" @openChange="onOpenChange">
+            <a-sub-menu v-for="item in draftTemplateList" :key="item.id">
+              <span slot="title">{{ item.chapterTitle }}</span>
+              <a-menu-item v-for="vi in item.children" :key="vi.id" @click="templateChose(vi)">
+                {{ vi.chapterTitle }}
+              </a-menu-item>
+            </a-sub-menu>
+          </a-menu>
         </div>
-        <div
-          class="right-content"
-          :style="{ height: editorHeight }"
-          :class="{ 'list-collapsed': isListCollapsed }"
-          v-if="typeFrom !== 'industryReport'"
-        >
-          <div v-if="!isListCollapsed" class="container-detail">
-            <div class="close-item">
-              <a-icon
-                type="close-circle"
-                style="color: #78b3f0; font-size: 16px"
-                theme="filled"
-                @click="isListCollapsed = true"
-              />
-            </div>
-            <div class="content-item">
-              <div class="limit-title"><img src="@/assets/images/customers.png" alt="dark" />客户信息</div>
-              <div class="detail-content">
-                <div class="flex card-box">
-                  <!-- <a-avatar style="color: #5380ea; background-color: #dde8fc">
-                    {{ customerDetail?.logoName || '' }}
-                  </a-avatar> -->
-                  <div class="customer-info flex-1 single-line-text">
-                    <a-tooltip placement="top">
-                      <template slot="title">
-                        <div class="limit-title">{{ customerDetail?.enterpriseName || '' }}</div>
-                      </template>
-                      <div class="limit-title single-line-text">
-                        企业名称：{{ customerDetail?.enterpriseName || '' }}
-                      </div>
-                    </a-tooltip>
-                    <a-tooltip placement="top">
-                      <template slot="title">
-                        <div class="code">统一社会信用代码：{{ customerDetail?.enterpriseCreditCode || '' }}</div>
-                      </template>
-                      <div class="code single-line-text">
-                        统一社会信用代码：{{ customerDetail?.enterpriseCreditCode || '' }}
-                      </div>
-                    </a-tooltip>
-                  </div>
-                </div>
-                <div class="flex customer-data-info" v-if="customerDetail">
-                  <div class="flex-1 d-info">
-                    <div class="num">{{ customerDetail.authCount }}个</div>
-                    <div class="name">授权数量</div>
-                  </div>
-                  <div class="flex-1 d-info">
-                    <div class="num">{{ customerDetail.uploadCount }}个</div>
-                    <div class="name">上传数据</div>
-                  </div>
-                  <div class="flex-1 d-info">
-                    <div class="num">4份</div>
-                    <div class="name">报告+草稿</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="content-item">
-              <div class="limit-title flex-row-spacebetween">
-                <div><img src="@/assets/images/data-overview.png" alt="dark" />数据验证</div>
-                <!-- <a-button class="update-btn" type="primary" size="small" @click="toCustomerDetail">详情</a-button> -->
-              </div>
-              <div class="detail-content">
-                <a-collapse expand-icon-position="right">
-                  <a-collapse-panel v-for="(parentItem, i) in customerReportDetail" :key="i">
-                    <template slot="header">
-                      <div class="config-title">
-                        {{ parentItem.name }}
-                      </div>
-                    </template>
-                    <div
-                      :class="{ 'finished-content': item.status == 1 }"
-                      class="table-show"
-                      v-for="item in parentItem.data"
-                      :key="item.id"
-                    >
-                      <div class="flex-row-spacebetween" style="margin-bottom: 4px">
-                        <div>
-                          <div class="table-name single-line-text">{{ item.tableNameZh }}</div>
-                          <div class="time">
-                            {{ item.status == 1 ? '已完成' : '未授权' }} {{ item.createTime | dealCreateTime }}
-                            <a-icon style="color: #9d59ef" v-if="item.status == 0" type="question-circle" />
-                            <a-icon style="color: #5ec269" v-if="item.status == 1" type="check-circle" />
-                          </div>
-                        </div>
-                        <div class="flex-row-spacebetween">
-                          <a-button class="update-btn" type="primary" size="small" @click="updateTable(item)"
-                            >更新</a-button
-                          >
-                          <a-button
-                            v-if="judgeShowDataRoute(item)"
-                            class="update-btn org-btn"
-                            type="primary"
-                            size="small"
-                            @click="openDataYCFun(item)"
-                            >现场调研</a-button
-                          >
-                        </div>
-                      </div>
-                    </div>
-                  </a-collapse-panel>
-                </a-collapse>
-              </div>
-            </div>
+        <div ref="editorContainerRef" class="editor-container" v-if="currentChose">
+          <OnlyOfficeEditorFD ref="editorR" :reportId="currentChose" :editorHeight="editorHeight" />
+        </div>
+        <div :class="{ 'open-right': !!showRightType }" class="right-content" v-if="draftTemplateList.length">
+          <div v-if="showRightType == 'ai-save'">
+            <AiContentGenerate
+              :firstDraftId="currentChose"
+              :chapterId="reportId"
+              :editorHeight="editorHeight"
+              @close="() => (showRightType = '')"
+            ></AiContentGenerate>
           </div>
+          <div v-else-if="showRightType == 'ai-search'"></div>
         </div>
       </div>
       <a-upload
@@ -211,18 +106,6 @@
         :showUploadList="false"
         :openFileDialogOnClick="openFileDialogOnClick"
       ></a-upload>
-      <a-drawer
-        v-if="typeFrom !== 'industryReport'"
-        title=" "
-        placement="right"
-        :closable="true"
-        :visible="visible"
-        :maskClosable="false"
-        width="90vw"
-        @close="onClose"
-      >
-        <edit-modal :reportDetail="reportDetail" @refreshEdit="updateEdit"></edit-modal>
-      </a-drawer>
       <a-modal
         class="qr-modal"
         v-model="setReportName"
@@ -260,22 +143,15 @@
 <script>
 import { mapActions } from 'vuex'
 import AnomalyContent from '../anomaly/innerContent.vue'
-import {
-  getReportDetail,
-  customerData,
-  getCustomerDetail,
-  updateReportDate,
-  updateReport,
-  applyReport,
-  setDraftStatus,
-} from '@/api/report'
-import { OnlyOfficeEditor } from '@/components'
+import { updateReportDate, updateReport, setDraftStatus, getFirstDraftChapter } from '@/api/report'
+import { OnlyOfficeEditorFD } from '@/components'
+import AiContentGenerate from './components/draftRightAISave.vue'
 import EditModal from './editModal.vue'
 import { getCurrentDate, getCurrentTime } from './util'
 import { classifyDataByClassName, classifyDataByTemplateName } from '../client/util'
 export default {
   name: 'addReport',
-  components: { OnlyOfficeEditor, EditModal, AnomalyContent },
+  components: { OnlyOfficeEditorFD, EditModal, AnomalyContent, AiContentGenerate },
   data() {
     return {
       applyIcon: require('@/assets/images/apply.png'),
@@ -283,11 +159,9 @@ export default {
       visible: false,
       getChangeHeight: true,
       editorHeight: null,
-      config: null,
       reportId: null,
       isListCollapsed: true,
       reportDetail: null,
-      customerReportDetail: null,
       customerDetail: null,
       clickItem: null,
       disabledList: [],
@@ -302,6 +176,13 @@ export default {
       popTitle: null,
       udt: false,
       uploadTableList: [],
+
+      // 初稿
+      draftTemplateList: [],
+      templateOptions: [],
+      currentChose: null,
+      currentOption: [],
+      showRightType: null,
     }
   },
   created() {
@@ -333,20 +214,33 @@ export default {
       return showbtnList.includes(v.tableNameZh)
     },
     init() {
-      if (this.typeFrom && this.typeFrom === 'industryReport') {
-        return
-      } else {
-        getReportDetail(this.reportId).then((res) => {
-          this.reportDetail = res.data
-          this.reportName = res.data.reportName
-          getCustomerDetail(res.data.appUserId).then((result) => {
-            this.customerDetail = Object.assign(result.data, {
-              logoName: result.data.enterpriseName.substring(0, 1),
-            })
-            this.getData()
-          })
+      getFirstDraftChapter(this.reportId).then((res) => {
+        this.draftTemplateList = res.data
+        this.templateOptions = [res.data[0].id]
+        this.currentOption = [res.data[0].children[0].id]
+        this.currentChose = res.data[0].children[0].id
+        this.$nextTick(() => {
+          const editors = this.$refs.editorContainerRef
+          this.editorHeight = editors.offsetHeight + 'px'
         })
+      })
+    },
+    onOpenChange(openKeys) {
+      const latestOpenKey = openKeys.find((key) => this.templateOptions.indexOf(key) === -1)
+      if (this.draftTemplateList.findIndex((v) => v.id == latestOpenKey) === -1) {
+        this.templateOptions = openKeys
+      } else {
+        this.templateOptions = latestOpenKey ? [latestOpenKey] : []
       }
+    },
+    templateChose(item) {
+      // 选择模块
+      this.currentOption = [item.id]
+      this.currentChose = item.id
+    },
+    openRight(type) {
+      // 右侧抽屉展示内容
+      this.showRightType = type
     },
     allViewPort() {
       // 打开全屏
@@ -443,37 +337,9 @@ export default {
         },
       })
     },
-    getData() {
-      customerData({
-        creditCode: this.customerDetail.enterpriseCreditCode,
-        reportType: this.reportDetail.reportType,
-        template: JSON.parse(this.reportDetail.template),
-      }).then((response) => {
-        this.customerReportDetail = classifyDataByTemplateName(response.data)
-      })
-    },
-    openSetName(type) {
-      this.setType = type
-      this.setReportName = true
-      const reportTypeName =
-        this.reportDetail.reportType == 1
-          ? '授信调查报告'
-          : this.reportDetail.reportType == 2
-          ? '财务分析报告'
-          : '能耗分析报告'
-      const nowTime = getCurrentDate()
-      this.otherSaveReportName = `${this.reportDetail.enterpriseName}_${reportTypeName}_${nowTime}`
-      if (type === 'draft') {
-        this.popTitle = '另存草稿报告名称'
-      } else if (type === 'apply') {
-        this.popTitle = '发布应用报告名称'
-      }
-    },
     resetReportFun() {
       if (this.setType === 'draft') {
         this.saveAsDraft()
-      } else if (this.setType === 'apply') {
-        this.applyReport()
       }
     },
     openDataYCFun(v) {
@@ -500,34 +366,6 @@ export default {
             // 去草稿
             $router.push({ path: '/homePage/draftList' })
           }, 500)
-        })
-        .catch((err) => {
-          this.pageLoading = false
-          $notification['error']({
-            message: '通知：',
-            description: `操作失败：${err}`,
-            duration: 6,
-          })
-        })
-    },
-    applyReport() {
-      const { $notification } = this
-      this.pageLoading = true
-      this.reportName = ''
-      applyReport(this.reportDetail.id, this.otherSaveReportName)
-        .then((res) => {
-          this.pageLoading = false
-          this.setReportName = false
-          this.$nextTick(() => {
-            this.reportName = this.otherSaveReportName
-          })
-          this.$refs.editorR.refreshEditor()
-          this.startDownload()
-          $notification['success']({
-            message: '通知：',
-            description: `发布成功`,
-            duration: 6,
-          })
         })
         .catch((err) => {
           this.pageLoading = false
@@ -623,43 +461,6 @@ export default {
       this.uploadTableList = this.reportDetail.tableChangeInfos
       this.udt = true
     },
-    downloadReport() {
-      const { $confirm } = this
-      const _this = this
-      $confirm({
-        title: '下载提醒',
-        content: `是否将报告发布后进行下载？`,
-        okText: '确定',
-        cancelText: '取消',
-        onOk: () => {
-          this.applyReport()
-        },
-      })
-    },
-    startDownload() {
-      getReportDetail(this.reportId).then((res) => {
-        this.reportDetail = res.data
-        this.reportName = res.data.reportName
-        const url = this.reportDetail.fileUrl
-        const name = this.reportDetail.fileUrl.split('/')
-        const filename = `${name[name.length - 1]}`
-        const xhr = new XMLHttpRequest()
-        xhr.open('GET', url, true)
-        xhr.responseType = 'blob'
-        xhr.onload = function () {
-          if (xhr.status === 200) {
-            const blob = xhr.response
-            const urlObject = URL.createObjectURL(blob)
-            const a = document.createElement('a')
-            a.href = urlObject
-            a.download = filename
-            a.click()
-            URL.revokeObjectURL(urlObject)
-          }
-        }
-        xhr.send()
-      })
-    },
   },
 }
 </script>
@@ -684,6 +485,7 @@ export default {
 .flex-col {
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 .tools {
   width: 100%;
@@ -719,15 +521,33 @@ export default {
   flex: 1;
   width: 100%;
 }
+
+.left-content,
 .right-content {
   height: 100%;
   width: 300px;
   transition: width 0.3s ease;
   border-right: 1px solid #e8e8e8;
   position: relative;
-  background-image: url('@/assets/images/pop-header-bg.png');
-  background-size: 100% auto;
-  background-repeat: no-repeat;
+  overflow: hidden;
+  overflow-y: scroll;
+  &::-webkit-scrollbar {
+    width: 0px;
+  }
+}
+.right-content {
+  width: 0;
+  transition: all 0.3s ease-in-out;
+}
+.open-right {
+  width: 41.6% !important;
+  transition: all 0.3s ease-in-out;
+}
+.right-title {
+  justify-content: space-between;
+  align-items: center;
+  height: 45px;
+  border-bottom: 1px solid #e8e8e8;
 }
 
 .list-collapsed {

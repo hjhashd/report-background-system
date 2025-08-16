@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2022-10-10 22:31:07
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-27 18:10:22
- * @FilePath: /report-background-system/src/components/index.js
+ * @LastEditTime: 2025-08-16 15:34:33
+ * @FilePath: \report-background-system\src\components\index.js
  * @Description: 
  * 
  */
@@ -38,6 +38,7 @@ import ReportCardSlider from '@/components/ReportCardSlider'
 import buildQRCode from '@/components/buildQRCode/buildQRCode.vue'
 import Dialog from '@/components/Dialog'
 import OnlyOfficeEditor from '@/components/OnlyOfficeEditor/OnlyOfficeEditor.vue'
+import OnlyOfficeEditorFD from '@/components/OnlyOfficeEditor/OnlyOfficeEditorFD.vue'
 import AddCustomer from '@/components/AddCustomer/addCustomer.vue';
 import DataGoTabs from '@/components/DataGoTabs/DataGoTabs.vue';
 import DataGoTable from '@/components/dataGoTable/dataGoTable.vue';
@@ -73,6 +74,7 @@ export {
   Dialog,
   buildQRCode,
   OnlyOfficeEditor,
+  OnlyOfficeEditorFD,
   AddCustomer,
   DataGoTabs,
   DataGoTable,

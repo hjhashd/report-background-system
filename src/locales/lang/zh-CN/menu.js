@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2022-10-10 22:31:07
  * @LastEditors: bekon
- * @LastEditTime: 2025-08-11 17:07:30
- * @FilePath: /report-background-system/src/locales/lang/zh-CN/menu.js
+ * @LastEditTime: 2025-08-16 10:27:17
+ * @FilePath: \report-background-system\src\locales\lang\zh-CN\menu.js
  * @Description: 
  * 
  */
@@ -65,5 +65,6 @@ export default {
     'menu.writeReport': '撰写报告',
     'menu.other': '其他',
     'menu.checkData': '数据确认',
-    'menu.firstDraft': '初稿列表'
+    'menu.firstDraft': '初稿列表',
+    'menu.home.viewReportFirstDraft': '初稿预览'
 }

@@ -10,7 +10,7 @@
           :key="item.id"
           @click="changModalShow(item)"
         >
-          <div class="drawer-left-item-content-item-title">
+          <div class="drawer-left-item-content-item-title single-line-text">
             <span>{{ item }}</span>
           </div>
         </div>
@@ -874,10 +874,16 @@ export default {
   }
 }
 .drawer-left-item-content-item {
-  padding: 20px 0;
-  font-size: 18px;
+  padding: 12px 0;
+  font-size: 14px;
   line-height: 1;
   color: #999999;
+  width: 100%;
+  overflow: hidden;
+  overflow-y: scroll;
+  &::-webkit-scrollbar {
+    width: 0px;
+  }
   &:hover {
     font-weight: bold;
     color: #1789ff;

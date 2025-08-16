@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-08-13 18:55:49
- * @FilePath: /report-background-system/src/api/report.js
+ * @LastEditTime: 2025-08-16 23:57:31
+ * @FilePath: \report-background-system\src\api\report.js
  * @Description:
  *
  */
@@ -84,7 +84,24 @@ const reportAPI = {
     deleteFirstDraft: '/report/draft/delete/',
     saveFirstDraft: '/report/draft/save/report',
     batchDeleteFirstDraft: '/report/draft/batch/delete',
+    getFirstDraftDetail: '/report/draft/chapter/detail/',
+    getFirstDraftConfig: '/report/office/draft/config/',
+    getFirstDraftChapter: '/report/draft/chapter/',
+    // 初稿AI相关接口
+    getTemplateDetail: '/report/draft/chose/report/content',
+    getDraftQuickChose: '/report/draft/quick/chose',
+    mergeTemplate: '/report/draft/merge/draft/',
+    getAIRetouchType: '/report/v2/entity/ai/retouch/type',
+    contentRetouch: '/report/v2/entity/ai/content/retouch',
+    saveDraftPolishing: '/report/draft/polishing/save',
+    getPolishingList: '/report/draft/polishing/list',
+    draftAIContent: '/report/draft/ai/content',
+    applyAIContent: '/report/draft/apply/ai/content',
+    addAIEngine: '/report/draft/ai/engine/save',
+    getAIEngineList: '/report/draft/ai/engine/list'
 }
+
+
 
 // 初稿列表
 export function getFirstDraftList(parameter) {
@@ -259,9 +276,9 @@ export function getFields(clickItem) {
 // 获取更新后的灵活入库三表字段
 export function getNewSpecialFields(tableName) {
     return request({
-      url: reportAPI.getSpecialFields,
-      method: 'get',
-      params: {"tableName": tableName}
+        url: reportAPI.getSpecialFields,
+        method: 'get',
+        params: { "tableName": tableName }
     })
 }
 
@@ -271,13 +288,13 @@ export function pullTableData(clickItem, data, pickFieldsData, mapping) {
 
     const specialTable = ['现金流量表', '利润表', '资产负债表']
     if (specialTable.includes(tableNameZh)) {
-      // 过滤处理
-      mapping = Object.entries(mapping).reduce((acc, [key, value]) => {
-        if (value !== "--不匹配---") {
-          acc[key] = value;
-        }
-        return acc;
-      }, {});
+        // 过滤处理
+        mapping = Object.entries(mapping).reduce((acc, [key, value]) => {
+            if (value !== "--不匹配---") {
+                acc[key] = value;
+            }
+            return acc;
+        }, {});
     }
 
     switch (tableNameZh) {
@@ -613,5 +630,126 @@ export function getReportTemplateClassify(parameter) {
         url: reportAPI.getReportTemplateClassify,
         method: 'post',
         data: parameter
+    })
+}
+
+// 获取章节详情(使用章节的id)
+export function getFirstDraftDetail(id) {
+    return request({
+        url: reportAPI.getFirstDraftDetail + id,
+        method: 'get',
+    })
+}
+
+// 获取office配置
+export function getFirstDraftConfig(id) {
+    return request({
+        url: reportAPI.getFirstDraftConfig + id,
+        method: 'get',
+    })
+}
+
+// 获取初稿详情列表接口(使用初稿的id)
+export function getFirstDraftChapter(id) {
+    return request({
+        url: reportAPI.getFirstDraftChapter + id,
+        method: 'get',
+    })
+}
+
+// 初稿详情-AI生成-获取详情页面的(选择报告内容项，使用标题的templateId)
+export function getTemplateDetail(parameter) {
+    return request({
+        url: reportAPI.getTemplateDetail,
+        method: 'post',
+        data: parameter
+    })
+}
+
+// 初稿详情-AI生成-获取快速选择列表(使用templateId和选择的报告内容项)
+export function getDraftQuickChose(parameter) {
+    return request({
+        url: reportAPI.getDraftQuickChose,
+        method: 'post',
+        data: parameter
+    })
+}
+
+// 将初稿生成一份报告(用初稿id在url上，不用带body)
+export function mergeTemplate(id) {
+    return request({
+        url: reportAPI.mergeTemplate + id,
+        method: 'post',
+    })
+}
+
+// 获取润色的全部分类
+export function getAIRetouchType() {
+    return request({
+        url: reportAPI.getAIRetouchType,
+        method: 'get',
+    })
+}
+
+// 内容润色接口
+export function contentRetouch(parameter) {
+    return request({
+        url: reportAPI.contentRetouch,
+        method: 'post',
+        data: parameter
+    })
+}
+
+// 保存初稿润色结果版本
+export function saveDraftPolishing(parameter) {
+    return request({
+        url: reportAPI.saveDraftPolishing,
+        method: 'post',
+        data: parameter
+    })
+}
+
+// 获取初稿润色结果版本列表
+export function getPolishingList(parameter) {
+    return request({
+        url: reportAPI.getPolishingList,
+        method: 'post',
+        data: parameter
+    })
+}
+
+// 初稿生成AI内容
+export function draftAIContent(parameter) {
+    console.log(parameter)
+    return request({
+        url: reportAPI.draftAIContent,
+        method: 'post',
+        data: parameter
+    })
+}
+
+// 应用AI内容到初稿章节
+export function applyAIContent(parameter) {
+    return request({
+        url: reportAPI.applyAIContent,
+        method: 'post',
+        data: parameter
+    })
+}
+
+// 新增AI引擎
+export function addAIEngine(parameter) {
+    return request({
+        url: reportAPI.addAIEngine,
+        method: 'post',
+        data: parameter
+    })
+}
+
+// AI引擎列表
+export function getAIEngineList() {
+    return request({
+        url: reportAPI.getAIEngineList,
+        method: 'get',
     })
 }
