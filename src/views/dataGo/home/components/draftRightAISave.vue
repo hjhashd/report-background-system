@@ -196,8 +196,8 @@ export default {
       quickSelected: null,
       showRsList: [],
       buildContent: false, // 生成内容按钮状态
-      aiContent: '对集团采用的授信管理模式进行分析',
-      tounchContent: '对集团333进行分析',
+      aiContent: '',
+      tounchContent: '',
       tounchBtnStatus: false,
       savingStauts: false,
       modalShow: false,
@@ -236,10 +236,10 @@ export default {
     },
     getQuickChoseList() {
       getDraftQuickChose({
-        templateId: 100,
-        choseReportContent: '公司治理情况',
-        // templateId: this.firstDraftId,
-        // choseReportContent: this.selectedContent,
+        // templateId: 100,
+        // choseReportContent: '公司治理情况',
+        templateId: this.firstDraftId,
+        choseReportContent: this.selectedContent,
       }).then((res) => {
         if (res.data[0] === '无') {
           this.quickReList = []
@@ -297,25 +297,26 @@ export default {
         templateNameFilter: this.selectedContent, // 上面的选择报告内容项
         presetPrompt: this.quickSelected, // 页面上快速选择的提示词
       }
-      this.aiContent = '对集团采用的授信管理模式进行分析'
-      this.tounchContent = '对集团采用的授信管理模式进行分析'
-      //   this.buildContent = true
-      //   draftAIContent(parameter).then((res) => {
-      //     // this.buildContent = false
-      //   })
+      //   this.aiContent = '对集团采用的授信管理模式进行分析'
+      //   this.tounchContent = '对集团采用的授信管理模式进行分析'
+      this.buildContent = true
+      draftAIContent(parameter).then((res) => {
+        this.buildContent = false
+        this.aiContent = res.data
+        this.tounchContent = res.data
+      })
     },
     starTounch() {
-      console.log(this.retounchChose)
       const parameter = {
         content: this.aiContent,
         types: this.retounchChose,
       }
-      this.tounchContent = '润色后的结果'
-      //   this.tounchBtnStatus = true
-      //   contentRetouch(parameter).then((res) => {
-      //     this.tounchBtnStatus = false
-      //     this.tounchContent = res.data;
-      //   })
+      //   this.tounchContent = '润色后的结果'
+      this.tounchBtnStatus = true
+      contentRetouch(parameter).then((res) => {
+        this.tounchBtnStatus = false
+        this.tounchContent = res.data
+      })
     },
     resetReportFun() {
       // 保存版本
