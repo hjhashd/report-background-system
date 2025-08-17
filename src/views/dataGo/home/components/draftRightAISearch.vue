@@ -11,24 +11,29 @@
     <div class="p-16 inner-content">
       <div class="content-item-select">
         <span>搜索关键词</span>
-        <div style="margin-top: 4px;">
-          <a-select v-model="selectedContent" placeholder="请选择" style="width: 100px;">
-            <a-select-option v-for="(item, index) in templateList" :key="index" :value="item">{{
-              item
+        <div style="margin-top: 4px">
+          <a-select v-model="currentEngine" placeholder="请选择" style="width: 100px">
+            <div slot="dropdownRender" slot-scope="menu">
+              <v-nodes :vnodes="menu" />
+              <a-divider style="margin: 4px 0" />
+              <div
+                style="padding: 4px 8px; cursor: pointer"
+                @mousedown="(e) => e.preventDefault()"
+                @click="() => (addEngineModal = true)"
+              >
+                <a-icon type="plus" /> 添加API
+              </div>
+            </div>
+            <a-select-option v-for="(item, index) in engineList" :key="index" :value="item.id">{{
+              item.modelName
             }}</a-select-option>
           </a-select>
           <a-select v-model="selectedContent" placeholder="请选择" style="width: 200px; margin-left: 8px">
-            <a-select-option v-for="(item, index) in templateList" :key="index" :value="item">{{
-              item
-            }}</a-select-option>
+            <a-select-option v-for="(item, index) in templateList" :key="index" :value="item">
+              {{ item }}
+            </a-select-option>
           </a-select>
         </div>
-      </div>
-
-      <!-- 自定义提示词区域 -->
-      <div class="custom-prompt">
-        <span>自定义提示词</span>
-        <a-textarea v-model="prompt" placeholder="请输入您的分析需求和具体要求..." rows="3" style="width: 100%" />
       </div>
 
       <!-- 预设提示词相关 -->
@@ -78,7 +83,7 @@
         class="generate-btn"
         @click="handleGenerate"
       >
-        <a-icon type="star" /> 生成内容
+        <a-icon type="search" /> 确定搜索
       </a-button>
     </div>
     <!-- 已生成内容 -->
@@ -161,6 +166,51 @@
         <a-input :loading="savingStauts" allowClear size="large" v-model="otherSaveReportName"></a-input>
       </div>
     </a-modal>
+
+    <a-modal
+      title="添加自定义搜索引擎API"
+      v-model="addEngineModal"
+      :bodyStyle="{ padding: 0, backgroundColor: 'transparent' }"
+      :maskClosable="false"
+      @ok="addEngine"
+      @cancel="addEngineModal = false"
+    >
+      <template slot="okText"> <a-icon type="plus"></a-icon>添加引擎 </template>
+      <div class="add-engine-area">
+        <div class="flex input-set">
+          <div class="set-name-title">引擎名称：</div>
+          <a-input
+            :style="{ width: '200px' }"
+            placeholder="例如：自定义搜索"
+            :loading="savingStauts"
+            allowClear
+            v-model="engineName"
+          ></a-input>
+        </div>
+        <div class="flex input-set">
+          <div class="set-name-title">API地址：</div>
+          <a-input
+            :style="{ width: '200px' }"
+            placeholder="https://api.example.com/search"
+            :loading="savingStauts"
+            allowClear
+            v-model="APIAdress"
+          ></a-input>
+        </div>
+        <div class="flex input-set">
+          <div class="set-name-title">API密钥：</div>
+          <a-input
+            :style="{ width: '200px' }"
+            placeholder="可选：API密钥"
+            :loading="savingStauts"
+            allowClear
+            v-model="APISercet"
+          ></a-input>
+        </div>
+        <div class="desc">提示：API地址中可以使用 {query} 作为搜索关键词的占位符</div>
+        <div class="desc">例如：https://api.example.com/search?q={query}&key={apikey}</div>
+      </div>
+    </a-modal>
   </div>
 </template>
   
@@ -174,9 +224,17 @@ import {
   saveDraftPolishing,
   getPolishingList,
   applyAIContent,
+  getAIEngineList,
+  addAIEngine,
 } from '@/api/report'
 export default {
   name: 'DraftRightAISearch',
+  components: {
+    VNodes: {
+      functional: true,
+      render: (h, ctx) => ctx.props.vnodes,
+    },
+  },
   props: {
     chapterId: {
       type: String / Number,
@@ -197,7 +255,6 @@ export default {
       retounchChose: [],
       templateList: [],
       selectedContent: '', // 默认选中项
-      prompt: '', // 自定义提示词
       quickReList: [],
       quickSelectList: [],
       aiSaveBtn: true,
@@ -212,6 +269,13 @@ export default {
       otherSaveReportName: '',
       reportVersionList: [],
       versionDetail: null,
+      engineList: [],
+      addEngineModal: false,
+      addEngineStatus: false,
+      engineName: '',
+      APIAdress: '',
+      APISercet: '',
+      currentEngine: null,
     }
   },
   watch: {
@@ -240,6 +304,52 @@ export default {
         this.selectedContent = res.data[0]
         this.getQuickChoseList()
         this.getReportVersionList()
+      })
+      this.getEngineList()
+    },
+    getEngineList() {
+      getAIEngineList().then((res) => {
+        if (res.data.length) {
+          this.engineList = res.data
+          this.currentEngine = res.data[0].id
+        }
+      })
+    },
+    addEngine() {
+      const { $notification } = this
+      if (!this.engineName || !this.APIAdress || !this.APISercet) {
+        $notification['warn']({
+          message: '通知：',
+          description: `添加自定义搜索引擎API，内容填写不能为空`,
+          duration: 6,
+        })
+        return
+      }
+      if (this.addEngineStatus) {
+        $notification['warn']({
+          message: '通知：',
+          description: `正在新增引擎，请等待`,
+          duration: 6,
+        })
+        return
+      }
+      const parameter = {
+        modelName: this.engineName,
+        baseUrl: this.APIAdress, // AI模型接口地址
+        apiKey: this.APISercet,
+      }
+      this.addEngineStatus = true
+      addAIEngine(parameter).then(() => {
+        $notification['success']({
+          message: '通知：',
+          description: `添加自定义搜索引擎API成功`,
+          duration: 6,
+        })
+        this.$nextTick(() => {
+          this.addEngineStatus = false
+          this.addEngineModal = false
+        })
+        this.getEngineList()
       })
     },
     getQuickChoseList() {
@@ -508,5 +618,22 @@ export default {
 }
 .set-name {
   padding: 16px;
+}
+.add-engine-area {
+  padding: 12px 24px;
+  .input-set {
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .set-name-title {
+    width: 80px;
+    text-align: right;
+    margin-right: 20px;
+    font-weight: bold;
+  }
+  .desc {
+    font-size: 12px;
+    color: #999;
+  }
 }
 </style>
