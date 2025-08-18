@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 基础样式 */
+@layer base {
+    body {
+        @apply bg-neutral-50 text-neutral-800 font-sans;
+    }
+
+    h1,
+    h2,
+    h3 {
+        @apply font-bold text-neutral-900 mt-8 mb-4;
+    }
+
+    p {
+        @apply my-4 leading-relaxed text-neutral-700;
+    }
+}
+
+/* 组件样式 */
+@layer components {
+
+    /* 容器样式 */
+    .markdown-container {
+        @apply max-w-4xl mx-auto p-4 md:p-8;
+    }
+
+    .markdown-card {
+        @apply bg-white rounded-xl shadow-kimi p-6 md:p-8 transition-all hover:shadow-kimi-hover;
+    }
+
+    /* 标题样式 */
+    .markdown-h1 {
+        @apply text-3xl md:text-4xl pl-2 border-l-4 border-primary;
+    }
+
+    .markdown-h2 {
+        @apply text-2xl md:text-3xl pl-2 border-l-4 border-primary/80 mt-10 mb-5;
+    }
+
+    .markdown-h3 {
+        @apply text-xl md:text-2xl pl-2 border-l-4 border-primary/60 mt-8 mb-4;
+    }
+
+    /* 列表样式 */
+    .markdown-list {
+        @apply pl-6 my-5 space-y-2.5;
+    }
+
+    .markdown-list-disc {
+        @apply markdown-list list-disc;
+    }
+
+    .markdown-list-item {
+        @apply text-neutral-700 leading-relaxed;
+    }
+
+    /* 表格样式 */
+    .markdown-table {
+        @apply w-full my-6 border-collapse rounded-lg overflow-hidden;
+    }
+
+    .markdown-table th {
+        @apply bg-neutral-100 px-4 py-3 text-left font-semibold border-b border-neutral-200;
+    }
+
+    .markdown-table td {
+        @apply px-4 py-3 border-b border-neutral-200 text-neutral-700;
+    }
+
+    .markdown-table tr:hover td {
+        @apply bg-neutral-50/50;
+    }
+
+    /* 代码样式 */
+    .markdown-code-block {
+        @apply my-6 p-4 bg-neutral-900 text-white rounded-lg overflow-x-auto font-mono text-sm;
+    }
+
+    .markdown-code-inline {
+        @apply bg-neutral-100 px-1.5 py-0.5 rounded text-sm font-mono;
+    }
+
+    /* 其他元素 */
+    .markdown-divider {
+        @apply my-8 border-t border-neutral-200 relative;
+    }
+
+    .markdown-divider::after {
+        content: '';
+        @apply absolute left-1/2 top-0 w-16 h-1 -translate-x-1/2 bg-primary/20 rounded-full;
+    }
+
+    .markdown-link {
+        @apply text-primary hover:text-primary/80 underline underline-offset-2;
+    }
+
+    .markdown-bold {
+        @apply font-semibold text-neutral-900;
+    }
+}

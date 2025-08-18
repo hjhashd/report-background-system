@@ -11,8 +11,8 @@
     <div class="p-16 inner-content">
       <div class="content-item-select">
         <span>搜索关键词</span>
-        <div style="margin-top: 4px">
-          <a-select v-model="currentEngine" placeholder="请选择" style="width: 100px">
+        <div class="flex" style="margin-top: 4px">
+          <a-select v-model="currentEngine" placeholder="请选择" style="width: 100px; margin-right: 12px">
             <div slot="dropdownRender" slot-scope="menu">
               <v-nodes :vnodes="menu" />
               <a-divider style="margin: 4px 0" />
@@ -28,11 +28,7 @@
               item.modelName
             }}</a-select-option>
           </a-select>
-          <a-select v-model="selectedContent" placeholder="请选择" style="width: 200px; margin-left: 8px">
-            <a-select-option v-for="(item, index) in templateList" :key="index" :value="item">
-              {{ item }}
-            </a-select-option>
-          </a-select>
+          <a-input placeholder="请输入搜索关键词..." allowClear v-model="inputContent"></a-input>
         </div>
       </div>
 
@@ -76,35 +72,26 @@
       </div>
 
       <!-- 生成内容按钮 -->
-      <a-button
-        :loading="buildContent"
-        :disabled="!aiSaveBtn"
-        type="primary"
-        class="generate-btn"
-        @click="handleGenerate"
-      >
+      <a-button :loading="buildContent" type="primary" class="generate-btn" @click="handleGenerate">
         <a-icon type="search" /> 确定搜索
       </a-button>
     </div>
     <!-- 已生成内容 -->
-    <div v-if="aiContent" class="flex-1 ai-content-generate">
+    <!-- <div v-if="aiContent" class="flex-1 ai-content-generate"> -->
+    <div class="flex-1 ai-content-generate">
       <div class="result-content flex">
-        <img style="width: 22px; height: 25px" src="@/assets/images/AISave.png" alt="dark" />
-        <h2 class="title">生成结果</h2>
+        <h2 class="title">搜索内容</h2>
+        <a-icon type="close" class="close-icon" @click="cleanAISearch" />
       </div>
       <div class="flex down-content flex-1">
         <div class="ai-content-body flex-1 h100 left-content p-12-16">
-          <div class="flex">
-            <img style="width: 16px; height: 18px" src="@/assets/images/AISave.png" alt="dark" />
-            <h2 class="inner-title">原始生成内容</h2>
-          </div>
-          <a-textarea class="flex-1 m-h-4" v-model="aiContent" style="width: 100%" />
+          <div id="kimi-response-content" class="prose-kimi" v-html="showAIContent"></div>
         </div>
         <div class="ai-content-body flex-1 p-12-16">
           <div class="flex">
-            <div class="flex">
-              <img style="width: 16px; height: 18px" src="@/assets/images/AITounch.png" alt="dark" />
-              <h2 class="inner-title">AI润色结果</h2>
+            <div class="flex result-title">
+              <a-icon type="bulb" style="color: #44a5fd; font-size: 14px; font-weight: bold" />
+              <h2 class="inner-title">AI总结结果</h2>
             </div>
             <a-select style="margin-left: 10px" size="small" class="flex-1" @change="versionChange">
               <a-select-option v-for="item in reportVersionList" :key="item.id" :value="item.id">
@@ -215,6 +202,7 @@
 </template>
   
 <script>
+import { mapState } from 'vuex'
 import {
   getTemplateDetail,
   getDraftQuickChose,
@@ -226,7 +214,9 @@ import {
   applyAIContent,
   getAIEngineList,
   addAIEngine,
+  getEngineQuickList,
 } from '@/api/report'
+import { AIWebSocketClient, parseMarkdown } from './AIutil'
 export default {
   name: 'DraftRightAISearch',
   components: {
@@ -257,11 +247,9 @@ export default {
       selectedContent: '', // 默认选中项
       quickReList: [],
       quickSelectList: [],
-      aiSaveBtn: true,
       quickSelected: null,
       showRsList: [],
       buildContent: false, // 生成内容按钮状态
-      aiContent: '',
       tounchContent: '',
       tounchBtnStatus: false,
       savingStauts: false,
@@ -276,36 +264,37 @@ export default {
       APIAdress: '',
       APISercet: '',
       currentEngine: null,
+
+      inputContent: null,
+      wsClient: null,
+      aiContent: '',
+      showAIContent: '',
     }
   },
   watch: {
     firstDraftId: {
       handler() {
-        this.initTemplateList()
+        this.getQuickChoseList()
       },
       deep: true,
     },
   },
+  computed: {
+    ...mapState({
+      // 动态主路由
+      userInfo: (state) => state.user.info,
+    }),
+  },
   mounted() {
-    this.initTemplateList()
+    this.getQuickChoseList()
     this.getAIRetouchType()
+    this.getEngineList()
   },
   methods: {
     getAIRetouchType() {
       getAIRetouchType().then((res) => {
         this.retounchTypeList = res.data
       })
-    },
-    initTemplateList() {
-      // 获取选择报告内容项列表
-      if (!this.firstDraftId) return
-      getTemplateDetail({ templateId: this.firstDraftId }).then((res) => {
-        this.templateList = res.data
-        this.selectedContent = res.data[0]
-        this.getQuickChoseList()
-        this.getReportVersionList()
-      })
-      this.getEngineList()
     },
     getEngineList() {
       getAIEngineList().then((res) => {
@@ -353,19 +342,12 @@ export default {
       })
     },
     getQuickChoseList() {
-      getDraftQuickChose({
-        // templateId: 100,
-        // choseReportContent: '公司治理情况',
-        templateId: this.firstDraftId,
-        choseReportContent: this.selectedContent,
-      }).then((res) => {
+      getEngineQuickList().then((res) => {
         if (res.data[0] === '无') {
           this.quickReList = []
           this.quickSelectList = []
-          this.aiSaveBtn = false
           this.showRsList = []
         } else {
-          this.aiSaveBtn = true
           if (res.data.length > 3) {
             this.quickReList = res.data
             this.quickSelectList = [res.data[0], res.data[1], res.data[2]]
@@ -399,30 +381,60 @@ export default {
       })
     },
     handleGenerate() {
-      const { $notification } = this
-      if (!this.quickSelected) {
+      const _this = this
+      const { $notification, quickSelected, inputContent } = this
+      if (!quickSelected && !inputContent) {
         $notification['warn']({
           message: '通知：',
-          description: `快速选择不可为空`,
+          description: `搜索内容不能为空`,
           duration: 6,
         })
         return
       }
-      const parameter = {
-        chapterId: this.firstDraftId, // 章节id
-        draftId: this.chapterId, // 初稿id
-        customePrompt: this.prompt, // 用户自己编写的提示词
-        templateNameFilter: this.selectedContent, // 上面的选择报告内容项
-        presetPrompt: this.quickSelected, // 页面上快速选择的提示词
-      }
-      //   this.aiContent = '对集团采用的授信管理模式进行分析'
-      //   this.tounchContent = '对集团采用的授信管理模式进行分析'
-      this.buildContent = true
-      draftAIContent(parameter).then((res) => {
-        this.buildContent = false
-        this.aiContent = res.data
-        this.tounchContent = res.data
+
+      _this.wsClient = new AIWebSocketClient()
+
+      // 设置回调
+      _this.wsClient.on('message', (content) => {
+        _this.aiContent += `${content}`
+        _this.showAIContent = `${parseMarkdown(_this.aiContent)}`
       })
+
+      _this.wsClient.on('error', (error) => {
+        // 处理错误
+        $notification['error']({
+          message: '通知：',
+          description: `发生错误:, ${error.content}`,
+          duration: 6,
+        })
+      })
+
+      _this.wsClient.on('complete', () => {
+        console.log('AI处理完成')
+        // 处理完成逻辑
+        // _this.showAIContent = `${parseMarkdown(_this.aiContent)}`
+        // 将格式化后的HTML添加到页面
+        // document.getElementById('ai-response-container').innerHTML += `${parseMarkdown(content)}`
+      })
+      // 连接到服务器
+      _this.wsClient
+        .connect(_this.userInfo.userId, _this.currentEngine)
+        .then(() => {
+          // 发送内容消息（立即搜索）
+          _this.wsClient.sendContentMessage(inputContent, quickSelected)
+          // 或者发送总结请求
+          // wsClient.sendSummaryRequest(1, 2);
+        })
+        .catch((error) => {
+          $notification['error']({
+            message: '通知：',
+            description: `连接失败:, ${error}`,
+            duration: 6,
+          })
+        })
+    },
+    cleanAISearch() {
+      this.aiContent = ''
     },
     starTounch() {
       const parameter = {
@@ -484,10 +496,17 @@ export default {
       })
     },
   },
+  destroyed() {
+    if (this.wsClient) {
+      this.wsClient.close()
+      this.wsClient = null
+    }
+  },
 }
 </script>
   
 <style lang="less" scoped>
+@import './kimi-markdown.css';
 .h100 {
   height: 100%;
 }
@@ -499,6 +518,12 @@ export default {
 .ai-content-body {
   display: flex;
   flex-direction: column;
+  border: 1px solid #e8e8e8;
+  border-radius: 5px;
+  margin: 10px 12px;
+  background-color: #fff;
+  box-sizing: border-box;
+  .prose-kimi{}
 }
 .header {
   padding: 0 16px;
@@ -508,8 +533,12 @@ export default {
   height: 45px;
   border-bottom: 1px solid #e8e8e8;
 }
+.result-title{
+  align-items: center;
+}
 .result-content {
   padding: 0 16px 8px;
+  justify-content: space-between;
   border-bottom: 1px solid #e8e8e8;
 }
 .title {
@@ -520,7 +549,7 @@ export default {
   margin-bottom: 0;
 }
 .inner-title {
-  margin-left: 10px;
+  margin-left: 5px;
   font-size: 12px;
   line-height: 24px;
   font-weight: bold;

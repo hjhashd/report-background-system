@@ -236,10 +236,10 @@ export default {
     },
     getQuickChoseList() {
       getDraftQuickChose({
-        // templateId: 100,
-        // choseReportContent: '公司治理情况',
-        templateId: this.firstDraftId,
-        choseReportContent: this.selectedContent,
+        templateId: 100,
+        choseReportContent: '公司治理情况',
+        // templateId: this.firstDraftId,
+        // choseReportContent: this.selectedContent,
       }).then((res) => {
         if (res.data[0] === '无') {
           this.quickReList = []

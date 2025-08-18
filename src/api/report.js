@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-08-16 23:57:31
+ * @LastEditTime: 2025-08-18 22:10:58
  * @FilePath: \report-background-system\src\api\report.js
  * @Description:
  *
@@ -98,7 +98,8 @@ const reportAPI = {
     draftAIContent: '/report/draft/ai/content',
     applyAIContent: '/report/draft/apply/ai/content',
     addAIEngine: '/report/draft/ai/engine/save',
-    getAIEngineList: '/report/draft/ai/engine/list'
+    getAIEngineList: '/report/draft/ai/engine/list',
+    getEngineQuickList: '/report/draft/ai/search/prompt'
 }
 
 
@@ -750,6 +751,14 @@ export function addAIEngine(parameter) {
 export function getAIEngineList() {
     return request({
         url: reportAPI.getAIEngineList,
+        method: 'get',
+    })
+}
+
+// 初稿详情-AI搜索-快速选择提示词列表
+export function getEngineQuickList() {
+    return request({
+        url: reportAPI.getEngineQuickList,
         method: 'get',
     })
 }
