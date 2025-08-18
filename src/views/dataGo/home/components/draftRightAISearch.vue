@@ -85,7 +85,24 @@
       </div>
       <div class="flex down-content flex-1">
         <div class="ai-content-body flex-1 h100 left-content p-12-16">
-          <div id="kimi-response-content" class="prose-kimi" v-html="showAIContent"></div>
+          <div class="ai-show-item flex-1">
+            <div id="kimi-response-content" class="prose-kimi" v-html="showAIContent"></div>
+          </div>
+          <div class="footer-body">
+            <div class="flex">
+              <a-input placeholder="进一步提问或细化总结..." allowClear v-model="detailQ"></a-input>
+              <a-button
+                type="primary"
+                style="margin-left: 4px; background-color: #e5eeff; border-color: #1d6aff"
+                @click="stepAIQuestion"
+              >
+                <a-icon type="monitor" style="color: #1d6aff" />
+              </a-button>
+            </div>
+            <a-button type="primary" style="margin: 4px 0" class="footer-btn w100" @click="AIResulted">
+              <a-icon type="bulb" /> AI总结
+            </a-button>
+          </div>
         </div>
         <div class="ai-content-body flex-1 p-12-16">
           <div class="flex">
@@ -100,43 +117,39 @@
             </a-select>
           </div>
           <a-textarea class="flex-1 m-h-4" v-model="tounchContent" style="width: 100%" />
-        </div>
-      </div>
-      <!-- 底部按钮 -->
-      <div class="flex p-16 footer-body">
-        <a-dropdown>
-          <a-checkbox-group
-            style="background-color: #fff; padding: 5px; border: 1px solid #f5f5f5"
-            slot="overlay"
-            v-model="retounchChose"
-          >
-            <div style="padding: 5px 0">选择润色类型 (可多选)</div>
-            <div style="max-height: 40vh; overflow-y: scroll; overflow-x: hidden">
-              <a-row v-for="(item, index) in retounchTypeList" :key="index" :value="item">
-                <a-checkbox :value="item">{{ item }}</a-checkbox>
-              </a-row>
-            </div>
-            <a-button
-              type="primary"
-              :loading="tounchBtnStatus"
-              style="color: #000; background-color: #fff; border-color: #e8e8e8; margin-top: 12px; width: 100%"
-              @click="starTounch"
-            >
-              <img style="width: 16px; height: 16px" src="@/assets/images/AITounch0.png" alt="dark" /> 开始润色
+          <!-- 底部按钮 -->
+          <div class="flex p-16 footer-body">
+            <a-dropdown>
+              <a-checkbox-group
+                style="background-color: #fff; padding: 5px; border: 1px solid #f5f5f5"
+                slot="overlay"
+                v-model="retounchChose"
+              >
+                <div style="padding: 5px 0">选择润色类型 (可多选)</div>
+                <div style="max-height: 40vh; overflow-y: scroll; overflow-x: hidden">
+                  <a-row v-for="(item, index) in retounchTypeList" :key="index" :value="item">
+                    <a-checkbox :value="item">{{ item }}</a-checkbox>
+                  </a-row>
+                </div>
+                <a-button
+                  type="primary"
+                  :loading="tounchBtnStatus"
+                  style="color: #000; background-color: #fff; border-color: #e8e8e8; margin-top: 12px; width: 100%"
+                  @click="starTounch"
+                >
+                  <img style="width: 16px; height: 16px" src="@/assets/images/AITounch0.png" alt="dark" /> 开始润色
+                </a-button>
+              </a-checkbox-group>
+              <a-button type="primary" class="footer-btn flex-1">
+                <img style="width: 16px; height: 16px" src="@/assets/images/AITounch0.png" alt="dark" /> AI润色
+              </a-button>
+            </a-dropdown>
+            <div style="width: 16px"></div>
+            <a-button type="primary" class="footer-btn flex-1" @click="() => (modalShow = true)">
+              <a-icon type="save" /> 保存版本
             </a-button>
-          </a-checkbox-group>
-          <a-button type="primary" class="footer-btn flex-1">
-            <img style="width: 16px; height: 16px" src="@/assets/images/AITounch0.png" alt="dark" /> AI润色
-          </a-button>
-        </a-dropdown>
-        <div style="width: 16px"></div>
-        <a-button type="primary" class="footer-btn flex-1" @click="() => (modalShow = true)">
-          <a-icon type="save" /> 保存版本
-        </a-button>
-        <div style="width: 16px"></div>
-        <a-button type="primary" class="flex-1" @click="applyReport">
-          <a-icon type="check-circle" /> 应用到报告
-        </a-button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -211,7 +224,6 @@ import {
   contentRetouch,
   saveDraftPolishing,
   getPolishingList,
-  applyAIContent,
   getAIEngineList,
   addAIEngine,
   getEngineQuickList,
@@ -269,6 +281,7 @@ export default {
       wsClient: null,
       aiContent: '',
       showAIContent: '',
+      detailQ: '',
     }
   },
   watch: {
@@ -436,6 +449,10 @@ export default {
     cleanAISearch() {
       this.aiContent = ''
     },
+    // AI总结
+    AIResulted() {},
+    // 进一步提问
+    stepAIQuestion() {},
     starTounch() {
       const parameter = {
         content: this.aiContent,
@@ -491,9 +508,6 @@ export default {
         templateNameFilter: this.selectedContent,
         content: this.tounchContent,
       }
-      applyAIContent(parameter).then((res) => {
-        console.log(res)
-      })
     },
   },
   destroyed() {
@@ -510,6 +524,9 @@ export default {
 .h100 {
   height: 100%;
 }
+.w100 {
+  width: 100%;
+}
 .ai-content-generate {
   display: flex;
   flex-direction: column;
@@ -518,12 +535,12 @@ export default {
 .ai-content-body {
   display: flex;
   flex-direction: column;
-  border: 1px solid #e8e8e8;
-  border-radius: 5px;
-  margin: 10px 12px;
-  background-color: #fff;
-  box-sizing: border-box;
-  .prose-kimi{}
+  justify-content: space-between;
+  overflow: hidden;
+  overflow-y: scroll;
+  &::-webkit-scrollbar {
+    width: 0px;
+  }
 }
 .header {
   padding: 0 16px;
@@ -533,7 +550,7 @@ export default {
   height: 45px;
   border-bottom: 1px solid #e8e8e8;
 }
-.result-title{
+.result-title {
   align-items: center;
 }
 .result-content {
@@ -561,6 +578,9 @@ export default {
 .footer-body {
   background-color: #f9fafb;
   box-sizing: border-box;
+}
+.footer-body {
+  padding: 4px 0 !important;
 }
 .p-12-16 {
   padding: 12px 16px 0;
