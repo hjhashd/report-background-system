@@ -99,7 +99,13 @@
                 <a-icon type="monitor" style="color: #1d6aff" />
               </a-button>
             </div>
-            <a-button type="primary" style="margin: 4px 0" class="footer-btn w100" @click="AIResulted">
+            <a-button
+              :loading="aiResultLoading"
+              type="primary"
+              style="margin: 4px 0"
+              class="footer-btn w100"
+              @click="AIResulted"
+            >
               <a-icon type="bulb" /> AI总结
             </a-button>
           </div>
@@ -242,6 +248,14 @@ export default {
       type: String / Number,
       required: true,
     },
+    categoryId: {
+      type: String / Number,
+      required: true,
+    },
+    reportType: {
+      type: String,
+      required: true,
+    },
     firstDraftId: {
       type: String / Number,
       required: true,
@@ -282,6 +296,9 @@ export default {
       aiContent: '',
       showAIContent: '',
       detailQ: '',
+      // 流式输出存储
+      lineObj: [],
+      aiResultLoading: false,
     }
   },
   watch: {
@@ -404,6 +421,11 @@ export default {
         })
         return
       }
+      if (_this.wsClient) {
+        // 如果已经有实例，直接发送消息
+        _this.wsClient.sendContentMessage(inputContent, quickSelected)
+        return
+      }
 
       _this.wsClient = new AIWebSocketClient()
 
@@ -424,10 +446,14 @@ export default {
 
       _this.wsClient.on('complete', () => {
         console.log('AI处理完成')
-        // 处理完成逻辑
-        // _this.showAIContent = `${parseMarkdown(_this.aiContent)}`
-        // 将格式化后的HTML添加到页面
-        // document.getElementById('ai-response-container').innerHTML += `${parseMarkdown(content)}`
+        // 清除aiContent渲染
+        _this.aiContent = ''
+        // 存储本次输出结果,并通过lineObj渲染
+        _this.lineObj.push({
+          id: _this.lineObj.length + 1,
+          type: 'ai',
+          content: `${parseMarkdown(_this.aiContent)}`,
+        })
       })
       // 连接到服务器
       _this.wsClient
@@ -450,9 +476,45 @@ export default {
       this.aiContent = ''
     },
     // AI总结
-    AIResulted() {},
+    AIResulted() {
+      const _this = this
+      const { $notification, quickSelected, inputContent } = this
+      _this.aiResultLoading = true
+      if (!_this.wsClient) {
+        _this.wsClient = new AIWebSocketClient()
+        _this.wsClient
+          .connect(_this.userInfo.userId, _this.currentEngine)
+          .then(() => {
+            // 或者发送总结请求
+            wsClient.sendSummaryRequest(1, 2)
+          })
+          .catch((error) => {
+            $notification['error']({
+              message: '通知：',
+              description: `连接失败:, ${error}`,
+              duration: 6,
+            })
+          })
+      } else {
+        _this.wsClient.sendSummaryRequest(1, 2)
+      }
+    },
     // 进一步提问
-    stepAIQuestion() {},
+    stepAIQuestion() {
+      if (!this.wsClient) {
+        this.wsClient = new AIWebSocketClient()
+      }
+      // 发起ai搜索提问
+      this.wsClient.sendContentMessage(this.detailQ)
+      // 将detailQ接入lineObj中进行渲染
+      this.lineObj.push({
+        id: this.lineObj.length + 1,
+        type: 'question',
+        content: `${this.detailQ}`,
+      })
+      // 清除detailQ
+      this.detailQ = ''
+    },
     starTounch() {
       const parameter = {
         content: this.aiContent,

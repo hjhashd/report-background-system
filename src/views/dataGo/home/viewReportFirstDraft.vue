@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-08-17 02:33:43
- * @FilePath: \report-background-system\src\views\dataGo\home\viewReportFirstDraft.vue
+ * @LastEditTime: 2025-08-19 20:34:45
+ * @FilePath: /report-background-system/src/views/dataGo/home/viewReportFirstDraft.vue
  * @Description: 报告预览
  * 
 -->
@@ -73,7 +73,7 @@
         </div>
       </div>
       <div class="flex flex-1" :style="{ height: editorHeight }">
-        <div class="left-content" v-if="draftTemplateList.length">
+        <div class="left-content" :style="{ height: editorHeight }" v-if="draftTemplateList.length">
           <a-menu mode="inline" :open-keys="templateOptions" :selectedKeys="currentOption" @openChange="onOpenChange">
             <a-sub-menu v-for="item in draftTemplateList" :key="item.id">
               <span slot="title">{{ item.chapterTitle }}</span>
@@ -90,9 +90,11 @@
           <div v-if="showRightType == 'ai-save'">
             <AiContentGenerate
               :firstDraftId="currentChose"
+              :templateId="templateId"
               :chapterId="reportId"
               :editorHeight="editorHeight"
               @close="() => (showRightType = '')"
+              @updateTemplateContent="updateEdit"
             ></AiContentGenerate>
           </div>
           <div v-else-if="showRightType == 'ai-search'">
@@ -100,6 +102,8 @@
               :firstDraftId="currentChose"
               :chapterId="reportId"
               :editorHeight="editorHeight"
+              :categoryId="categoryId"
+              :reportType="reportType"
               @close="() => (showRightType = '')"
             ></DraftRightAISearch>
           </div>
@@ -150,13 +154,12 @@
 <script>
 import { mapActions } from 'vuex'
 import AnomalyContent from '../anomaly/innerContent.vue'
-import { updateReportDate, updateReport, setDraftStatus, getFirstDraftChapter } from '@/api/report'
+import { updateReportDate, setDraftStatus, getFirstDraftChapter, mergeTemplate } from '@/api/report'
 import { OnlyOfficeEditorFD } from '@/components'
 import AiContentGenerate from './components/draftRightAISave.vue'
 import DraftRightAISearch from './components/draftRightAISearch.vue'
 import EditModal from './editModal.vue'
-import { getCurrentDate, getCurrentTime } from './util'
-import { classifyDataByClassName, classifyDataByTemplateName } from '../client/util'
+import { debounce } from '@/utils/util'
 export default {
   name: 'addReport',
   components: { OnlyOfficeEditorFD, EditModal, AnomalyContent, AiContentGenerate, DraftRightAISearch },
@@ -177,6 +180,8 @@ export default {
       fullView: false,
       typeFrom: null,
       reportName: null,
+      categoryId: null,
+      reportType: null,
       setType: null,
       otherSaveReportName: '',
       setReportName: false,
@@ -191,11 +196,14 @@ export default {
       currentChose: null,
       currentOption: [],
       showRightType: null,
+      templateId: null,
     }
   },
   created() {
     this.typeFrom = (this.$route.query && this.$route.query.typeFrom) || ''
     this.reportName = (this.$route.query && this.$route.query.reportName) || ''
+    this.categoryId = (this.$route.query && this.$route.query.categoryId) || ''
+    this.reportType = (this.$route.query && this.$route.query.reportType) || ''
     this.reportId = this.$route.params.reportId
     this.init()
     this.setCollapsed(true)
@@ -210,16 +218,16 @@ export default {
     },
   },
   mounted() {
-    this.$nextTick(() => {
-      const editors = this.$refs.editorContainerRef
-      this.editorHeight = editors.offsetHeight + 'px'
-    })
+    window.addEventListener('resize', debounce(this.getinnerBodyHeight))
+    this.getinnerBodyHeight()
   },
   methods: {
     ...mapActions(['setCollapsed', 'setFullScreen']),
-    judgeShowDataRoute(v) {
-      const showbtnList = ['资产负债表', '利润表', '现金流量表']
-      return showbtnList.includes(v.tableNameZh)
+    getinnerBodyHeight() {
+      this.$nextTick(() => {
+        const viewportHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+        this.editorHeight = viewportHeight - 170 + 'px'
+      })
     },
     init() {
       getFirstDraftChapter(this.reportId).then((res) => {
@@ -227,10 +235,8 @@ export default {
         this.templateOptions = [res.data[0].id]
         this.currentOption = [res.data[0].children[0].id]
         this.currentChose = res.data[0].children[0].id
-        this.$nextTick(() => {
-          const editors = this.$refs.editorContainerRef
-          this.editorHeight = editors.offsetHeight + 'px'
-        })
+        this.templateId = res.data[0].children[0].templateId
+        this.getinnerBodyHeight()
       })
     },
     onOpenChange(openKeys) {
@@ -245,6 +251,7 @@ export default {
       // 选择模块
       this.currentOption = [item.id]
       this.currentChose = item.id
+      this.templateId = item.templateId
     },
     openRight(type) {
       // 右侧抽屉展示内容
@@ -300,14 +307,6 @@ export default {
       } else if (document.webkitExitFullscreen) {
         document.webkitExitFullscreen()
       }
-      setTimeout(() => {
-        this.$nextTick(() => {
-          const editors = this.$refs.editorContainerRef
-          if (editors) {
-            this.editorHeight = editors.offsetHeight + 'px'
-          }
-        })
-      })
     },
     updateReportData() {
       // 更新数据
@@ -319,7 +318,7 @@ export default {
         cancelText: '取消',
         onOk: () => {
           this.pageLoading = true
-          updateReport(this.reportDetail.id).then((res) => {
+          mergeTemplate(this.reportId).then((res) => {
             if (res.code != 200) {
               this.pageLoading = false
               $notification['error']({

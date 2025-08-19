@@ -109,3 +109,19 @@ export function transformData(item) {
 
   return newItem
 }
+
+/**
+ * 防抖方法
+ * @param {*} func 
+ * @param {*} delay 
+ * @returns 
+ */
+export function debounce(func, delay = 100) {
+  let timer;
+  return function() {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      func.apply(this, arguments);
+    }, delay);
+  };
+}

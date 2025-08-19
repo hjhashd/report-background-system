@@ -170,6 +170,10 @@ import {
 export default {
   name: 'AiContentGenerate',
   props: {
+    templateId: {
+      type: String / Number,
+      required: true,
+    },
     chapterId: {
       type: String / Number,
       required: true,
@@ -227,7 +231,7 @@ export default {
     initTemplateList() {
       // 获取选择报告内容项列表
       if (!this.firstDraftId) return
-      getTemplateDetail({ templateId: this.firstDraftId }).then((res) => {
+      getTemplateDetail({ templateId: this.templateId }).then((res) => {
         this.templateList = res.data
         this.selectedContent = res.data[0]
         this.getQuickChoseList()
@@ -236,10 +240,8 @@ export default {
     },
     getQuickChoseList() {
       getDraftQuickChose({
-        templateId: 100,
-        choseReportContent: '公司治理情况',
-        // templateId: this.firstDraftId,
-        // choseReportContent: this.selectedContent,
+        templateId: this.templateId,
+        choseReportContent: this.selectedContent,
       }).then((res) => {
         if (res.data[0] === '无') {
           this.quickReList = []
@@ -356,6 +358,16 @@ export default {
       this.tounchContent = this.versionDetail.content
     },
     applyReport() {
+      const { $notification } = this
+      if (!this.tounchContent) {
+        $notification['warn']({
+          message: '通知：',
+          description: `更新内容不能为空`,
+          duration: 6,
+        })
+        return
+      }
+      // 应用内容到初稿
       const parameter = {
         chapterId: this.firstDraftId,
         templateNameFilter: this.selectedContent,
@@ -363,6 +375,8 @@ export default {
       }
       applyAIContent(parameter).then((res) => {
         console.log(res)
+        // 成功、更新章节内容
+        this.$emit('updateTemplateContent')
       })
     },
   },
