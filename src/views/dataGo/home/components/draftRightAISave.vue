@@ -93,7 +93,7 @@
               <img style="width: 16px; height: 18px" src="@/assets/images/AITounch.png" alt="dark" />
               <h2 class="inner-title">AI润色结果</h2>
             </div>
-            <a-select style="margin-left: 10px" size="small" class="flex-1" @change="versionChange">
+            <a-select allowClear style="margin-left: 10px" size="small" class="flex-1" @change="versionChange">
               <a-select-option v-for="item in reportVersionList" :key="item.id" :value="item.id">
                 {{ item.versionName }}
               </a-select-option>
@@ -299,8 +299,6 @@ export default {
         templateNameFilter: this.selectedContent, // 上面的选择报告内容项
         presetPrompt: this.quickSelected, // 页面上快速选择的提示词
       }
-      //   this.aiContent = '对集团采用的授信管理模式进行分析'
-      //   this.tounchContent = '对集团采用的授信管理模式进行分析'
       this.buildContent = true
       draftAIContent(parameter).then((res) => {
         this.buildContent = false
@@ -313,7 +311,6 @@ export default {
         content: this.aiContent,
         types: this.retounchChose,
       }
-      //   this.tounchContent = '润色后的结果'
       this.tounchBtnStatus = true
       contentRetouch(parameter).then((res) => {
         this.tounchBtnStatus = false
@@ -354,6 +351,7 @@ export default {
       })
     },
     versionChange(item) {
+      if (!item) return
       this.versionDetail = this.reportVersionList.find((v) => v.id == item)
       this.tounchContent = this.versionDetail.content
     },
@@ -374,7 +372,11 @@ export default {
         content: this.tounchContent,
       }
       applyAIContent(parameter).then((res) => {
-        console.log(res)
+        $notification['success']({
+          message: '通知：',
+          description: `成功应用到报告`,
+          duration: 6,
+        })
         // 成功、更新章节内容
         this.$emit('updateTemplateContent')
       })

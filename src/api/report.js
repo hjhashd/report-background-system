@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-08-18 22:10:58
+ * @LastEditTime: 2025-08-20 22:38:17
  * @FilePath: \report-background-system\src\api\report.js
  * @Description:
  *
@@ -721,7 +721,6 @@ export function getPolishingList(parameter) {
 
 // 初稿生成AI内容
 export function draftAIContent(parameter) {
-    console.log(parameter)
     return request({
         url: reportAPI.draftAIContent,
         method: 'post',
