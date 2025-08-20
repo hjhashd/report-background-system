@@ -77,21 +77,36 @@
       </a-button>
     </div>
     <!-- 已生成内容 -->
-    <!-- <div v-if="aiContent" class="flex-1 ai-content-generate"> -->
-    <div class="flex-1 ai-content-generate">
+    <div v-if="aiContent" class="flex-1 ai-content-generate">
       <div class="result-content flex">
         <h2 class="title">搜索内容</h2>
         <a-icon type="close" class="close-icon" @click="cleanAISearch" />
       </div>
       <div class="flex down-content flex-1">
-        <div class="ai-content-body flex-1 h100 left-content p-12-16">
-          <div class="ai-show-item flex-1">
-            <div id="kimi-response-content" class="prose-kimi" v-html="showAIContent"></div>
+        <div class="ai-content-body">
+          <div ref="messageContainer" class="ai-show-item" :style="{ height: `calc(${editorHeight} - 410px)` }">
+            <div v-if="lineObj.length">
+              <div v-for="item in lineObj" :key="item.id" class="flex">
+                <div
+                  class="prose-kimi"
+                  :class="item.type == 'ai' ? 'prose-ai' : 'prose-question'"
+                  v-html="item.content"
+                ></div>
+              </div>
+            </div>
+            <!-- 正在输出的 -->
+            <div
+              v-if="showAIContent"
+              id="kimi-response-content"
+              class="prose-kimi prose-ai"
+              v-html="showAIContent"
+            ></div>
           </div>
           <div class="footer-body">
             <div class="flex">
               <a-input placeholder="进一步提问或细化总结..." allowClear v-model="detailQ"></a-input>
               <a-button
+                :loading="aiResultLoading"
                 type="primary"
                 style="margin-left: 4px; background-color: #e5eeff; border-color: #1d6aff"
                 @click="stepAIQuestion"
@@ -110,7 +125,8 @@
             </a-button>
           </div>
         </div>
-        <div class="ai-content-body flex-1 p-12-16">
+        <div class="middle-line"></div>
+        <div class="ai-content-body">
           <div class="flex">
             <div class="flex result-title">
               <a-icon type="bulb" style="color: #44a5fd; font-size: 14px; font-weight: bold" />
@@ -122,9 +138,11 @@
               </a-select-option>
             </a-select>
           </div>
-          <a-textarea class="flex-1 m-h-4" v-model="tounchContent" style="width: 100%" />
+          <div ref="messageContainer" class="ai-show-item" :style="{ height: `calc(${editorHeight} - 410px)` }">
+            <div v-if="tounchContent" class="prose-kimi prose-ai w100" v-html="tounchContent"></div>
+          </div>
           <!-- 底部按钮 -->
-          <div class="flex p-16 footer-body">
+          <div class="flex footer-body">
             <a-dropdown>
               <a-checkbox-group
                 style="background-color: #fff; padding: 5px; border: 1px solid #f5f5f5"
@@ -223,9 +241,6 @@
 <script>
 import { mapState } from 'vuex'
 import {
-  getTemplateDetail,
-  getDraftQuickChose,
-  draftAIContent,
   getAIRetouchType,
   contentRetouch,
   saveDraftPolishing,
@@ -294,11 +309,13 @@ export default {
       inputContent: null,
       wsClient: null,
       aiContent: '',
+      resultContent: '',
       showAIContent: '',
       detailQ: '',
       // 流式输出存储
       lineObj: [],
       aiResultLoading: false,
+      currentType: null,
     }
   },
   watch: {
@@ -421,11 +438,8 @@ export default {
         })
         return
       }
-      if (_this.wsClient) {
-        // 如果已经有实例，直接发送消息
-        _this.wsClient.sendContentMessage(inputContent, quickSelected)
-        return
-      }
+      _this.buildContent = true
+      _this.aiResultLoading = true
 
       _this.wsClient = new AIWebSocketClient()
 
@@ -433,9 +447,13 @@ export default {
       _this.wsClient.on('message', (content) => {
         _this.aiContent += `${content}`
         _this.showAIContent = `${parseMarkdown(_this.aiContent)}`
+        _this.scrollToBottom()
       })
 
       _this.wsClient.on('error', (error) => {
+        _this.buildContent = false
+        _this.aiResultLoading = false
+        _this.currentType = null
         // 处理错误
         $notification['error']({
           message: '通知：',
@@ -445,15 +463,22 @@ export default {
       })
 
       _this.wsClient.on('complete', () => {
-        console.log('AI处理完成')
-        // 清除aiContent渲染
-        _this.aiContent = ''
-        // 存储本次输出结果,并通过lineObj渲染
-        _this.lineObj.push({
-          id: _this.lineObj.length + 1,
-          type: 'ai',
-          content: `${parseMarkdown(_this.aiContent)}`,
-        })
+        _this.buildContent = false
+        _this.aiResultLoading = false
+        if (_this.currentType == 'content') {
+          // 存储本次输出结果,并通过lineObj渲染
+          _this.lineObj.push({
+            id: _this.lineObj.length + 1,
+            type: 'ai',
+            content: `${parseMarkdown(_this.aiContent)}`,
+          })
+          // 清除detailQ
+          _this.detailQ = ''
+          // 清除aiContent渲染
+          _this.aiContent = ''
+        } else if (_this.currentType == 'summary') {
+          _this.tounchContent = `${_this.resultContent}`
+        }
       })
       // 连接到服务器
       _this.wsClient
@@ -461,8 +486,7 @@ export default {
         .then(() => {
           // 发送内容消息（立即搜索）
           _this.wsClient.sendContentMessage(inputContent, quickSelected)
-          // 或者发送总结请求
-          // wsClient.sendSummaryRequest(1, 2);
+          _this.currentType = 'content'
         })
         .catch((error) => {
           $notification['error']({
@@ -472,48 +496,53 @@ export default {
           })
         })
     },
+    // 滚动到最底部方法
+    scrollToBottom() {
+      const container = this.$refs.messageContainer
+      if (container) {
+        container.scrollTop = container.scrollHeight
+      }
+    },
     cleanAISearch() {
       this.aiContent = ''
     },
     // AI总结
     AIResulted() {
       const _this = this
-      const { $notification, quickSelected, inputContent } = this
-      _this.aiResultLoading = true
+      const { $notification, reportType, categoryId } = this
       if (!_this.wsClient) {
-        _this.wsClient = new AIWebSocketClient()
-        _this.wsClient
-          .connect(_this.userInfo.userId, _this.currentEngine)
-          .then(() => {
-            // 或者发送总结请求
-            wsClient.sendSummaryRequest(1, 2)
-          })
-          .catch((error) => {
-            $notification['error']({
-              message: '通知：',
-              description: `连接失败:, ${error}`,
-              duration: 6,
-            })
-          })
-      } else {
-        _this.wsClient.sendSummaryRequest(1, 2)
+        $notification['error']({
+          message: '通知：',
+          description: `ai连接失败`,
+          duration: 6,
+        })
+        return
       }
+      _this.aiResultLoading = true
+      _this.currentType = 'summary'
+      _this.wsClient.sendSummaryRequest(reportType, categoryId)
     },
     // 进一步提问
     stepAIQuestion() {
+      const { $notification } = this
       if (!this.wsClient) {
-        this.wsClient = new AIWebSocketClient()
+        $notification['error']({
+          message: '通知：',
+          description: `ai连接失败`,
+          duration: 6,
+        })
+        return
       }
+      this.aiResultLoading = true
       // 发起ai搜索提问
       this.wsClient.sendContentMessage(this.detailQ)
+      this.currentType = 'content'
       // 将detailQ接入lineObj中进行渲染
       this.lineObj.push({
         id: this.lineObj.length + 1,
         type: 'question',
         content: `${this.detailQ}`,
       })
-      // 清除detailQ
-      this.detailQ = ''
     },
     starTounch() {
       const parameter = {
@@ -593,19 +622,18 @@ export default {
   display: flex;
   flex-direction: column;
   background-color: #fff;
+  overflow: hidden;
 }
 .ai-content-body {
+  margin: 12px 16px;
+  width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  overflow: hidden;
-  overflow-y: scroll;
-  &::-webkit-scrollbar {
-    width: 0px;
-  }
+  box-sizing: border-box;
 }
 .header {
-  padding: 0 16px;
+  padding: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -642,7 +670,7 @@ export default {
   box-sizing: border-box;
 }
 .footer-body {
-  padding: 4px 0 !important;
+  padding-top: 4px !important;
 }
 .p-12-16 {
   padding: 12px 16px 0;
@@ -650,8 +678,10 @@ export default {
 .m-h-4 {
   margin: 4px 0;
 }
-.left-content {
-  border-right: 1px solid #e8e8e8;
+.middle-line {
+  height: 100%;
+  width: 1px;
+  background-color: #e8e8e8;
 }
 .close-icon {
   cursor: pointer;
@@ -712,20 +742,12 @@ export default {
   .generate-btn {
     width: 100%;
   }
-  .footer-btn {
-    background-color: #fff;
-    color: #000;
-    border-color: #e8e8e8;
-    font-size: 14px;
-  }
-  .inner-content {
-    height: 100%;
-    overflow: hidden;
-    overflow-y: scroll;
-    &::-webkit-scrollbar {
-      width: 0px;
-    }
-  }
+}
+.footer-btn {
+  background-color: #fff;
+  color: #000;
+  border-color: #e8e8e8;
+  font-size: 14px;
 }
 .set-name {
   padding: 16px;
@@ -746,5 +768,43 @@ export default {
     font-size: 12px;
     color: #999;
   }
+}
+.ai-show-item {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  overflow-y: scroll;
+  &::-webkit-scrollbar {
+    width: 0px;
+  }
+}
+.prose-kimi {
+  max-width: 80%;
+  padding: 5px;
+  border-radius: 5px;
+  font-size: 12px;
+  margin-bottom: 15px;
+  &.w100 {
+    padding: 5px 10px;
+    max-width: 100%;
+    border: 1px solid #e8e8e8;
+    background-color: #ffffff;
+    color: #000000;
+    margin-right: auto;
+  }
+}
+.prose-ai {
+  border: 1px solid #fff085;
+  background-color: #fefce8;
+  color: #905f16;
+  margin-right: auto;
+}
+.prose-question {
+  border: 1px solid #2b7fff;
+  background-color: #2b7fff;
+  color: #ffffff;
+  text-align: right;
+  margin-left: auto;
 }
 </style>
