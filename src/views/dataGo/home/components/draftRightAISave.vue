@@ -18,9 +18,9 @@
       </div>
 
       <!-- 自定义提示词区域 -->
-      <div class="custom-prompt">
+      <div class="custom-prompt" v-if="quickSelectList.length">
         <span>自定义提示词</span>
-        <a-textarea v-model="prompt" placeholder="请输入您的分析需求和具体要求..." rows="3" style="width: 100%" />
+        <a-textarea v-model="prompt" placeholder="请输入您的分析需求和具体要求..." rows="2" style="width: 100%" />
       </div>
 
       <!-- 预设提示词相关 -->
@@ -29,6 +29,7 @@
         <span>快速选择</span>
         <div style="margin-top: 6px">
           <a-button
+            size="small"
             class="quick-select-item"
             :class="{ active: item == quickSelected }"
             v-for="(item, index) in quickSelectList"
@@ -80,14 +81,14 @@
         <h2 class="title">生成结果</h2>
       </div>
       <div class="flex down-content flex-1">
-        <div class="ai-content-body flex-1 h100 left-content p-12-16">
+        <div class="ai-content-body flex-1 h100 left-content p-8-16">
           <div class="flex">
             <img style="width: 16px; height: 18px" src="@/assets/images/AISave.png" alt="dark" />
             <h2 class="inner-title">原始生成内容</h2>
           </div>
           <a-textarea class="flex-1 m-h-4" v-model="aiContent" style="width: 100%" />
         </div>
-        <div class="ai-content-body flex-1 p-12-16">
+        <div class="ai-content-body flex-1 p-8-16">
           <div class="flex">
             <div class="flex">
               <img style="width: 16px; height: 18px" src="@/assets/images/AITounch.png" alt="dark" />
@@ -103,7 +104,7 @@
         </div>
       </div>
       <!-- 底部按钮 -->
-      <div class="flex p-16 footer-body">
+      <div class="flex p-8-16 footer-body">
         <a-dropdown>
           <a-checkbox-group
             style="background-color: #fff; padding: 5px; border: 1px solid #f5f5f5"
@@ -284,10 +285,10 @@ export default {
     },
     handleGenerate() {
       const { $notification } = this
-      if (!this.quickSelected) {
+      if (!this.quickSelected && !this.prompt) {
         $notification['warn']({
           message: '通知：',
-          description: `快速选择不可为空`,
+          description: `自定义提示词或快速选择不可均为空`,
           duration: 6,
         })
         return
@@ -302,8 +303,16 @@ export default {
       this.buildContent = true
       draftAIContent(parameter).then((res) => {
         this.buildContent = false
-        this.aiContent = res.data
-        this.tounchContent = res.data
+        if (res.code !== 200) {
+          $notification['error']({
+            message: '通知：',
+            description: `错误：${res.msg}`,
+            duration: 6,
+          })
+        } else {
+          this.aiContent = res.data
+          this.tounchContent = res.data
+        }
       })
     },
     starTounch() {
@@ -431,8 +440,8 @@ export default {
   background-color: #f9fafb;
   box-sizing: border-box;
 }
-.p-12-16 {
-  padding: 12px 16px 0;
+.p-8-16 {
+  padding: 8px 16px 0;
 }
 .m-h-4 {
   margin: 4px 0;
@@ -455,7 +464,7 @@ export default {
     color: #333;
   }
   .custom-prompt {
-    margin-bottom: 16px;
+    margin-bottom: 8px;
   }
   .custom-prompt span {
     display: block;
@@ -464,7 +473,8 @@ export default {
   }
   .preset-tip {
     color: #999;
-    margin-bottom: 8px;
+    margin-top: 4px;
+    margin-bottom: 4px;
     font-size: 12px;
     /deep/ .ant-divider-inner-text {
       padding: 0 12px;
@@ -478,6 +488,7 @@ export default {
       background-color: #f3f4f6;
       border: none;
       padding: 4px 8px;
+      line-height: 1;
       margin-right: 8px;
       &.more-btn {
         background-color: #eff6ff;
@@ -507,6 +518,7 @@ export default {
   }
   .inner-content {
     height: 100%;
+    padding-bottom: 8px;
     overflow: hidden;
     overflow-y: scroll;
     &::-webkit-scrollbar {

@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-08-19 20:34:45
- * @FilePath: /report-background-system/src/views/dataGo/home/viewReportFirstDraft.vue
+ * @LastEditTime: 2025-08-24 21:09:45
+ * @FilePath: \report-background-system\src\views\dataGo\home\viewReportFirstDraft.vue
  * @Description: 报告预览
  * 
 -->
@@ -72,19 +72,31 @@
           </div>
         </div>
       </div>
-      <div class="flex flex-1" :style="{ height: editorHeight }">
-        <div class="left-content" :style="{ height: editorHeight }" v-if="draftTemplateList.length">
+      <div class="flex flex-1" :style="{ height: editorHeight, position: 'relative' }">
+        <div
+          class="left-content"
+          :class="{ 'close-body': isListCollapsed }"
+          :style="{ height: editorHeight }"
+          v-if="draftTemplateList.length"
+        >
           <a-menu mode="inline" :open-keys="templateOptions" :selectedKeys="currentOption" @openChange="onOpenChange">
-            <a-sub-menu v-for="item in draftTemplateList" :key="item.id">
-              <span slot="title">{{ item.chapterTitle }}</span>
-              <a-menu-item v-for="vi in item.children" :key="vi.id" @click="templateChose(vi)">
-                {{ vi.chapterTitle }}
+            <template v-for="item in draftTemplateList">
+              <a-menu-item v-if="!item.children.length" :key="item.id" @click="templateChose(vi)">
+                {{ item.chapterTitle }}
               </a-menu-item>
-            </a-sub-menu>
+              <sub-menu v-else :key="item.key" :menu-info="item" @templateChose="templateChose" />
+            </template>
           </a-menu>
         </div>
         <div ref="editorContainerRef" class="editor-container" v-if="currentChose">
           <OnlyOfficeEditorFD ref="editorR" :reportId="currentChose" :editorHeight="editorHeight" />
+          <div
+            @click="() => (isListCollapsed = !isListCollapsed)"
+            class="collpase-icon"
+            :class="{ 'turn-around': isListCollapsed }"
+          >
+            <a-icon type="left-circle" theme="filled" />
+          </div>
         </div>
         <div :class="{ 'open-right': !!showRightType }" class="right-content" v-if="draftTemplateList.length">
           <div v-if="showRightType == 'ai-save'">
@@ -109,14 +121,7 @@
           </div>
         </div>
       </div>
-      <a-upload
-        v-if="typeFrom !== 'industryReport'"
-        ref="uploadRef"
-        name="tableUpload"
-        :customRequest="uploadFile"
-        :showUploadList="false"
-        :openFileDialogOnClick="openFileDialogOnClick"
-      ></a-upload>
+
       <a-modal
         class="qr-modal"
         v-model="setReportName"
@@ -160,23 +165,54 @@ import AiContentGenerate from './components/draftRightAISave.vue'
 import DraftRightAISearch from './components/draftRightAISearch.vue'
 import EditModal from './editModal.vue'
 import { debounce } from '@/utils/util'
+import { Menu } from 'ant-design-vue'
+const SubMenu = {
+  template: `
+    <a-sub-menu :key="menuInfo.key" v-bind="$props" v-on="$listeners">
+      <span slot="title">
+        <span>{{ menuInfo.chapterTitle }}</span>
+      </span>
+      <template v-for="item in menuInfo.children">
+        <a-menu-item v-if="!item.children.length" :key="item.id" @click="templateChose(item)">
+          <span>{{ item.chapterTitle }}</span>
+        </a-menu-item>
+        <sub-menu v-else :key="item.id" :menu-info="item" />
+      </template>
+    </a-sub-menu>
+  `,
+  name: 'SubMenu',
+  isSubMenu: true,
+  props: {
+    ...Menu.SubMenu.props,
+    menuInfo: {
+      type: Object,
+      default: () => ({}),
+    },
+  },
+  methods: {
+    templateChose(v) {
+      this.$emit('templateChose', v)
+    },
+  },
+}
+
 export default {
   name: 'addReport',
-  components: { OnlyOfficeEditorFD, EditModal, AnomalyContent, AiContentGenerate, DraftRightAISearch },
+  components: {
+    OnlyOfficeEditorFD,
+    EditModal,
+    AnomalyContent,
+    AiContentGenerate,
+    DraftRightAISearch,
+    'sub-menu': SubMenu,
+  },
   data() {
     return {
-      applyIcon: require('@/assets/images/apply.png'),
       pageLoading: false,
-      visible: false,
-      getChangeHeight: true,
       editorHeight: null,
       reportId: null,
-      isListCollapsed: true,
       reportDetail: null,
       customerDetail: null,
-      clickItem: null,
-      disabledList: [],
-      openFileDialogOnClick: false,
       fullView: false,
       typeFrom: null,
       reportName: null,
@@ -197,6 +233,7 @@ export default {
       currentOption: [],
       showRightType: null,
       templateId: null,
+      isListCollapsed: false,
     }
   },
   created() {
@@ -383,90 +420,15 @@ export default {
           })
         })
     },
-    showDrawer() {
-      this.visible = true
-    },
-    onClose() {
-      this.visible = false
-    },
-    toCustomerDetail() {
-      const { $router } = this
-      // 前往客户详情页面，获取客户和模板信息
-      const paramsRequest = {
-        appUserId: this.customerDetail.userId,
-        enterpriseName: this.customerDetail.enterpriseName,
-        creditCode: this.customerDetail.enterpriseCreditCode,
-        reportType: parseInt(this.reportDetail.reportType),
-        template: this.reportDetail.template,
-      }
-      // 去往查看数据页面
-      $router.push({ path: '/homePage/viewCustomerData', query: paramsRequest })
-    },
     updateEdit() {
       this.$refs.editorR.refreshEditor()
-    },
-    updateTable(v) {
-      // 获取a-upload组件实例
-      if (!this.openFileDialogOnClick) {
-        this.$confirm({
-          title: '更新文件数据提醒',
-          content: `是否确认进行（${v.tableNameZh}）文件数据更新，该操作会更新原有的（${v.tableNameZh}）数据信息。`,
-          okText: '确定',
-          cancelText: '取消',
-          onOk: () => {
-            this.clickItem = v
-            this.openFileDialogOnClick = true
-            setTimeout(() => {
-              this.$refs.uploadRef.$el.querySelector('input[type="file"]').click()
-              this.openFileDialogOnClick = false
-            }, 50)
-          },
-          onCancel: () => {
-            this.openFileDialogOnClick = false
-          },
-        })
-      }
-    },
-    uploadFile(options) {
-      const { $notification } = this
-      const { file, onSuccess, onError } = options
-      const formData = new FormData()
-      const item = this.clickItem
-      if (this.disabledList.findIndex((i) => i.tableName == item.tableName) != -1) {
-        $notification['info']({
-          message: '上传通知：',
-          description: `该文档文件正在上传，请稍后再试`,
-          duration: 6,
-        })
-        return
-      }
-      formData.append(item.tableName, file)
-      this.uploading = true
-      this.pageLoading = true
-      this.disabledList.push(item.tableName)
-      updateReportDate(formData, this.reportDetail.id).then((res) => {
-        this.pageLoading = false
-        this.uploading = false
-        this.disabledList = this.disabledList.filter((item) => item != item.tableName)
-        if (res.code && res.code == 200) {
-          $notification['success']({
-            message: '上传通知：',
-            description: `上传文件成功：${file.name}`,
-            duration: 6,
-          })
-          this.getData()
-        } else {
-          $notification['error']({
-            message: '上传通知：',
-            description: `${res.msg}`,
-            duration: 6,
-          })
-        }
-      })
     },
     lookUploadModal(v) {
       this.uploadTableList = this.reportDetail.tableChangeInfos
       this.udt = true
+    },
+    toggleCollapsed() {
+      this.collapsed = !this.collapsed
     },
   },
 }
@@ -527,6 +489,7 @@ export default {
 .editor-container {
   flex: 1;
   width: 100%;
+  position: relative;
 }
 
 .left-content,
@@ -540,6 +503,26 @@ export default {
   overflow-y: scroll;
   &::-webkit-scrollbar {
     width: 0px;
+  }
+}
+.left-content {
+  z-index: 1;
+  &.close-body {
+    width: 0;
+  }
+}
+.collpase-icon {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translate(0, -50%);
+  z-index: 1;
+  cursor: pointer;
+  &.turn-around {
+    position: absolute;
+    transform: translate(50%, -50%);
+    transform: rotate(180deg);
+    transition: all 0.3s ease-in-out;
   }
 }
 .right-content {

@@ -38,14 +38,15 @@
         <span>快速选择</span>
         <div style="margin-top: 6px">
           <a-button
+            size="small"
             class="quick-select-item"
-            :class="{ active: item == quickSelected }"
+            :class="{ active: item.id == quickSelected }"
             v-for="(item, index) in quickSelectList"
             :key="index"
             type="default"
             @click="handleQuickSelect(item)"
           >
-            {{ item }}
+            {{ item.templateNameFilter }}
           </a-button>
 
           <a-dropdown v-if="quickReList.length">
@@ -60,7 +61,7 @@
               </div>
               <div style="max-height: 40vh; overflow-y: scroll; overflow-x: hidden">
                 <a-row v-for="(item, index) in showRsList" :key="index" :value="item">
-                  <a-radio :value="item">{{ item }}</a-radio>
+                  <a-radio :value="item.id">{{ item.templateNameFilter }}</a-radio>
                 </a-row>
               </div>
             </a-radio-group>
@@ -77,7 +78,7 @@
       </a-button>
     </div>
     <!-- 已生成内容 -->
-    <div v-if="aiContent" class="flex-1 ai-content-generate">
+    <div v-if="aiContent || lineObj.length" class="flex-1 ai-content-generate">
       <div class="result-content flex">
         <h2 class="title">搜索内容</h2>
         <a-icon type="close" class="close-icon" @click="cleanAISearch" />
@@ -138,8 +139,10 @@
               </a-select-option>
             </a-select>
           </div>
-          <div ref="messageContainer" class="ai-show-item" :style="{ height: `calc(${editorHeight} - 410px)` }">
-            <div v-if="tounchContent" class="prose-kimi prose-ai w100" v-html="tounchContent"></div>
+          <div ref="messageContainerR" class="ai-show-item" :style="{ height: `calc(${editorHeight} - 410px)` }">
+            <a-spin :spinning="tounchBtnStatus" tip="Loading...">
+              <div v-if="tounchContent" class="prose-kimi prose-ai w100" v-html="tounchContent"></div>
+            </a-spin>
           </div>
           <!-- 底部按钮 -->
           <div class="flex footer-body">
@@ -389,7 +392,8 @@ export default {
       })
     },
     getQuickChoseList() {
-      getEngineQuickList().then((res) => {
+      // getEngineQuickList(this.firstDraftId).then((res) => {
+      getEngineQuickList(100).then((res) => {
         if (res.data[0] === '无') {
           this.quickReList = []
           this.quickSelectList = []
@@ -410,7 +414,7 @@ export default {
       this.$emit('close')
     },
     handleQuickSelect(text) {
-      this.quickSelected = this.quickSelected == text ? '' : text
+      this.quickSelected = this.quickSelected == text.id ? '' : text.id
     },
     chooseQuickAI(value) {
       this.quickSelected = value.target.value
@@ -429,6 +433,8 @@ export default {
     },
     handleGenerate() {
       const _this = this
+      _this.aiContent = ''
+      _this.lineObj = []
       const { $notification, quickSelected, inputContent } = this
       if (!quickSelected && !inputContent) {
         $notification['warn']({
@@ -438,6 +444,8 @@ export default {
         })
         return
       }
+      // 获取快速选择的prompt
+      const prompt = _this.quickSelectList.find((i) => i.id === quickSelected).prompt
       _this.buildContent = true
       _this.aiResultLoading = true
 
@@ -445,9 +453,15 @@ export default {
 
       // 设置回调
       _this.wsClient.on('message', (content) => {
-        _this.aiContent += `${content}`
-        _this.showAIContent = `${parseMarkdown(_this.aiContent)}`
-        _this.scrollToBottom()
+        if (_this.currentType == 'content') {
+          _this.aiContent += `${content}`
+          _this.showAIContent = `${parseMarkdown(_this.aiContent)}`
+          _this.scrollToBottom()
+        } else {
+          _this.resultContent += `${content}`
+          _this.tounchContent = `${parseMarkdown(_this.resultContent)}`
+          this.scrollToBottomR()
+        }
       })
 
       _this.wsClient.on('error', (error) => {
@@ -485,7 +499,7 @@ export default {
         .connect(_this.userInfo.userId, _this.currentEngine)
         .then(() => {
           // 发送内容消息（立即搜索）
-          _this.wsClient.sendContentMessage(inputContent, quickSelected)
+          _this.wsClient.sendContentMessage(inputContent, prompt)
           _this.currentType = 'content'
         })
         .catch((error) => {
@@ -499,6 +513,13 @@ export default {
     // 滚动到最底部方法
     scrollToBottom() {
       const container = this.$refs.messageContainer
+      if (container) {
+        container.scrollTop = container.scrollHeight
+      }
+    },
+    // 滚动到最底部方法
+    scrollToBottomR() {
+      const container = this.$refs.messageContainerR
       if (container) {
         container.scrollTop = container.scrollHeight
       }
@@ -625,7 +646,7 @@ export default {
   overflow: hidden;
 }
 .ai-content-body {
-  margin: 12px 16px;
+  margin: 8px 16px;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -633,11 +654,11 @@ export default {
   box-sizing: border-box;
 }
 .header {
-  padding: 16px;
+  padding: 0 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 45px;
+  height: 40px;
   border-bottom: 1px solid #e8e8e8;
 }
 .result-title {
@@ -672,8 +693,8 @@ export default {
 .footer-body {
   padding-top: 4px !important;
 }
-.p-12-16 {
-  padding: 12px 16px 0;
+.p-8-16 {
+  padding: 8px 16px 0;
 }
 .m-h-4 {
   margin: 4px 0;
@@ -689,7 +710,7 @@ export default {
   font-size: 18px;
 }
 .p-16 {
-  padding: 16px;
+  padding: 8px 16px;
   font-weight: bold;
   .content-item-select {
     margin-bottom: 8px;
@@ -707,6 +728,7 @@ export default {
   }
   .preset-tip {
     color: #999;
+    margin-top: 8px;
     margin-bottom: 8px;
     font-size: 12px;
     /deep/ .ant-divider-inner-text {
@@ -714,7 +736,7 @@ export default {
     }
   }
   .quick-select {
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     .quick-select-item {
       font-size: 12px;
       font-weight: bold;

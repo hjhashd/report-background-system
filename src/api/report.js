@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-08-20 22:38:17
+ * @LastEditTime: 2025-08-24 17:16:17
  * @FilePath: \report-background-system\src\api\report.js
  * @Description:
  *
@@ -99,7 +99,7 @@ const reportAPI = {
     applyAIContent: '/report/draft/apply/ai/content',
     addAIEngine: '/report/draft/ai/engine/save',
     getAIEngineList: '/report/draft/ai/engine/list',
-    getEngineQuickList: '/report/draft/ai/search/prompt'
+    getEngineQuickList: '/report/draft/ai/search/prompt/'
 }
 
 
@@ -755,9 +755,9 @@ export function getAIEngineList() {
 }
 
 // 初稿详情-AI搜索-快速选择提示词列表
-export function getEngineQuickList() {
+export function getEngineQuickList(prompt) {
     return request({
-        url: reportAPI.getEngineQuickList,
+        url: reportAPI.getEngineQuickList + prompt,
         method: 'get',
     })
 }
