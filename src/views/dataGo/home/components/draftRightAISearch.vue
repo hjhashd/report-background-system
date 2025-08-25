@@ -444,7 +444,7 @@ export default {
         return
       }
       // 获取快速选择的prompt
-      const prompt = _this.quickSelectList.find((i) => i.id === quickSelected).prompt
+      const prompt = quickSelected ? _this.quickSelectList.find((i) => i.id === quickSelected).prompt : ''
       _this.buildContent = true
       _this.aiResultLoading = true
 
