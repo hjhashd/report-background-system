@@ -101,6 +101,18 @@
                 <img style="width: 28px; height: 28px" src="@/assets/images/see.png" alt="dark" />
               </a-button>
             </a-tooltip>
+            <!-- 这里可以定义操作列的具体内容，例如按钮 -->
+            <a-tooltip v-if="scoped.genStatus == 2">
+              <template slot="title">
+                <span>重新生成</span>
+              </template>
+              <a-button
+                @click="rebuild(scoped)"
+                :style="{ color: '#7fbbf1', border: 'none', padding: 0, margin: '0 5px' }"
+              >
+                <img style="width: 28px; height: 28px" src="@/assets/images/rebuild.png" alt="dark" />
+              </a-button>
+            </a-tooltip>
             <a-popconfirm title="是否确定删除该报告?" ok-text="确定" cancel-text="取消" @confirm="deleteChat(scoped)">
               <a-tooltip>
                 <template slot="title">
@@ -159,7 +171,7 @@ const draftStatusList = [
   },
 ]
 import { mapState } from 'vuex'
-import { getFirstDraftList, deleteFirstDraft, batchDeleteFirstDraft } from '@/api/report'
+import { getFirstDraftList, deleteFirstDraft, batchDeleteFirstDraft, rebuildFirstDraft } from '@/api/report'
 import { STable } from '@/components'
 import { baseMixin } from '@/store/app-mixin'
 import { columns } from './util'
@@ -295,6 +307,26 @@ export default {
     lookUploadModal(v) {
       this.uploadTableList = v.tableChangeInfos
       this.udt = true
+    },
+    rebuild(v) {
+      // 重新生产初稿
+      const { $notification } = this
+      rebuildFirstDraft(v.id).then((res) => {
+        if (res.code !== 200) {
+          $notification['error']({
+            message: '通知：',
+            description: `操作失败：${res.msg}`,
+            duration: 8,
+          })
+          return
+        }
+        $notification['success']({
+          message: '通知：',
+          description: `操作成功`,
+          duration: 8,
+        })
+        this.$refs.table.refresh()
+      })
     },
   },
 }

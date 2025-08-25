@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-21 14:25:44
  * @LastEditors: bekon
- * @LastEditTime: 2025-08-24 17:16:17
+ * @LastEditTime: 2025-08-25 22:18:06
  * @FilePath: \report-background-system\src\api\report.js
  * @Description:
  *
@@ -99,7 +99,8 @@ const reportAPI = {
     applyAIContent: '/report/draft/apply/ai/content',
     addAIEngine: '/report/draft/ai/engine/save',
     getAIEngineList: '/report/draft/ai/engine/list',
-    getEngineQuickList: '/report/draft/ai/search/prompt/'
+    getEngineQuickList: '/report/draft/ai/search/prompt/',
+    rebuildFirstDraft: '/report/draft/regenerate/'
 }
 
 
@@ -759,5 +760,13 @@ export function getEngineQuickList(prompt) {
     return request({
         url: reportAPI.getEngineQuickList + prompt,
         method: 'get',
+    })
+}
+
+// 初稿详情-重新生产初稿
+export function rebuildFirstDraft(prompt) {
+    return request({
+        url: reportAPI.rebuildFirstDraft + prompt,
+        method: 'post',
     })
 }
