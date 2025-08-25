@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-08-24 21:09:45
- * @FilePath: \report-background-system\src\views\dataGo\home\viewReportFirstDraft.vue
+ * @LastEditTime: 2025-08-25 12:16:49
+ * @FilePath: /report-background-system/src/views/dataGo/home/viewReportFirstDraft.vue
  * @Description: 报告预览
  * 
 -->
@@ -81,7 +81,7 @@
         >
           <a-menu mode="inline" :open-keys="templateOptions" :selectedKeys="currentOption" @openChange="onOpenChange">
             <template v-for="item in draftTemplateList">
-              <a-menu-item v-if="!item.children.length" :key="item.id" @click="templateChose(vi)">
+              <a-menu-item v-if="!item.children.length" :key="item.id" @click="templateChose(item)">
                 {{ item.chapterTitle }}
               </a-menu-item>
               <sub-menu v-else :key="item.key" :menu-info="item" @templateChose="templateChose" />
@@ -159,13 +159,14 @@
 <script>
 import { mapActions } from 'vuex'
 import AnomalyContent from '../anomaly/innerContent.vue'
-import { updateReportDate, setDraftStatus, getFirstDraftChapter, mergeTemplate } from '@/api/report'
+import { setDraftStatus, getFirstDraftChapter, mergeTemplate } from '@/api/report'
 import { OnlyOfficeEditorFD } from '@/components'
 import AiContentGenerate from './components/draftRightAISave.vue'
 import DraftRightAISearch from './components/draftRightAISearch.vue'
 import EditModal from './editModal.vue'
 import { debounce } from '@/utils/util'
 import { Menu } from 'ant-design-vue'
+import { findFirstTemplateId } from './util'
 const SubMenu = {
   template: `
     <a-sub-menu :key="menuInfo.key" v-bind="$props" v-on="$listeners">
@@ -176,7 +177,7 @@ const SubMenu = {
         <a-menu-item v-if="!item.children.length" :key="item.id" @click="templateChose(item)">
           <span>{{ item.chapterTitle }}</span>
         </a-menu-item>
-        <sub-menu v-else :key="item.id" :menu-info="item" />
+        <sub-menu v-else :key="item.id" :menu-info="item"  @templateChose="templateChose"/>
       </template>
     </a-sub-menu>
   `,
@@ -269,10 +270,12 @@ export default {
     init() {
       getFirstDraftChapter(this.reportId).then((res) => {
         this.draftTemplateList = res.data
-        this.templateOptions = [res.data[0].id]
-        this.currentOption = [res.data[0].children[0].id]
-        this.currentChose = res.data[0].children[0].id
-        this.templateId = res.data[0].children[0].templateId
+        // 判断树下的第一个templateId
+        const firstItem = findFirstTemplateId(res.data)
+        this.templateOptions = [firstItem.id]
+        this.currentOption = [firstItem.id]
+        this.currentChose = firstItem.id
+        this.templateId = firstItem.templateId
         this.getinnerBodyHeight()
       })
     },

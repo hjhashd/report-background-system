@@ -567,10 +567,9 @@ export default {
     },
     starTounch() {
       const parameter = {
-        content: this.aiContent,
+        content: this.tounchContent,
         types: this.retounchChose,
       }
-      //   this.tounchContent = '润色后的结果'
       this.tounchBtnStatus = true
       contentRetouch(parameter).then((res) => {
         this.tounchBtnStatus = false

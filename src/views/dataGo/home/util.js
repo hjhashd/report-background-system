@@ -321,10 +321,31 @@ export function getCurrentTime() {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
-export function getCurrentDate(){
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+export function getCurrentDate() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+export function findFirstTemplateId(list) {
+    // 遍历当前层级的每个元素
+    for (const item of list) {
+        // 检查当前元素的children是否存在且长度为0
+        if (Array.isArray(item.children) && item.children.length === 0) {
+            return item; // 找到后返回对应的item
+        }
+
+        // 如果当前元素有children，递归查找子级
+        if (Array.isArray(item.children) && item.children.length > 0) {
+            const result = findFirstTemplateId(item.children);
+            // 如果子级中找到符合条件的，立即返回
+            if (result !== null) {
+                return result;
+            }
+        }
+    }
+    // 遍历完所有元素都没找到，返回null
+    return null;
 }
