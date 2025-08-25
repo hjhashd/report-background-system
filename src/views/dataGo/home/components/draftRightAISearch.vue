@@ -392,8 +392,7 @@ export default {
       })
     },
     getQuickChoseList() {
-      // getEngineQuickList(this.firstDraftId).then((res) => {
-      getEngineQuickList(100).then((res) => {
+      getEngineQuickList(this.firstDraftId).then((res) => {
         if (res.data[0] === '无') {
           this.quickReList = []
           this.quickSelectList = []
