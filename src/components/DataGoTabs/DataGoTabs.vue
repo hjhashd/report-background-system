@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-03-21 22:37:18
  * @LastEditors: bekon
- * @LastEditTime: 2025-04-20 18:09:52
- * @FilePath: \report-background-system\src\components\DataGoTabs\DataGoTabs.vue
+ * @LastEditTime: 2025-08-26 20:02:11
+ * @FilePath: /report-background-system/src/components/DataGoTabs/DataGoTabs.vue
  * @Description: 
  * 
 -->
@@ -14,15 +14,15 @@
       <div
         v-for="(item, index) in tab"
         :key="index"
-        :class="{ 'item flex-1': true, active: item.type == active }"
-        @click="changeTab(item.type)"
+        :class="{ 'item flex-1': true, active: item.typeEnum == active }"
+        @click="changeTab(item.typeEnum)"
       >
         <div :class="['flex', 'son-item', 'item-' + index, 'active-' + active, 'flex-1']">
           <div v-if="item.icon" class="son-item">
             <img v-if="item.type != active" style="width: 35px; height: 35px" :src="item.icon" alt="dark" />
-            <img v-else style="width: 35px; height: 35px" :src="item.iconActive || item.icon" alt="dark" />
+            <img v-else style="width: 35px; height: 35px" :src="item.typeImage || item.icon" alt="dark" />
           </div>
-          <span>{{ item.name }}</span>
+          <span>{{ item.typeName }}</span>
         </div>
       </div>
       <slot name="rightContant" v-if="hasRightContant"></slot>
@@ -36,7 +36,7 @@ export default {
   name: 'DataGoTabs',
   props: {
     activeTab: {
-      type: String,
+      type: String / Number,
       default: null,
     },
     tab: {

@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-08-13 18:39:17
+ * @LastEditTime: 2025-08-26 20:25:55
  * @FilePath: /report-background-system/src/views/dataGo/home/addReport.vue
  * @Description: 
  * 
@@ -10,7 +10,7 @@
 <template>
   <page-header-wrapper>
     <div class="page-content">
-      <data-go-tabs :tab="reportTypeList" :activeTab="reportType" @changeTab="changeTab">
+      <data-go-tabs :tab="modalInfo" :activeTab="reportType" @changeTab="changeTab">
         <div class="flex add-report-page">
           <div class="left-box">
             <h1 style="text-align: center; font-size: 32px">报告目录</h1>
@@ -68,6 +68,9 @@
                     ></a-tab-pane>
                   </a-tabs>
                 </div>
+                <a-checkbox :indeterminate="indeterminate" :checked="checkAll" @change="onCheckAllChange">
+                  <span class="modal-title hh">全选</span>
+                </a-checkbox>
                 <a-checkbox-group v-model="chooseModal" @change="onChange">
                   <a-row>
                     <a-col :span="24" v-for="item in modalList" :key="item.templateName" style="margin-bottom: 10px">
@@ -147,6 +150,8 @@ export default {
       reportTemplateClassifyList: [],
       reportTemplateClassify: null,
       reportTemplateClassifyName: '',
+      indeterminate: true,
+      checkAll: false,
     }
   },
   created() {
@@ -189,9 +194,11 @@ export default {
       }, 500)
     },
     changeTab(v) {
+      if (v == this.reportType) return
       this.chooseModal = []
       this.reportType = v
-      this.getReportModal()
+      this.tabA = 2
+      this.chooseCustomer = null
       this.currentModalInfo = this.modalInfo.find((v) => v.typeEnum == this.reportType)
     },
     getCustomerList() {
@@ -245,6 +252,16 @@ export default {
     },
     onChange(v) {
       this.chooseModal = v
+      this.indeterminate = !!this.chooseModal.length && this.chooseModal.length < this.modalList.length
+      this.checkAll = this.chooseModal.length === this.modalList.length
+    },
+    onCheckAllChange(e) {
+      const chl = this.modalList.map((v) => v.templateName)
+      Object.assign(this, {
+        chooseModal: e.target.checked ? chl : [],
+        indeterminate: false,
+        checkAll: e.target.checked,
+      })
     },
     cancelPop(v) {
       if (v == 'update') {
@@ -264,9 +281,11 @@ export default {
         })
         return
       }
-      const chooseModal = this.modalList.filter((v) => {
-        return this.chooseModal.find((v2) => v2 == v.templateName) !== undefined
-      }).map((v) => v.templateName)
+      const chooseModal = this.modalList
+        .filter((v) => {
+          return this.chooseModal.find((v2) => v2 == v.templateName) !== undefined
+        })
+        .map((v) => v.templateName)
 
       const paramsRequest = {
         appUserId: this.chooseCustomer.appUserId,
@@ -302,7 +321,8 @@ export default {
   }
 }
 .button-group {
-  margin-top: 40px;
+  margin-top: 20px;
+  margin-bottom: 20px;
   text-align: center;
 }
 .button-group button {

@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-25 15:23:20
  * @LastEditors: bekon
- * @LastEditTime: 2025-08-25 12:16:49
+ * @LastEditTime: 2025-08-26 19:49:08
  * @FilePath: /report-background-system/src/views/dataGo/home/viewReportFirstDraft.vue
  * @Description: 报告预览
  * 
@@ -50,7 +50,7 @@
                 <span>AI生成</span>
               </template>
               <div class="btn-item" @click="openRight('ai-save')">
-                <div class="icon-box"><a-icon style="color: rgb(87, 135, 238)" type="star" /></div>
+                <div class="icon-box ai-bold-font">AI</div>
               </div>
             </a-tooltip>
             <a-tooltip>
@@ -98,7 +98,14 @@
             <a-icon type="left-circle" theme="filled" />
           </div>
         </div>
-        <div :class="{ 'open-right': !!showRightType }" class="right-content" v-if="draftTemplateList.length">
+        <div
+          :class="{
+            'open-right': !!showRightType && !isListCollapsed,
+            'open-right-five': !!showRightType && isListCollapsed,
+          }"
+          class="right-content"
+          v-if="draftTemplateList.length"
+        >
           <div v-if="showRightType == 'ai-save'">
             <AiContentGenerate
               :firstDraftId="currentChose"
@@ -483,6 +490,10 @@ export default {
     width: 32px;
     height: 32px;
     border-radius: 50%;
+    &.ai-bold-font{
+      font-weight: bold;
+      color: #7e9cea;
+    }
   }
   span {
     margin-top: 4px;
@@ -533,7 +544,11 @@ export default {
   transition: all 0.3s ease-in-out;
 }
 .open-right {
-  width: 41.6% !important;
+  width: calc(50% - 150px) !important;
+  transition: all 0.3s ease-in-out;
+}
+.open-right-five {
+  width: 50% !important;
   transition: all 0.3s ease-in-out;
 }
 .right-title {

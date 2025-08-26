@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-02-26 11:22:54
  * @LastEditors: bekon
- * @LastEditTime: 2025-08-13 18:56:28
+ * @LastEditTime: 2025-08-26 19:53:31
  * @FilePath: /report-background-system/src/views/dataGo/home/viewCustomerData.vue
  * @Description: 
  * 
@@ -67,7 +67,7 @@
           :loading="buildLoading"
           style="width: 25%; height: 40px"
           @click="setReportName = true"
-          >生成报告</a-button
+          >生成初稿</a-button
         >
         <a-button v-if="buildReportId" style="width: 25%; height: 40px" @click="reviewReport">报告预览</a-button>
       </div>

@@ -8,7 +8,7 @@
       </div>
       <a-icon type="close" class="close-icon" @click="handleClose" />
     </div>
-    <div class="p-16 inner-content">
+    <div class="p-16 inner-content" :class="{ 'close-body': searchBS }">
       <div class="content-item-select">
         <span>搜索关键词</span>
         <div class="flex" style="margin-top: 4px">
@@ -79,13 +79,17 @@
     </div>
     <!-- 已生成内容 -->
     <div v-if="aiContent || lineObj.length" class="flex-1 ai-content-generate">
+      <!-- 展开/关闭 -->
+      <div class="turn-roge" @click="() => (searchBS = !searchBS)">
+        <a-icon class="ii-icon" :class="{ 'ic-icon': searchBS }" type="double-right" />
+      </div>
       <div class="result-content flex">
         <h2 class="title">搜索内容</h2>
         <a-icon type="close" class="close-icon" @click="cleanAISearch" />
       </div>
       <div class="flex down-content flex-1">
-        <div class="ai-content-body">
-          <div ref="messageContainer" class="ai-show-item" :style="{ height: `calc(${editorHeight} - 410px)` }">
+        <div class="ai-content-body flex-1">
+          <div ref="messageContainer" class="ai-show-item">
             <div v-if="lineObj.length">
               <div v-for="item in lineObj" :key="item.id" class="flex">
                 <div
@@ -126,8 +130,7 @@
             </a-button>
           </div>
         </div>
-        <div class="middle-line"></div>
-        <div class="ai-content-body">
+        <div class="ai-content-body flex-1" v-if="resultBS">
           <div class="flex">
             <div class="flex result-title">
               <a-icon type="bulb" style="color: #44a5fd; font-size: 14px; font-weight: bold" />
@@ -139,7 +142,7 @@
               </a-select-option>
             </a-select>
           </div>
-          <div ref="messageContainerR" class="ai-show-item" :style="{ height: `calc(${editorHeight} - 410px)` }">
+          <div ref="messageContainerR" class="ai-show-item">
             <a-spin :spinning="tounchBtnStatus" tip="Loading...">
               <div v-if="tounchContent" class="prose-kimi prose-ai w100" v-html="tounchContent"></div>
             </a-spin>
@@ -319,6 +322,8 @@ export default {
       lineObj: [],
       aiResultLoading: false,
       currentType: null,
+      searchBS: false,
+      resultBS: false,
     }
   },
   watch: {
@@ -489,6 +494,7 @@ export default {
           _this.detailQ = ''
           // 清除aiContent渲染
           _this.aiContent = ''
+          _this.showAIContent = ''
         } else if (_this.currentType == 'summary') {
           _this.tounchContent = `${_this.resultContent}`
         }
@@ -499,6 +505,7 @@ export default {
         .then(() => {
           // 发送内容消息（立即搜索）
           _this.wsClient.sendContentMessage(inputContent, prompt)
+          _this.searchBS = true
           _this.currentType = 'content'
         })
         .catch((error) => {
@@ -541,6 +548,7 @@ export default {
       _this.aiResultLoading = true
       _this.currentType = 'summary'
       _this.wsClient.sendSummaryRequest(reportType, categoryId)
+      _this.resultBS = true
     },
     // 进一步提问
     stepAIQuestion() {
@@ -645,7 +653,6 @@ export default {
 }
 .ai-content-body {
   margin: 8px 16px;
-  width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -687,6 +694,10 @@ export default {
 .footer-body {
   background-color: #f9fafb;
   box-sizing: border-box;
+}
+.down-content {
+  display: flex;
+  flex-direction: column;
 }
 .footer-body {
   padding-top: 4px !important;
@@ -761,6 +772,32 @@ export default {
   }
   .generate-btn {
     width: 100%;
+  }
+}
+.inner-content {
+  position: relative;
+  padding-bottom: 8px;
+  overflow: hidden;
+}
+.close-body {
+  padding: 0 !important;
+  height: 0 !important;
+  transition: all 0.3s ease-in-out;
+}
+.turn-roge {
+  width: 100%;
+  height: 12px;
+  text-align: center;
+  cursor: pointer;
+  .ii-icon {
+    height: 12px;
+    width: 30px;
+    transform: rotate(270deg);
+    transition: all 0.3s ease-in-out;
+    &.ic-icon {
+      transform: rotate(90deg);
+      transition: all 0.3s ease-in-out;
+    }
   }
 }
 .footer-btn {

@@ -8,7 +8,7 @@
       </div>
       <a-icon type="close" class="close-icon" @click="handleClose" />
     </div>
-    <div class="p-16 inner-content">
+    <div class="p-16 inner-content" :class="{ 'close-body': saveBS }">
       <!-- 选择报告内容项 -->
       <div class="content-item-select">
         <span>选择报告内容项</span>
@@ -75,19 +75,16 @@
       </a-button>
     </div>
     <!-- 已生成内容 -->
-    <div v-if="aiContent" class="flex-1 ai-content-generate">
-      <div class="result-content flex">
+    <div v-if="tounchContent" class="flex-1 ai-content-generate">
+      <!-- 展开/关闭 -->
+      <div class="turn-roge" @click="() => (saveBS = !saveBS)">
+        <a-icon class="ii-icon" :class="{ 'ic-icon': saveBS }" type="double-right" />
+      </div>
+      <div class="result-content flex felx-1">
         <img style="width: 22px; height: 25px" src="@/assets/images/AISave.png" alt="dark" />
         <h2 class="title">生成结果</h2>
       </div>
       <div class="flex down-content flex-1">
-        <div class="ai-content-body flex-1 h100 left-content p-8-16">
-          <div class="flex">
-            <img style="width: 16px; height: 18px" src="@/assets/images/AISave.png" alt="dark" />
-            <h2 class="inner-title">原始生成内容</h2>
-          </div>
-          <a-textarea class="flex-1 m-h-4" v-model="aiContent" style="width: 100%" />
-        </div>
         <div class="ai-content-body flex-1 p-8-16">
           <div class="flex">
             <div class="flex">
@@ -127,7 +124,7 @@
             </a-button>
           </a-checkbox-group>
           <a-button type="primary" class="footer-btn flex-1">
-            <img style="width: 16px; height: 16px" src="@/assets/images/AITounch0.png" alt="dark" /> AI润色
+            <img style="width: 16px; height: 16px" src="@/assets/images/AITounch-w.png" alt="dark" /> AI润色
           </a-button>
         </a-dropdown>
         <div style="width: 16px"></div>
@@ -201,7 +198,6 @@ export default {
       quickSelected: null,
       showRsList: [],
       buildContent: false, // 生成内容按钮状态
-      aiContent: '',
       tounchContent: '',
       tounchBtnStatus: false,
       savingStauts: false,
@@ -209,6 +205,7 @@ export default {
       otherSaveReportName: '',
       reportVersionList: [],
       versionDetail: null,
+      saveBS: false,
     }
   },
   watch: {
@@ -310,14 +307,14 @@ export default {
             duration: 6,
           })
         } else {
-          this.aiContent = res.data
           this.tounchContent = res.data
+          this.saveBS = true
         }
       })
     },
     starTounch() {
       const parameter = {
-        content: this.aiContent,
+        content: this.tounchContent,
         types: this.retounchChose,
       }
       this.tounchBtnStatus = true
@@ -516,14 +513,35 @@ export default {
     border-color: #e8e8e8;
     font-size: 14px;
   }
-  .inner-content {
-    height: 100%;
-    padding-bottom: 8px;
-    overflow: hidden;
-    overflow-y: scroll;
-    &::-webkit-scrollbar {
-      width: 0px;
+}
+.close-body {
+  padding: 0 !important;
+  height: 0 !important;
+  transition: all 0.3s ease-in-out;
+}
+.turn-roge {
+  width: 100%;
+  height: 12px;
+  text-align: center;
+  cursor: pointer;
+  .ii-icon {
+    height: 12px;
+    width: 30px;
+    transform: rotate(270deg);
+    transition: all 0.3s ease-in-out;
+    &.ic-icon {
+      transform: rotate(90deg);
+      transition: all 0.3s ease-in-out;
     }
+  }
+}
+.inner-content {
+  position: relative;
+  padding-bottom: 8px;
+  overflow: hidden;
+  overflow-y: scroll;
+  &::-webkit-scrollbar {
+    width: 0px;
   }
 }
 .set-name {
