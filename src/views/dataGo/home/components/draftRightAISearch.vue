@@ -85,11 +85,10 @@
       </div>
       <div class="result-content flex">
         <h2 class="title">搜索内容</h2>
-        <a-icon type="close" class="close-icon" @click="cleanAISearch" />
       </div>
-      <div class="flex down-content flex-1">
-        <div class="ai-content-body flex-1">
-          <div ref="messageContainer" class="ai-show-item">
+      <div class="flex down-content">
+        <div class="ai-content-body" :style="{ height: `${getBodyheight()}` }">
+          <div ref="messageContainer" class="ai-show-item flex-1">
             <div v-if="lineObj.length">
               <div v-for="item in lineObj" :key="item.id" class="flex">
                 <div
@@ -130,7 +129,7 @@
             </a-button>
           </div>
         </div>
-        <div class="ai-content-body flex-1" v-if="resultBS">
+        <div class="ai-content-body" :style="{ height: `${getBodyheight()}` }" v-if="resultBS">
           <div class="flex">
             <div class="flex result-title">
               <a-icon type="bulb" style="color: #44a5fd; font-size: 14px; font-weight: bold" />
@@ -346,6 +345,16 @@ export default {
     this.getEngineList()
   },
   methods: {
+    getBodyheight() {
+      let height = parseInt(this.editorHeight) - 114
+      if (!this.searchBS) {
+        height -= 140
+      }
+      if (this.resultBS) {
+        height = height / 2
+      }
+      return height + 'px'
+    },
     getAIRetouchType() {
       getAIRetouchType().then((res) => {
         this.retounchTypeList = res.data
@@ -530,9 +539,6 @@ export default {
         container.scrollTop = container.scrollHeight
       }
     },
-    cleanAISearch() {
-      this.aiContent = ''
-    },
     // AI总结
     AIResulted() {
       const _this = this
@@ -571,6 +577,8 @@ export default {
         type: 'question',
         content: `${this.detailQ}`,
       })
+      // 清空搜索框内容
+      this.detailQ = ''
     },
     starTounch() {
       const parameter = {
@@ -843,6 +851,7 @@ export default {
   font-size: 12px;
   margin-bottom: 15px;
   &.w100 {
+    margin: 8px 0;
     padding: 5px 10px;
     max-width: 100%;
     border: 1px solid #e8e8e8;

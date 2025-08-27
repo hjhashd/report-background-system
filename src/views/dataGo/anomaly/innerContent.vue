@@ -274,16 +274,16 @@ import { Empty } from 'ant-design-vue'
 const uploadTab = ['上传文件', '选择本地文件', '选择APP/小程序文件']
 const reportTypeList = [
   {
-    type: 1,
-    name: '财务基础指标',
+    typeEnum: 1,
+    typeName: '财务基础指标',
   },
   {
-    type: 2,
-    name: '财务异常指标',
+    typeEnum: 2,
+    typeName: '财务异常指标',
   },
   {
-    type: 3,
-    name: '衍生异常指标',
+    typeEnum: 3,
+    typeName: '衍生异常指标',
   },
 ]
 //负债表、利润表、现金流量表

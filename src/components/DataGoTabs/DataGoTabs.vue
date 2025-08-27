@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-03-21 22:37:18
  * @LastEditors: bekon
- * @LastEditTime: 2025-08-26 20:02:11
+ * @LastEditTime: 2025-08-27 21:54:16
  * @FilePath: /report-background-system/src/components/DataGoTabs/DataGoTabs.vue
  * @Description: 
  * 
@@ -58,7 +58,7 @@ export default {
     }
   },
   mounted() {
-    this.active = this.activeTab != null ? this.activeTab : this.tab.length ? this.tab[0].type : 0
+    this.active = this.activeTab != null ? this.activeTab : this.tab.length ? this.tab[0].typeEnum : 0
   },
   methods: {
     changeTab(type) {

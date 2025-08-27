@@ -211,6 +211,10 @@ export default {
   watch: {
     firstDraftId: {
       handler() {
+        // 清除场景内部ai生成的内容
+        this.prompt = ''
+        this.tounchContent = ''
+        this.saveBS = false
         this.initTemplateList()
       },
       deep: true,
