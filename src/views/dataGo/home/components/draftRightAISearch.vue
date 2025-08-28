@@ -600,6 +600,7 @@ export default {
         chapterId: this.firstDraftId, // 章节id
         content: this.tounchContent, // 润色内容,
         templateNameFilter: this.selectedContent, // 上面选择的报告内容项
+        type: 2
       }
       this.savingStauts = true
       saveDraftPolishing(parameter).then((res) => {
@@ -619,6 +620,7 @@ export default {
         draftId: this.chapterId, // 初稿id
         chapterId: this.firstDraftId, // 章节id
         templateNameFilter: this.selectedContent, // 上面选择的报告内容项
+        type: 2
       }
       getPolishingList(parameter).then((res) => {
         this.reportVersionList = res.data

@@ -60,14 +60,14 @@ export const asyncRouterMap = [
             path: '/homePage/firstDraft',
             name: 'firstDraft',
             component: () => import('@/views/dataGo/home/firstDraft'),
-            meta: { title: 'menu.firstDraft', icon: 'read', keepAlive: false, permission: ['home'] }
-          },
-          {
-            path: '/homePage/draftList',
-            name: 'draftList',
-            component: () => import('@/views/dataGo/home/draftList'),
             meta: { title: 'menu.draftList', icon: 'read', keepAlive: false, permission: ['home'] }
           },
+          // {
+          //   path: '/homePage/draftList',
+          //   name: 'draftList',
+          //   component: () => import('@/views/dataGo/home/draftList'),
+          //   meta: { title: 'menu.draftList', icon: 'read', keepAlive: false, permission: ['home'] }
+          // },
           {
             path: '/homePage/reportList',
             name: 'reportList',

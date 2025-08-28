@@ -12,7 +12,12 @@
       <!-- 选择报告内容项 -->
       <div class="content-item-select">
         <span>选择报告内容项</span>
-        <a-select v-model="selectedContent" placeholder="请选择" style="width: 200px; margin-left: 8px">
+        <a-select
+          @change="selectChange"
+          v-model="selectedContent"
+          placeholder="请选择"
+          style="width: 200px; margin-left: 8px"
+        >
           <a-select-option v-for="(item, index) in templateList" :key="index" :value="item">{{ item }}</a-select-option>
         </a-select>
       </div>
@@ -240,6 +245,12 @@ export default {
         this.getReportVersionList()
       })
     },
+    selectChange() {
+      this.getQuickChoseList()
+      this.getReportVersionList()
+      this.tounchContent = ''
+      this.saveBS = false
+    },
     getQuickChoseList() {
       getDraftQuickChose({
         templateId: this.templateId,
@@ -336,6 +347,7 @@ export default {
         chapterId: this.firstDraftId, // 章节id
         content: this.tounchContent, // 润色内容,
         templateNameFilter: this.selectedContent, // 上面选择的报告内容项
+        type: 1
       }
       this.savingStauts = true
       saveDraftPolishing(parameter).then((res) => {
@@ -355,6 +367,7 @@ export default {
         draftId: this.chapterId, // 初稿id
         chapterId: this.firstDraftId, // 章节id
         templateNameFilter: this.selectedContent, // 上面选择的报告内容项
+        type: 1
       }
       getPolishingList(parameter).then((res) => {
         this.reportVersionList = res.data

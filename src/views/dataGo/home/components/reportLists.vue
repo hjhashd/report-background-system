@@ -2,18 +2,10 @@
   <div>
     <div class="flex home-part-title-right flex-1">
       <div class="flex">
-        <div class="flex flex-center" style="margin-right: 20px">
+        <div class="flex flex-center" style="margin-right: 20px;">
           <div class="right-item-title">报告类型：</div>
-          <a-select v-model="draftTypeSelected" style="width: 150px" @change="selectChange" :allowClear="true">
+          <a-select v-model="draftTypeSelected" style="width: 200px" @change="selectChange" :allowClear="true">
             <a-select-option v-for="item in reportTypeList" :key="item.type" :value="item.type">
-              {{ item.name }}
-            </a-select-option>
-          </a-select>
-        </div>
-        <div class="flex flex-center" style="margin-right: 20px">
-          <div class="right-item-title">报告状态：</div>
-          <a-select v-model="draftStatus" style="width: 150px" @change="selectChange" :allowClear="true">
-            <a-select-option v-for="item in draftStatusList" :key="item.type" :value="item.type">
               {{ item.name }}
             </a-select-option>
           </a-select>
@@ -30,7 +22,7 @@
           />
         </div>
       </div>
-      <a-popconfirm title="是否删除已选中的草稿报告?" ok-text="是" cancel-text="否" @confirm="deleteMutil">
+      <a-popconfirm title="是否删除已选中的报告?" ok-text="是" cancel-text="否" @confirm="deleteMutil">
         <a-button>批量删除</a-button>
       </a-popconfirm>
     </div>
@@ -50,13 +42,13 @@
         }}</template>
         <div slot="reportName" slot-scope="text, scoped">
           <span>{{ text }}</span>
-          <!-- <a-tooltip placement="right" v-if="scoped.status != 1">
+          <a-tooltip placement="right" v-if="scoped.status != 1">
             <template slot="title">
               <span v-if="scoped.dataStatus == 2">未完成数据授权，数据上传</span>
               <span v-else-if="scoped.dataStatus == 3">已完成数据授权，数据上传，正在制作报告</span>
             </template>
             <a-icon type="bell" theme="filled" style="color: #c92c1f" />
-          </a-tooltip> -->
+          </a-tooltip>
         </div>
         <span slot="status" slot-scope="text">
           <!-- // 0 草稿 1 已完成 2 数据未授权 3 数据已授权 -->
@@ -67,9 +59,6 @@
         </span>
         <template slot="genStatus" slot-scope="text, scoped">
           <span v-if="text == 1" class="table-status status1">已完成</span>
-          <span v-else-if="text == 0" class="table-status"> 生成中 </span>
-          <span v-else-if="text == 3" class="table-status"> 更新中 </span>
-          <span class="table-status status4" v-else>生成失败</span>
           <a-badge
             :offset="[-3, 5]"
             v-if="scoped.tableChangeInfos && scoped.tableChangeInfos.length"
@@ -77,7 +66,6 @@
           >
             <a-button style="margin-left: 5px" icon="bell" type="link" @click="lookUploadModal(scoped)"></a-button>
           </a-badge>
-          <a-progress v-if="text == 0" :percent="scoped.process" size="small" />
         </template>
         <span slot="reportType" slot-scope="text">
           {{ text == 1 ? '信贷调查报告' : text == 2 ? '财务分析报告' : '能耗分析报告' }}
@@ -87,42 +75,25 @@
           <span v-else>{{ text }}</span>
         </span>
         <template slot="action" slot-scope="text, scoped">
-          <div class="flex">
-            <!-- 这里可以定义操作列的具体内容，例如按钮 -->
-            <a-tooltip v-if="scoped.genStatus == 2">
+          <!-- 这里可以定义操作列的具体内容，例如按钮 -->
+          <a-tooltip>
+            <template slot="title">
+              <span>查看</span>
+            </template>
+            <a-button @click="handleChat(scoped)" :style="{ color: '#7fbbf1', border: 'none', padding: 0 }">
+              <img style="width: 28px; height: 28px" src="@/assets/images/see.png" alt="dark" />
+            </a-button>
+          </a-tooltip>
+          <a-popconfirm title="是否确定删除该报告?" ok-text="确定" cancel-text="取消" @confirm="deleteChat(scoped)">
+            <a-tooltip>
               <template slot="title">
-                <span>更新数据</span>
+                <span>删除</span>
               </template>
-              <a-button
-                @click="updateReportData(scoped)"
-                :style="{ color: '#7fbbf1', border: 'none', padding: 0, margin: '0 8px' }"
-              >
-                <a-icon style="font-size: 22px" type="redo" />
+              <a-button :style="{ color: '#7fbbf1', border: 'none', padding: 0, 'margin-left': '10px' }">
+                <img style="width: 22px; height: 22px" src="@/assets/images/delete.png" alt="dark" />
               </a-button>
             </a-tooltip>
-            <a-tooltip v-else>
-              <template slot="title">
-                <span>查看</span>
-              </template>
-              <a-button
-                :disabled="scoped.genStatus !== 1"
-                @click="handleChat(scoped)"
-                :style="{ color: '#7fbbf1', border: 'none', padding: 0, margin: '0 5px' }"
-              >
-                <img style="width: 28px; height: 28px" src="@/assets/images/see.png" alt="dark" />
-              </a-button>
-            </a-tooltip>
-            <a-popconfirm title="是否确定删除该报告?" ok-text="确定" cancel-text="取消" @confirm="deleteChat(scoped)">
-              <a-tooltip>
-                <template slot="title">
-                  <span>删除</span>
-                </template>
-                <a-button :style="{ color: '#7fbbf1', border: 'none', padding: 0, margin: '0 5px' }">
-                  <img style="width: 22px; height: 22px" src="@/assets/images/delete.png" alt="dark" />
-                </a-button>
-              </a-tooltip>
-            </a-popconfirm>
-          </div>
+          </a-popconfirm>
         </template>
       </s-table>
     </div>
@@ -151,29 +122,11 @@ const reportTypeList = [
     name: '能耗分析报告',
   },
 ]
-const draftStatusList = [
-  {
-    type: 1,
-    name: '已完成',
-  },
-  {
-    type: 0,
-    name: '生成中',
-  },
-  {
-    type: 3,
-    name: '更新中',
-  },
-  {
-    type: 2,
-    name: '生成失败',
-  },
-]
 import { mapState } from 'vuex'
-import { reportList, deleteReport, batchDeleteReport, updateReport } from '@/api/report'
+import { reportList, deleteReport, batchDeleteReport } from '@/api/report'
 import { STable } from '@/components'
 import { baseMixin } from '@/store/app-mixin'
-import { columns } from './util'
+import { columns } from '../util'
 
 export default {
   name: 'Analysis',
@@ -184,33 +137,30 @@ export default {
   data() {
     return {
       loading: true,
-      udt: false,
       columns,
       draftTypeSelected: null,
-      draftStatus: null,
       search: null,
       reportTypeList,
-      draftStatusList,
+      udt: false,
       uploadTableList: [],
       expandedRowKeys: [],
       // 查询参数
       queryParam: {
         pageNum: 1,
         pageSize: 10,
-        status: 0,
+        status: 1,
       },
       loadData: (parameter) => {
         let requestParameters = Object.assign({}, this.queryParam, parameter, {
           pageNum: parameter.pageNo,
           reportName: this.search,
           reportType: this.draftTypeSelected,
-          genStatus: this.draftStatus,
         })
         if (parameter.pageSize !== this.queryParam.pageSize) {
           requestParameters.pageNo = 1
           requestParameters.pageNum = 1
         }
-        this.queryParam = JSON.parse(JSON.stringify(requestParameters))
+        this.queryParam = requestParameters
         return new Promise((resolve, reject) => {
           reportList(requestParameters).then((res) => {
             const reD = {
@@ -254,9 +204,6 @@ export default {
       const { $router } = this
       $router.push({ path: `/homePage/viewReport/` + v.id })
     },
-    selectChange() {
-      this.$refs.table.refresh()
-    },
     rowChange(_, selectedRows) {
       this.expandedRowKeys = selectedRows.map((u) => u.id)
     },
@@ -289,6 +236,9 @@ export default {
         }
       })
     },
+    selectChange() {
+      this.$refs.table.refresh()
+    },
     deleteChat(v) {
       const { $notification } = this
       deleteReport(v.id).then((res) => {
@@ -303,35 +253,6 @@ export default {
     lookUploadModal(v) {
       this.uploadTableList = v.tableChangeInfos
       this.udt = true
-    },
-    updateReportData(v) {
-      // 更新数据
-      const { $notification, $confirm, $router } = this
-      $confirm({
-        title: '更新报告提醒',
-        content: `是否对当前报告进行更新，更新后内容可能较之前发生变化。数据更新将退出查阅模式进行内容更新，待内容更新完毕，可在草稿箱再次查看。`,
-        okText: '确定',
-        cancelText: '取消',
-        onOk: () => {
-          updateReport(v.id).then((res) => {
-            if (res.code != 200) {
-              this.pageLoading = false
-              $notification['error']({
-                message: '错误通知：',
-                description: res.msg,
-                duration: 8,
-              })
-            } else {
-              $notification['success']({
-                message: '通知：',
-                description: `正在生成，请在草稿列表查看进度`,
-                duration: 6,
-              })
-              this.$refs.table.refresh()
-            }
-          })
-        },
-      })
     },
   },
 }
@@ -387,9 +308,6 @@ export default {
   }
   &.status3 {
     color: #0a69ef;
-  }
-  &.status4 {
-    color: #ea2222;
   }
 }
 .home-part-title-right {
