@@ -5,7 +5,7 @@
  * @LastEditTime: 2025-08-26 19:49:08
  * @FilePath: /report-background-system/src/views/dataGo/home/viewReportFirstDraft.vue
  * @Description: 报告预览
- * 
+ *
 -->
 <template>
   <!-- <page-header-wrapper> -->
@@ -384,7 +384,7 @@ export default {
               // this.$refs.editorR.refreshEditor()
               setTimeout(() => {
                 // 去草稿
-                $router.push({ path: '/homePage/draftList' })
+                $router.push({ path: '/homePage/reportList' })
               }, 500)
             }
           })
