@@ -242,7 +242,7 @@
     </a-modal>
   </div>
 </template>
-  
+
 <script>
 import { mapState } from 'vuex'
 import {
@@ -264,6 +264,10 @@ export default {
     },
   },
   props: {
+    templateId: {
+      type: String / Number,
+      required: true,
+    },
     chapterId: {
       type: String / Number,
       required: true,
@@ -406,7 +410,7 @@ export default {
       })
     },
     getQuickChoseList() {
-      getEngineQuickList(this.firstDraftId).then((res) => {
+      getEngineQuickList(this.templateId).then((res) => {
         if (res.data[0] === '无') {
           this.quickReList = []
           this.quickSelectList = []
@@ -646,7 +650,7 @@ export default {
   },
 }
 </script>
-  
+
 <style lang="less" scoped>
 @import './kimi-markdown.css';
 .h100 {

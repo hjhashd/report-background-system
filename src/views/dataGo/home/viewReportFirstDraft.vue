@@ -119,6 +119,7 @@
           <div v-else-if="showRightType == 'ai-search'">
             <DraftRightAISearch
               :firstDraftId="currentChose"
+              :templateId="templateId"
               :chapterId="reportId"
               :editorHeight="editorHeight"
               :categoryId="categoryId"
