@@ -87,7 +87,7 @@
         <h2 class="title">搜索内容</h2>
       </div>
       <div class="flex down-content">
-        <div class="ai-content-body" :style="{ height: `${getBodyheight()}` }">
+        <div class="ai-content-body" :style="{ height: `${bodyHieght}` }">
           <div ref="messageContainer" class="ai-show-item flex-1">
             <div v-if="lineObj.length">
               <div v-for="item in lineObj" :key="item.id" class="flex">
@@ -129,7 +129,7 @@
             </a-button>
           </div>
         </div>
-        <div class="ai-content-body" :style="{ height: `${getBodyheight()}` }" v-if="resultBS">
+        <div class="ai-content-body" :style="{ height: `${bodyHieght}` }" v-if="resultBS">
           <div class="flex">
             <div class="flex result-title">
               <a-icon type="bulb" style="color: #44a5fd; font-size: 14px; font-weight: bold" />
@@ -143,7 +143,11 @@
           </div>
           <div ref="messageContainerR" class="ai-show-item">
             <a-spin :spinning="tounchBtnStatus" tip="Loading...">
-              <div v-if="tounchContent" class="prose-kimi prose-ai w100" v-html="tounchContent"></div>
+              <a-textarea
+                class="prose-kimi prose-ai w100"
+                :style="{ height: `${textHieght}` }"
+                v-model="tounchContent"
+              />
             </a-spin>
           </div>
           <!-- 底部按钮 -->
@@ -326,13 +330,23 @@ export default {
       aiResultLoading: false,
       currentType: null,
       searchBS: false,
-      resultBS: false,
+      resultBS: true,
+      bodyHieght: 0,
+      textHieght: 0,
     }
   },
   watch: {
     firstDraftId: {
       handler() {
         this.getQuickChoseList()
+      },
+      deep: true,
+    },
+    searchBS: {
+      handler(v) {
+        console.log(v)
+        this.getTextHeight()
+        this.getBodyheight()
       },
       deep: true,
     },
@@ -347,17 +361,30 @@ export default {
     this.getQuickChoseList()
     this.getAIRetouchType()
     this.getEngineList()
+    this.getTextHeight()
+    this.getBodyheight()
   },
   methods: {
     getBodyheight() {
       let height = parseInt(this.editorHeight) - 114
       if (!this.searchBS) {
-        height -= 140
+        height -= 206
       }
       if (this.resultBS) {
         height = height / 2
       }
-      return height + 'px'
+      this.bodyHieght = height + 'px'
+    },
+    getTextHeight() {
+      let height = parseInt(this.editorHeight) - 114
+      if (this.searchBS) {
+        height -= 206
+      }
+      if (this.resultBS) {
+        height = height / 2
+      }
+      height -= 80
+      this.textHieght = height + 'px'
     },
     getAIRetouchType() {
       getAIRetouchType().then((res) => {
@@ -444,13 +471,14 @@ export default {
       }
       const searchTerm = e.toLowerCase().trim()
       this.showRsList = this.quickReList.filter((option) => {
-        const valueToMatch = option.toString()?.toLowerCase() || ''
+        const valueToMatch = option.templateNameFilter.toString()?.toLowerCase() || ''
         return valueToMatch.includes(searchTerm)
       })
     },
     handleGenerate() {
       const _this = this
       _this.aiContent = ''
+      _this.resultContent = ''
       _this.lineObj = []
       const { $notification, quickSelected, inputContent } = this
       if (!quickSelected && !inputContent) {
@@ -546,6 +574,7 @@ export default {
     // AI总结
     AIResulted() {
       const _this = this
+      _this.resultContent = ''
       const { $notification, reportType, categoryId } = this
       if (!_this.wsClient) {
         $notification['error']({
@@ -604,7 +633,7 @@ export default {
         chapterId: this.firstDraftId, // 章节id
         content: this.tounchContent, // 润色内容,
         templateNameFilter: this.selectedContent, // 上面选择的报告内容项
-        type: 2
+        type: 2,
       }
       this.savingStauts = true
       saveDraftPolishing(parameter).then((res) => {
@@ -624,7 +653,7 @@ export default {
         draftId: this.chapterId, // 初稿id
         chapterId: this.firstDraftId, // 章节id
         templateNameFilter: this.selectedContent, // 上面选择的报告内容项
-        type: 2
+        type: 2,
       }
       getPolishingList(parameter).then((res) => {
         this.reportVersionList = res.data
