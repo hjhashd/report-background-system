@@ -80,7 +80,7 @@
       </a-button>
     </div>
     <!-- 已生成内容 -->
-    <div v-if="tounchContent" class="flex-1 ai-content-generate">
+    <div v-if="tounchContent || reportVersionList.length" class="flex-1 ai-content-generate">
       <!-- 展开/关闭 -->
       <div class="turn-roge" @click="() => (saveBS = !saveBS)">
         <a-icon class="ii-icon" :class="{ 'ic-icon': saveBS }" type="double-right" />
@@ -328,6 +328,15 @@ export default {
       })
     },
     starTounch() {
+      const { $notification } = this
+      if (!this.tounchContent) {
+        $notification['warn']({
+          message: '通知：',
+          description: `内容不能为空`,
+          duration: 6,
+        })
+        return
+      }
       const parameter = {
         content: this.tounchContent,
         types: this.retounchChose,
@@ -341,13 +350,21 @@ export default {
     resetReportFun() {
       // 保存版本
       const { $notification } = this
+      if (!this.tounchContent) {
+        $notification['warn']({
+          message: '通知：',
+          description: `内容不能为空`,
+          duration: 6,
+        })
+        return
+      }
       const parameter = {
         draftId: this.chapterId, // 初稿id
         versionName: this.otherSaveReportName, // 版本名称
         chapterId: this.firstDraftId, // 章节id
         content: this.tounchContent, // 润色内容,
         templateNameFilter: this.selectedContent, // 上面选择的报告内容项
-        type: 1
+        type: 1,
       }
       this.savingStauts = true
       saveDraftPolishing(parameter).then((res) => {
@@ -367,7 +384,7 @@ export default {
         draftId: this.chapterId, // 初稿id
         chapterId: this.firstDraftId, // 章节id
         templateNameFilter: this.selectedContent, // 上面选择的报告内容项
-        type: 1
+        type: 1,
       }
       getPolishingList(parameter).then((res) => {
         this.reportVersionList = res.data

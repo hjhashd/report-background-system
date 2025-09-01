@@ -78,7 +78,7 @@
       </a-button>
     </div>
     <!-- 已生成内容 -->
-    <div v-if="aiContent || lineObj.length" class="flex-1 ai-content-generate">
+    <div class="flex-1 ai-content-generate">
       <!-- 展开/关闭 -->
       <div class="turn-roge" @click="() => (searchBS = !searchBS)">
         <a-icon class="ii-icon" :class="{ 'ic-icon': searchBS }" type="double-right" />
@@ -87,7 +87,7 @@
         <h2 class="title">搜索内容</h2>
       </div>
       <div class="flex down-content">
-        <div class="ai-content-body" :style="{ height: `${bodyHieght}` }">
+        <div class="ai-content-body" :style="{ height: `${bodyHieght}` }" v-if="aiContent || lineObj.length">
           <div ref="messageContainer" class="ai-show-item flex-1">
             <div v-if="lineObj.length">
               <div v-for="item in lineObj" :key="item.id" class="flex">
@@ -129,7 +129,7 @@
             </a-button>
           </div>
         </div>
-        <div class="ai-content-body" :style="{ height: `${bodyHieght}` }" v-if="resultBS">
+        <div class="ai-content-body" :style="{ height: `${bodyReHieght}` }" v-if="resultBS">
           <div class="flex">
             <div class="flex result-title">
               <a-icon type="bulb" style="color: #44a5fd; font-size: 14px; font-weight: bold" />
@@ -344,9 +344,9 @@ export default {
     },
     searchBS: {
       handler(v) {
-        console.log(v)
         this.getTextHeight()
         this.getBodyheight()
+        this.getBodyReheight()
       },
       deep: true,
     },
@@ -363,6 +363,8 @@ export default {
     this.getEngineList()
     this.getTextHeight()
     this.getBodyheight()
+    this.getBodyReheight()
+    this.getReportVersionList()
   },
   methods: {
     getBodyheight() {
@@ -375,16 +377,18 @@ export default {
       }
       this.bodyHieght = height + 'px'
     },
-    getTextHeight() {
+    getBodyReheight() {
       let height = parseInt(this.editorHeight) - 114
-      if (this.searchBS) {
+      if (!this.searchBS) {
         height -= 206
       }
-      if (this.resultBS) {
+      if (this.aiContent || this.lineObj.length) {
         height = height / 2
       }
-      height -= 80
-      this.textHieght = height + 'px'
+      this.bodyReHieght = height + 'px'
+    },
+    getTextHeight() {
+      this.textHieght = parseInt(this.editorHeight) - 85 + 'px'
     },
     getAIRetouchType() {
       getAIRetouchType().then((res) => {
@@ -657,6 +661,10 @@ export default {
       }
       getPolishingList(parameter).then((res) => {
         this.reportVersionList = res.data
+        if (res.data.length) {
+          //显示总结选项
+          this.resultBS = true
+        }
       })
     },
     versionChange(item) {
