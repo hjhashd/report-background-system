@@ -350,6 +350,13 @@ export default {
       },
       deep: true,
     },
+    editorHeight: {
+      handler() {
+        this.getTextHeight()
+        this.getBodyheight()
+        this.getBodyReheight()
+      },
+    },
   },
   computed: {
     ...mapState({
