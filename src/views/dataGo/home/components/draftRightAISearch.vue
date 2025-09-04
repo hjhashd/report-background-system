@@ -332,6 +332,7 @@ export default {
       searchBS: false,
       resultBS: true,
       bodyHieght: 0,
+      bodyReHieght: 0,
       textHieght: 0,
     }
   },
@@ -472,7 +473,7 @@ export default {
       this.quickSelected = this.quickSelected == text.id ? '' : text.id
     },
     chooseQuickAI(value) {
-      this.quickSelected = value.target.value
+    this.quickSelected = value.target.value
     },
     sortRs(es) {
       const e = es.target.value
@@ -501,7 +502,7 @@ export default {
         return
       }
       // 获取快速选择的prompt
-      const prompt = quickSelected ? _this.quickSelectList.find((i) => i.id === quickSelected).prompt : ''
+      const prompt = quickSelected ? _this.showRsList.find((i) => i.id === quickSelected).prompt : ''
       _this.buildContent = true
       _this.aiResultLoading = true
 
