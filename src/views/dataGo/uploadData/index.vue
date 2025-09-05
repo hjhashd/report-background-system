@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2025-02-18 16:37:26
  * @LastEditors: bekon
- * @LastEditTime: 2025-05-11 16:05:36
- * @FilePath: \report-background-system\src\views\dataGo\uploadData\index.vue
+ * @LastEditTime: 2025-09-05 17:17:48
+ * @FilePath: /report-background-system/src/views/dataGo/uploadData/index.vue
  * @Description: 数据上传
  * 
 -->
@@ -119,7 +119,7 @@ export default {
     this.initData()
   },
   methods: {
-    ...mapActions(['changeBuildQrCodePop']),
+    ...mapActions(['changeBuildQrCodePop', 'chooseEnter']),
     initData() {
       getCustomerList({})
         .then((res) => {
@@ -146,6 +146,8 @@ export default {
       }
     },
     customerHandle(v) {
+      //  存vuex
+      this.chooseEnter(this.customers[v])
       this.customerInfo = this.customers[v]
       this.getCustomerData()
     },

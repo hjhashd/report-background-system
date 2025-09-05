@@ -14,8 +14,18 @@
             <div class="search-item" style="flex: 1">
               <!-- <img style="" src="@/assets/images/customers.png" alt="dark" /> -->
               <a-icon type="team" style="color: #7fbbf1; margin-right: 10px; font-size: 22px" />
-              <a-select style="flex: 1" placeholder="选择查询客户" v-model="selectedCustomer" @change="selectCu">
-                <a-select-option v-for="(customer, index) in customers" :value="customer.userId" :key="index">
+              <a-select
+                showSearch
+                style="flex: 1"
+                placeholder="选择查询客户"
+                v-model="selectedCustomerName"
+                @change="selectCu"
+              >
+                <a-select-option
+                  v-for="(customer, index) in customers"
+                  :value="customer.enterprise.enterpriseName"
+                  :key="index"
+                >
                   {{ customer.enterprise.enterpriseName }}
                 </a-select-option>
               </a-select>
@@ -37,8 +47,7 @@
               </div>
             </div>
             <div>
-              <span v-if="secondLevel">数值单位:万元；比率:实际数值</span
-              ><span v-else>单位:万元；环比单位:实际值</span>
+              <span v-if="secondLevel">数值单位:万元；比率:实际数值</span><span v-else>单位:万元；环比单位:实际值</span>
             </div>
           </div>
           <a-table
@@ -338,6 +347,7 @@ export default {
       tabSelect: uploadTab[0],
       reportTypeList,
       selectedCustomer: null,
+      selectedCustomerName: null,
       tableLoading: true,
       customers: [],
       tabSelected: '财务基础指标',
@@ -367,9 +377,18 @@ export default {
     }).then((res) => {
       const responseData = res.data
       this.customers = responseData
-      if (this.customerDetail) {
+      if (this.entery) {
+        this.selectedCustomerName = responseData.find(
+          (i) => i.userId == this.entery.appUserId
+        ).enterprise.enterpriseName
+        this.selectedCustomer = responseData.find((i) => i.userId == this.entery.appUserId).userId
+      } else if (this.customerDetail) {
+        this.selectedCustomerName = responseData.find(
+          (i) => i.userId == this.customerDetail.userId
+        ).enterprise.enterpriseName
         this.selectedCustomer = responseData.find((i) => i.userId == this.customerDetail.userId).userId
       } else {
+        this.selectedCustomerName = responseData[0].enterprise.enterpriseName
         this.selectedCustomer = responseData[0].userId
       }
       this.getAbnormalData()
@@ -386,6 +405,7 @@ export default {
     ...mapState({
       // 动态主路由
       userInfo: (state) => state.user.info,
+      entery: (state) => state.user.entery,
     }),
   },
   methods: {
@@ -425,6 +445,8 @@ export default {
       this.getAbnormalData()
     },
     selectCu(v) {
+      const selectItem = this.customers.find((i) => i.enterprise.enterpriseName == v)
+      this.selectedCustomer = selectItem.userId
       this.getAbnormalData()
     },
     getAbnormalData() {

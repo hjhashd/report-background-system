@@ -28,6 +28,7 @@ const user = {
     buildQrCodePop: false,
     collapsed: false,
     fullScreen: false,
+    entery: null
   },
 
   mutations: {
@@ -55,6 +56,9 @@ const user = {
     },
     SET_BUILD_QRCODE: (state, status) => {
       state.buildQrCodePop = status
+    },
+    SET_CHOOSE_ENTERY: (state, item) => {
+      state.entery = item
     },
     SET_OVERVIEW: (state, info) => {
       state.overview = info
@@ -160,6 +164,14 @@ const user = {
     changeBuildQrCodePop({ commit }, status) {
       return new Promise((resolve) => {
         commit('SET_BUILD_QRCODE', status)
+        resolve();
+      })
+    },
+
+    // 存储选中的企业
+    chooseEnter({ commit }, item) {
+      return new Promise((resolve) => {
+        commit('SET_CHOOSE_ENTERY', item)
         resolve();
       })
     },

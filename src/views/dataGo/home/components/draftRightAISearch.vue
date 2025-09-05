@@ -78,7 +78,7 @@
       </a-button>
     </div>
     <!-- 已生成内容 -->
-    <div class="flex-1 ai-content-generate">
+    <div class="flex-1 ai-content-generate" v-if="aiContent || lineObj.length || resultBS">
       <!-- 展开/关闭 -->
       <div class="turn-roge" @click="() => (searchBS = !searchBS)">
         <a-icon class="ii-icon" :class="{ 'ic-icon': searchBS }" type="double-right" />
@@ -330,7 +330,7 @@ export default {
       aiResultLoading: false,
       currentType: null,
       searchBS: false,
-      resultBS: true,
+      resultBS: false,
       bodyHieght: 0,
       bodyReHieght: 0,
       textHieght: 0,
@@ -345,7 +345,13 @@ export default {
     },
     searchBS: {
       handler(v) {
-        this.getTextHeight()
+        this.getBodyheight()
+        this.getBodyReheight()
+      },
+      deep: true,
+    },
+    resultBS: {
+      handler(v) {
         this.getBodyheight()
         this.getBodyReheight()
       },
@@ -353,7 +359,6 @@ export default {
     },
     editorHeight: {
       handler() {
-        this.getTextHeight()
         this.getBodyheight()
         this.getBodyReheight()
       },
@@ -369,7 +374,6 @@ export default {
     this.getQuickChoseList()
     this.getAIRetouchType()
     this.getEngineList()
-    this.getTextHeight()
     this.getBodyheight()
     this.getBodyReheight()
     this.getReportVersionList()
@@ -394,9 +398,10 @@ export default {
         height = height / 2
       }
       this.bodyReHieght = height + 'px'
+      this.getTextHeight()
     },
     getTextHeight() {
-      this.textHieght = parseInt(this.editorHeight) - 85 + 'px'
+      this.textHieght = parseInt(this.bodyReHieght) - 85 + 'px'
     },
     getAIRetouchType() {
       getAIRetouchType().then((res) => {
@@ -473,7 +478,7 @@ export default {
       this.quickSelected = this.quickSelected == text.id ? '' : text.id
     },
     chooseQuickAI(value) {
-    this.quickSelected = value.target.value
+      this.quickSelected = value.target.value
     },
     sortRs(es) {
       const e = es.target.value
@@ -510,6 +515,7 @@ export default {
 
       // 设置回调
       _this.wsClient.on('message', (content) => {
+        if (!_this.searchBS) _this.searchBS = true
         if (_this.currentType == 'content') {
           _this.aiContent += `${content}`
           _this.showAIContent = `${parseMarkdown(_this.aiContent)}`
@@ -517,7 +523,7 @@ export default {
         } else {
           _this.resultContent += `${content}`
           _this.tounchContent = `${parseMarkdown(_this.resultContent)}`
-          this.scrollToBottomR()
+          _this.scrollToBottomR()
         }
       })
 
@@ -558,7 +564,6 @@ export default {
         .then(() => {
           // 发送内容消息（立即搜索）
           _this.wsClient.sendContentMessage(inputContent, prompt)
-          _this.searchBS = true
           _this.currentType = 'content'
         })
         .catch((error) => {
@@ -597,9 +602,9 @@ export default {
         return
       }
       _this.aiResultLoading = true
+      _this.resultBS = true
       _this.currentType = 'summary'
       _this.wsClient.sendSummaryRequest(reportType, categoryId)
-      _this.resultBS = true
     },
     // 进一步提问
     stepAIQuestion() {

@@ -2,8 +2,8 @@
  * @Author: bekon
  * @Date: 2022-10-10 22:31:07
  * @LastEditors: bekon
- * @LastEditTime: 2025-05-12 21:39:15
- * @FilePath: \report-background-system\src\store\getters.js
+ * @LastEditTime: 2025-09-05 17:18:28
+ * @FilePath: /report-background-system/src/store/getters.js
  * @Description: 
  * 
  */
@@ -23,6 +23,7 @@ const getters = {
   buildQrCodePop: state => state.user.buildQrCodePop,
   overview: state => state.user.overview,
   collapsed: state => state.user.collapsed,
+  entery: state => state.user.entery,
 }
 
 export default getters
