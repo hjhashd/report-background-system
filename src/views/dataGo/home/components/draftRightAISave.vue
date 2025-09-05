@@ -36,7 +36,7 @@
           <a-button
             size="small"
             class="quick-select-item"
-            :class="{ active: item == quickSelected }"
+            :class="{ active: quickSelected.includes(item) }"
             v-for="(item, index) in quickSelectList"
             :key="index"
             type="default"
@@ -46,7 +46,7 @@
           </a-button>
 
           <a-dropdown v-if="quickReList.length">
-            <a-radio-group
+            <a-checkbox-group
               style="background-color: #fff; padding: 5px; border: 1px solid #f5f5f5"
               slot="overlay"
               v-model="quickSelected"
@@ -57,10 +57,10 @@
               </div>
               <div style="max-height: 40vh; overflow-y: scroll; overflow-x: hidden">
                 <a-row v-for="(item, index) in showRsList" :key="index" :value="item">
-                  <a-radio :value="item">{{ item }}</a-radio>
+                  <a-checkbox :value="item">{{ item }}</a-checkbox>
                 </a-row>
               </div>
-            </a-radio-group>
+            </a-checkbox-group>
             <a-button class="quick-select-item more-btn" style="margin-left: 8px">
               <img style="width: 15px; height: 15px" src="@/assets/images/more-sort.png" alt="dark" /> <span>更多</span>
             </a-button>
@@ -200,7 +200,7 @@ export default {
       quickReList: [],
       quickSelectList: [],
       aiSaveBtn: true,
-      quickSelected: null,
+      quickSelected: [],
       showRsList: [],
       buildContent: false, // 生成内容按钮状态
       tounchContent: '',
@@ -278,10 +278,14 @@ export default {
       this.$emit('close')
     },
     handleQuickSelect(text) {
-      this.quickSelected = this.quickSelected == text ? '' : text
+      if(this.quickSelected.includes(text)){
+        this.quickSelected = this.quickSelected.filter((u)=> u !== text)
+      }else{
+        this.quickSelected.push(text)
+      }
     },
     chooseQuickAI(value) {
-      this.quickSelected = value.target.value
+      this.quickSelected = value
     },
     sortRs(es) {
       const e = es.target.value
@@ -297,7 +301,7 @@ export default {
     },
     handleGenerate() {
       const { $notification } = this
-      if (!this.quickSelected && !this.prompt) {
+      if (!this.quickSelected.length && !this.prompt) {
         $notification['warn']({
           message: '通知：',
           description: `自定义提示词或快速选择不可均为空`,

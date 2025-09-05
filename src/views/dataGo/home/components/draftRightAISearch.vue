@@ -40,7 +40,7 @@
           <a-button
             size="small"
             class="quick-select-item"
-            :class="{ active: item.id == quickSelected }"
+            :class="{ active: quickSelected.includes(item.id) }"
             v-for="(item, index) in quickSelectList"
             :key="index"
             type="default"
@@ -50,7 +50,7 @@
           </a-button>
 
           <a-dropdown v-if="quickReList.length">
-            <a-radio-group
+            <a-checkbox-group
               style="background-color: #fff; padding: 5px; border: 1px solid #f5f5f5"
               slot="overlay"
               v-model="quickSelected"
@@ -61,10 +61,10 @@
               </div>
               <div style="max-height: 40vh; overflow-y: scroll; overflow-x: hidden">
                 <a-row v-for="(item, index) in showRsList" :key="index" :value="item">
-                  <a-radio :value="item.id">{{ item.templateNameFilter }}</a-radio>
+                  <a-checkbox :value="item.id">{{ item.templateNameFilter }}</a-checkbox>
                 </a-row>
               </div>
-            </a-radio-group>
+            </a-checkbox-group>
             <a-button class="quick-select-item more-btn" style="margin-left: 8px">
               <img style="width: 15px; height: 15px" src="@/assets/images/more-sort.png" alt="dark" /> <span>更多</span>
             </a-button>
@@ -301,7 +301,7 @@ export default {
       selectedContent: '', // 默认选中项
       quickReList: [],
       quickSelectList: [],
-      quickSelected: null,
+      quickSelected: [],
       showRsList: [],
       buildContent: false, // 生成内容按钮状态
       tounchContent: '',
@@ -475,10 +475,14 @@ export default {
       this.$emit('close')
     },
     handleQuickSelect(text) {
-      this.quickSelected = this.quickSelected == text.id ? '' : text.id
+      if(this.quickSelected.includes(text.id)){
+        this.quickSelected = this.quickSelected.filter((u)=> u !== text.id)
+      }else{
+        this.quickSelected.push(text.id)
+      }
     },
     chooseQuickAI(value) {
-      this.quickSelected = value.target.value
+      this.quickSelected = value
     },
     sortRs(es) {
       const e = es.target.value
@@ -498,7 +502,7 @@ export default {
       _this.resultContent = ''
       _this.lineObj = []
       const { $notification, quickSelected, inputContent } = this
-      if (!quickSelected && !inputContent) {
+      if (!quickSelected.length && !inputContent) {
         $notification['warn']({
           message: '通知：',
           description: `搜索内容不能为空`,
@@ -507,7 +511,12 @@ export default {
         return
       }
       // 获取快速选择的prompt
-      const prompt = quickSelected ? _this.showRsList.find((i) => i.id === quickSelected).prompt : ''
+      let prompt = ''
+      _this.showRsList.forEach(v => {
+        if(quickSelected.includes(v.id)){
+          prompt += v.prompt
+        }
+      });
       _this.buildContent = true
       _this.aiResultLoading = true
 
