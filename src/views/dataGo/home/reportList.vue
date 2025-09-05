@@ -2,7 +2,7 @@
  * @Author: bekon
  * @Date: 2025-05-14 13:58:53
  * @LastEditors: bekon
- * @LastEditTime: 2025-08-28 14:35:03
+ * @LastEditTime: 2025-09-05 12:34:43
  * @FilePath: /report-background-system/src/views/dataGo/home/reportList.vue
  * @Description: 
  * 
@@ -35,7 +35,7 @@ export default {
         },
         {
           type: 2,
-          name: '财务分析报告',
+          name: '已完成报告',
         },
       ],
     }
