@@ -520,6 +520,12 @@ export default {
       _this.buildContent = true
       _this.aiResultLoading = true
 
+      if(_this.wsClient){
+        // 存在，断开链接，重新链接
+        _this.wsClient.close();
+        _this.wsClient = null
+      }
+
       _this.wsClient = new AIWebSocketClient()
 
       // 设置回调
