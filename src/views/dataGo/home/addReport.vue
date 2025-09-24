@@ -4,8 +4,8 @@
  * @LastEditors: bekon
  * @LastEditTime: 2025-08-26 20:25:55
  * @FilePath: /report-background-system/src/views/dataGo/home/addReport.vue
- * @Description: 
- * 
+ * @Description:
+ *
 -->
 <template>
   <page-header-wrapper>
@@ -89,8 +89,8 @@
             </div>
           </div>
           <div class="right-box">
-            <div v-if="currentModalInfo" class="modal-port">
-              <img :src="currentModalInfo.typeImage" alt="" />
+            <div v-if="reportTemplateClassifyItem" class="modal-port">
+              <img :src="reportTemplateClassifyItem.classifyNameImage" alt="" />
             </div>
           </div>
         </div>
@@ -152,6 +152,7 @@ export default {
       reportTemplateClassifyName: '',
       indeterminate: true,
       checkAll: false,
+      reportTemplateClassifyItem: null
     }
   },
   created() {
@@ -173,8 +174,10 @@ export default {
       })
     },
     reportTemplateChange(v) {
+      console.log(v)
       this.reportTemplateClassify = v
       this.reportTemplateClassifyName = this.reportTemplateClassifyList.find((item) => item.id == v).classifyName
+      this.reportTemplateClassifyItem = this.reportTemplateClassifyList.find((item) => item.id == v)
       this.getReportModal()
     },
     changeType(item) {
@@ -190,6 +193,7 @@ export default {
     chooseChange(v) {
       setTimeout(() => {
         this.tabA = 1
+        this.reportTemplateClassifyItem = this.reportTemplateClassifyList.find((item) => item.id == this.reportTemplateClassify)
         this.getReportModal()
       }, 500)
     },
