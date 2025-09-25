@@ -127,7 +127,7 @@ export function batchDeleteFirstDraft(ids) {
     return request({
         url: reportAPI.batchDeleteFirstDraft,
         method: 'post',
-        data: ids
+        data: {ids:ids}
     })
 }
 
@@ -237,7 +237,7 @@ export function batchDeleteReport(ids) {
     return request({
         url: reportAPI.batchDeleteReport,
         method: 'delete',
-        data: {ids:ids}
+        data: ids
     })
 }
 export function getAppFileList(parameter) {
