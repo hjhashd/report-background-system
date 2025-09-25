@@ -237,7 +237,7 @@ export function batchDeleteReport(ids) {
     return request({
         url: reportAPI.batchDeleteReport,
         method: 'delete',
-        data: ids
+        data: {ids:ids}
     })
 }
 export function getAppFileList(parameter) {
