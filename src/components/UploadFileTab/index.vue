@@ -76,7 +76,17 @@
                   placeholder="请选择匹配字段"
                   @change="pickFields"
                 >
-                  <a-select-option
+
+                  <a-select-option v-if="specialTableNames.includes(clickItem.tableNameZh)"
+                    v-for="(data, i) in dataRecord"
+                    :data-fields="item.fieldNameCh"
+                    :value="data"
+                    :key="i"
+                  >
+                    {{ data }}
+                  </a-select-option>
+
+                  <a-select-option v-if="!specialTableNames.includes(clickItem.tableNameZh)"
                     v-for="(data, i) in excelData"
                     :data-fields="item.fieldNameCh"
                     :value="data.fieldNameCh"
@@ -151,6 +161,8 @@ export default {
       uploadTableFiedls: [],
       excelData: [],
       mapping: {},
+      dataRecord: [],
+      specialTableNames: ['现金流量表', '利润表', '资产负债表']
     }
   },
   methods: {
@@ -201,6 +213,8 @@ export default {
       this.pickFieldsData = pickFieldsData
     },
     pickFields(v, item) {
+      console.log(v)
+      console.log(item)
       const key = item.data.attrs['data-fields']
       // 赋值
       this.mapping[key] = v
@@ -215,11 +229,18 @@ export default {
         if (specialTable.includes(tableNameZh)) {
           getNewSpecialFields(tableNameZh)
             .then((res) => {
+              // this.dataRecord = res.data
+
+
+
               const matchFields = {}
               const mapping = {}
               this.tabLoading = false
               const uploadTableFiedls = []
               res.data.forEach(item => {
+                if(!this.dataRecord.includes(item.record)){
+                  this.dataRecord.push(item.record)
+                }
                 matchFields[item.originRecord] = item.record
               })
 
