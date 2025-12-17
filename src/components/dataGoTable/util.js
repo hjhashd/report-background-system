@@ -11,30 +11,38 @@ export function dealTable(data, isCanEdit = false) {
     let columns = [];
 
     if (data.length) {
-        const first = data[0]
-        for (const key in first) {
-            if (key !== 'id') {
-                const columnItem = {
-                    width: '200px',
-                    title: key,
-                    dataIndex: key,
-                    key: key,
-                    customHeaderCell: () => {
-                        return {
-                            style: {
-                                backgroundColor: '#EFF6FF',
-                                color: '#656D92',
-                                padding: '5px'
-                            }
-                        };
-                    },
+        // 收集所有行中的字段键名，而不仅仅是第一行
+        const allKeys = new Set();
+        data.forEach(row => {
+            Object.keys(row).forEach(key => {
+                if (key !== 'id') {
+                    allKeys.add(key);
                 }
-                if (isCanEdit) {
-                    columnItem.scopedSlots = { customRender: key }
-                }
-                columns.push(columnItem)
+            });
+        });
+
+        // 为每个唯一键创建列配置
+        allKeys.forEach(key => {
+            const columnItem = {
+                width: '200px',
+                title: key,
+                dataIndex: key,
+                key: key,
+                customHeaderCell: () => {
+                    return {
+                        style: {
+                            backgroundColor: '#EFF6FF',
+                            color: '#656D92',
+                            padding: '5px'
+                        }
+                    };
+                },
             }
-        }
+            if (isCanEdit) {
+                columnItem.scopedSlots = { customRender: key }
+            }
+            columns.push(columnItem);
+        });
 
         if (isCanEdit) {
             columns.unshift({

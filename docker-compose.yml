@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  # 开发环境服务
+  app-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: report-system-dev
+    ports:
+      - "3003:8000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VUE_APP_PREVIEW=true
+      - VUE_APP_API_BASE_URL=http://localhost:8080/stage-api
+    networks:
+      - report-network
+    profiles:
+      - dev
+
+  # 生产环境服务
+  app-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: prod
+    container_name: report-system-prod
+    ports:
+      - "3003:8000"
+    environment:
+      - NODE_ENV=production
+      - VUE_APP_PREVIEW=false
+      - VUE_APP_API_BASE_URL=/stage-api
+    networks:
+      - report-network
+    profiles:
+      - prod
+
+networks:
+  report-network:
+    driver: bridge
