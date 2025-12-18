@@ -123,16 +123,105 @@ const vueConfig = {
   },
 
   devServer: {
-    // development server port 8000
-    port: 8000
-    // If you want to turn on the proxy, please remove the mockjs /src/main.jsL11
-    // proxy: {
-    //   '/api': {
-    //     target: 'https://mock.ihx.me/mock/5baf3052f7da7e07e04a5116/antd-pro',
-    //     ws: false,
-    //     changeOrigin: true
-    //   }
-    // }
+    port: 8000,
+    setupMiddlewares(middlewares, devServer) {
+      if (!devServer || !devServer.app) return middlewares
+      
+      // Create local storage directory
+      try {
+        const path = require('path')
+        const fs = require('fs')
+        const dir = path.join(__dirname, 'public', 'local-storage', 'drafts')
+        fs.mkdirSync(dir, { recursive: true })
+      } catch (e) {}
+      
+      devServer.app.post('/__local-upload', (req, res) => {
+        const chunks = []
+        req.on('data', (c) => chunks.push(c))
+        req.on('end', () => {
+          try {
+            const raw = Buffer.concat(chunks).toString('utf-8')
+            const json = raw ? JSON.parse(raw) : {}
+            const nameRaw = json && json.filename ? json.filename : ''
+            const name = require('path').basename(nameRaw || '')
+            const base64 = json && json.content ? json.content : ''
+            const buf = base64 ? Buffer.from(base64, 'base64') : Buffer.alloc(0)
+            const dir = require('path').join(__dirname, 'public', 'local-storage', 'drafts')
+            require('fs').mkdirSync(dir, { recursive: true })
+            require('fs').writeFileSync(require('path').join(dir, name), buf)
+            res.status(200).json({ ok: true })
+          } catch (e) {
+            res.status(500).json({ ok: false, error: e && e.message ? e.message : String(e) })
+          }
+        })
+      })
+      devServer.app.get('/__local-upload/ping', (req, res) => {
+        res.status(200).json({ ok: true })
+      })
+      devServer.app.get('/__proxy-fetch', (req, res) => {
+        const url = req.query && req.query.url ? req.query.url : ''
+        if (!url) {
+          res.status(400).json({ ok: false, error: 'missing url' })
+          return middlewares
+        }
+        try {
+          const u = new URL(url)
+          const mod = u.protocol === 'https:' ? require('https') : require('http')
+          const opts = { method: 'GET' }
+          const req2 = mod.request(url, opts, (r2) => {
+            const chunks = []
+            r2.on('data', (c) => chunks.push(c))
+            r2.on('end', () => {
+              const buf = Buffer.concat(chunks)
+              res.setHeader('Content-Type', 'application/octet-stream')
+              res.setHeader('Content-Length', buf.length)
+              res.status(200).end(buf)
+            })
+          })
+          req2.on('error', (e) => {
+            res.status(500).json({ ok: false, error: e && e.message ? e.message : String(e) })
+          })
+          req2.end()
+        } catch (e) {
+          res.status(500).json({ ok: false, error: e && e.message ? e.message : String(e) })
+        }
+      })
+      devServer.app.delete('/__local-upload', (req, res) => {
+        try {
+          const path = require('path')
+          const fs = require('fs')
+          const nameRaw = req.query && req.query.filename ? req.query.filename : ''
+          const name = path.basename(nameRaw || '')
+          const dir = path.join(__dirname, 'public', 'local-storage', 'drafts')
+          const fp = path.join(dir, name)
+          fs.unlinkSync(fp)
+          res.status(200).json({ ok: true })
+        } catch (e) {
+          res.status(500).json({ ok: false, error: e && e.message ? e.message : String(e) })
+        }
+      })
+      devServer.app.post('/__local-upload/delete', (req, res) => {
+        const chunks = []
+        req.on('data', (c) => chunks.push(c))
+        req.on('end', () => {
+          try {
+            const raw = Buffer.concat(chunks).toString('utf-8')
+            const json = raw ? JSON.parse(raw) : {}
+            const path = require('path')
+            const fs = require('fs')
+            const nameRaw = json && json.filename ? json.filename : ''
+            const name = path.basename(nameRaw || '')
+            const dir = path.join(__dirname, 'public', 'local-storage', 'drafts')
+            const fp = path.join(dir, name)
+            fs.unlinkSync(fp)
+            res.status(200).json({ ok: true })
+          } catch (e) {
+            res.status(500).json({ ok: false, error: e && e.message ? e.message : String(e) })
+          }
+        })
+      })
+      return middlewares
+    }
   },
 
   // disable source map in production

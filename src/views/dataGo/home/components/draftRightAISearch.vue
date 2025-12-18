@@ -405,15 +405,15 @@ export default {
     },
     getAIRetouchType() {
       getAIRetouchType().then((res) => {
-        this.retounchTypeList = res.data
+        const list = (res && Array.isArray(res.data)) ? res.data : []
+        this.retounchTypeList = list
       })
     },
     getEngineList() {
       getAIEngineList().then((res) => {
-        if (res.data.length) {
-          this.engineList = res.data
-          this.currentEngine = res.data[0].id
-        }
+        const list = (res && Array.isArray(res.data)) ? res.data : []
+        this.engineList = list
+        this.currentEngine = list.length ? list[0].id : null
       })
     },
     addEngine() {
@@ -454,19 +454,21 @@ export default {
       })
     },
     getQuickChoseList() {
-      getEngineQuickList(this.templateId).then((res) => {
-        if (res.data[0] === '无') {
+      getEngineQuickChoseSafe(this.templateId).then((list) => {
+        if (!list.length) {
           this.quickReList = []
           this.quickSelectList = []
           this.showRsList = []
+          return
+        }
+        if (list.length > 3) {
+          this.quickReList = list
+          this.quickSelectList = [list[0], list[1], list[2]]
+          this.showRsList = list
         } else {
-          if (res.data.length > 3) {
-            this.quickReList = res.data
-            this.quickSelectList = [res.data[0], res.data[1], res.data[2]]
-            this.showRsList = res.data
-          } else {
-            this.quickSelectList = res.data
-          }
+          this.quickReList = list
+          this.quickSelectList = list
+          this.showRsList = list
         }
       })
     },
@@ -492,7 +494,8 @@ export default {
       }
       const searchTerm = e.toLowerCase().trim()
       this.showRsList = this.quickReList.filter((option) => {
-        const valueToMatch = option.templateNameFilter.toString()?.toLowerCase() || ''
+        const raw = option && option.templateNameFilter
+        const valueToMatch = (raw ? String(raw) : '').toLowerCase()
         return valueToMatch.includes(searchTerm)
       })
     },
@@ -574,11 +577,21 @@ export default {
         }
       })
       // 连接到服务器
+      if (!_this.currentEngine) {
+        $notification['error']({
+          message: '通知：',
+          description: `请选择搜索引擎`,
+          duration: 6,
+        })
+        _this.buildContent = false
+        _this.aiResultLoading = false
+        return
+      }
+      const userId = (_this.userInfo && _this.userInfo.userId) ? _this.userInfo.userId : 'anonymous'
       _this.wsClient
-        .connect(_this.userInfo.userId, _this.currentEngine)
+        .connect(userId, _this.currentEngine)
         .then(() => {
-          // 发送内容消息（立即搜索）
-          _this.wsClient.sendContentMessage(inputContent, prompt)
+          _this.wsClient.sendContentMessage(inputContent || '', prompt || '')
           _this.currentType = 'content'
         })
         .catch((error) => {
@@ -616,10 +629,30 @@ export default {
         })
         return
       }
+      if (!_this.currentEngine) {
+        $notification['error']({
+          message: '通知：',
+          description: `请选择搜索引擎`,
+          duration: 6,
+        })
+        return
+      }
       _this.aiResultLoading = true
       _this.resultBS = true
       _this.currentType = 'summary'
       _this.wsClient.sendSummaryRequest(reportType, categoryId)
+    },
+    getEngineQuickChoseSafe(templateId) {
+      return new Promise((resolve) => {
+        getEngineQuickList(templateId).then((res) => {
+          const list = (res && Array.isArray(res.data)) ? res.data : []
+          if (list.length && list[0] === '无') {
+            resolve([])
+            return
+          }
+          resolve(list)
+        }).catch(() => resolve([]))
+      })
     },
     // 进一步提问
     stepAIQuestion() {

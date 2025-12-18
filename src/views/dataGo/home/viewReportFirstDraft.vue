@@ -20,20 +20,31 @@
               </template>
               <div class="sys-title single-line-text">{{ reportName }}</div>
             </a-tooltip>
-            <a-badge
-              :offset="[-3, 5]"
-              v-if="reportDetail && reportDetail.tableChangeInfos && reportDetail.tableChangeInfos.length"
-              :count="reportDetail.tableChangeInfos.length"
-            >
-              <a-button style="margin-left: 5px" icon="bell" type="link" @click="lookUploadModal(scoped)"></a-button>
-            </a-badge>
           </div>
-          <div class="flex" v-if="typeFrom !== 'industryReport'">
-            <a-tooltip v-if="!fullView">
-              <template slot="title">
-                <span>全屏</span>
-              </template>
-              <div class="btn-item" @click="allViewPort">
+        <div class="flex">
+          <a-tooltip>
+            <template slot="title">
+              <span>{{ editableMode ? '退出编辑' : '进入编辑' }}</span>
+            </template>
+            <div class="btn-item" @click="toggleEditMode">
+              <div class="icon-box">
+                <a-icon style="color: #5787ee" :type="editableMode ? 'lock' : 'edit'" />
+              </div>
+            </div>
+          </a-tooltip>
+          <a-tooltip>
+            <template slot="title">
+              <span>保存</span>
+            </template>
+            <div class="btn-item" @click="saveCurrent">
+              <div class="icon-box"><a-icon style="color: #4db36f" type="save" /></div>
+            </div>
+          </a-tooltip>
+          <a-tooltip v-if="!fullView">
+            <template slot="title">
+              <span>全屏</span>
+            </template>
+            <div class="btn-item" @click="allViewPort">
                 <div class="icon-box"><a-icon style="color: rgb(87, 135, 238)" type="fullscreen" /></div>
               </div>
             </a-tooltip>
@@ -69,42 +80,44 @@
                 <div class="icon-box"><a-icon style="color: rgb(87, 135, 238)" type="redo" /></div>
               </div>
             </a-tooltip>
+            <a-tooltip>
+              <template slot="title">
+                <span>诊断</span>
+              </template>
+              <div class="btn-item" @click="toggleDebug">
+                <div class="icon-box"><a-icon style="color: rgb(87, 135, 238)" type="bug" /></div>
+              </div>
+            </a-tooltip>
+            <a-tooltip>
+              <template slot="title">
+                <span>资料选择</span>
+              </template>
+              <div class="btn-item" @click="openRight('file-select')">
+                <div class="icon-box"><a-icon style="color: rgb(87, 135, 238)" type="folder-open" /></div>
+              </div>
+            </a-tooltip>
           </div>
         </div>
       </div>
       <div class="flex flex-1" :style="{ height: editorHeight, position: 'relative' }">
-        <div
-          class="left-content"
-          :class="{ 'close-body': isListCollapsed }"
-          :style="{ height: editorHeight }"
-          v-if="draftTemplateList.length"
-        >
-          <a-menu mode="inline" :open-keys="templateOptions" :selectedKeys="currentOption" @openChange="onOpenChange">
-            <template v-for="item in draftTemplateList">
-              <a-menu-item v-if="!item.children.length" :key="item.id" @click="templateChose(item)">
-                {{ item.chapterTitle }}
-              </a-menu-item>
-              <sub-menu v-else :key="item.key" :menu-info="item" @templateChose="templateChose" />
-            </template>
-          </a-menu>
-        </div>
-        <div ref="editorContainerRef" class="editor-container" v-if="currentChose">
-          <OnlyOfficeEditorFD ref="editorR" :reportId="currentChose" :editorHeight="editorHeight" />
-          <div
-            @click="() => (isListCollapsed = !isListCollapsed)"
-            class="collpase-icon"
-            :class="{ 'turn-around': isListCollapsed }"
-          >
-            <a-icon type="left-circle" theme="filled" />
-          </div>
+        <div ref="editorContainerRef" class="editor-container">
+          <OnlyOfficeEditorFD
+            ref="editorR"
+            :docUrl="docUrl"
+            :docTitle="reportName"
+            :docFileType="fileType"
+            :editable="editableMode"
+            :editorHeight="editorHeight"
+            @onlyoffice-info="onOOInfo"
+            @onlyoffice-error="onOOError"
+          />
         </div>
         <div
           :class="{
-            'open-right': !!showRightType && !isListCollapsed,
-            'open-right-five': !!showRightType && isListCollapsed,
+            'open-right': !!showRightType,
           }"
           class="right-content"
-          v-if="draftTemplateList.length"
+          v-if="debugVisible || showRightType"
         >
           <div v-if="showRightType == 'ai-save'">
             <AiContentGenerate
@@ -126,6 +139,22 @@
               :reportType="reportType"
               @close="() => (showRightType = '')"
             ></DraftRightAISearch>
+          </div>
+          <div v-else-if="debugVisible" style="padding: 12px">
+            <a-alert type="info" show-icon :message="'调试信息'" />
+            <div style="margin-top:8px; font-size:12px">
+              <div>docUrl: {{ docUrl }}</div>
+              <div>internalBase: {{ internalBase }}</div>
+              <div>onlyoffice events: {{ ooEvents.join(' | ') }}</div>
+              <a-button size="small" style="margin-top:8px" @click="runDiagnostics">运行诊断</a-button>
+              <div style="margin-top:8px" v-if="diagResult">{{ diagResult }}</div>
+            </div>
+          </div>
+          <div v-else-if="showRightType == 'file-select'">
+            <FileSelectPanel
+              :editorHeight="editorHeight"
+              @close="() => (showRightType = '')"
+            />
           </div>
         </div>
       </div>
@@ -166,92 +195,58 @@
 
 <script>
 import { mapActions } from 'vuex'
-import AnomalyContent from '../anomaly/innerContent.vue'
-import { setDraftStatus, getFirstDraftChapter, mergeTemplate } from '@/api/report'
 import { OnlyOfficeEditorFD } from '@/components'
+import { debounce } from '@/utils/util'
 import AiContentGenerate from './components/draftRightAISave.vue'
 import DraftRightAISearch from './components/draftRightAISearch.vue'
-import EditModal from './editModal.vue'
-import { debounce } from '@/utils/util'
-import { Menu } from 'ant-design-vue'
-import { findFirstTemplateId } from './util'
-const SubMenu = {
-  template: `
-    <a-sub-menu :key="menuInfo.key" v-bind="$props" v-on="$listeners">
-      <span slot="title">
-        <span>{{ menuInfo.chapterTitle }}</span>
-      </span>
-      <template v-for="item in menuInfo.children">
-        <a-menu-item v-if="!item.children.length" :key="item.id" @click="templateChose(item)">
-          <span>{{ item.chapterTitle }}</span>
-        </a-menu-item>
-        <sub-menu v-else :key="item.id" :menu-info="item"  @templateChose="templateChose"/>
-      </template>
-    </a-sub-menu>
-  `,
-  name: 'SubMenu',
-  isSubMenu: true,
-  props: {
-    ...Menu.SubMenu.props,
-    menuInfo: {
-      type: Object,
-      default: () => ({}),
-    },
-  },
-  methods: {
-    templateChose(v) {
-      this.$emit('templateChose', v)
-    },
-  },
-}
+import FileSelectPanel from './components/fileSelectPanel.vue'
+import { mergeTemplate } from '@/api/report'
 
 export default {
   name: 'addReport',
   components: {
     OnlyOfficeEditorFD,
-    EditModal,
-    AnomalyContent,
     AiContentGenerate,
     DraftRightAISearch,
-    'sub-menu': SubMenu,
+    FileSelectPanel,
   },
   data() {
     return {
       pageLoading: false,
       editorHeight: null,
-      reportId: null,
-      reportDetail: null,
-      customerDetail: null,
       fullView: false,
-      typeFrom: null,
       reportName: null,
-      categoryId: null,
-      reportType: null,
-      setType: null,
-      otherSaveReportName: '',
+      fileType: 'docx',
+      docUrl: '',
       setReportName: false,
-      openDataYC: false,
-      popTitle: null,
+      otherSaveReportName: '',
+      showRightType: '',
       udt: false,
       uploadTableList: [],
-
-      // 初稿
-      draftTemplateList: [],
-      templateOptions: [],
+      // 诊断
+      debugVisible: false,
+      ooEvents: [],
+      internalBase: 'http://report-system-dev:8000',
+      diagResult: '',
+      // 兼容旧逻辑需要的占位
       currentChose: null,
-      currentOption: [],
-      showRightType: null,
       templateId: null,
-      isListCollapsed: false,
+      reportId: null,
+      categoryId: null,
+      reportType: null,
+      editableMode: true,
+      saving: false,
+      lastSaveMeta: null,
     }
   },
   created() {
-    this.typeFrom = (this.$route.query && this.$route.query.typeFrom) || ''
     this.reportName = (this.$route.query && this.$route.query.reportName) || ''
+    this.docUrl = (this.$route.query && this.$route.query.docUrl) || ''
+    this.fileType = (this.$route.query && this.$route.query.fileType) || 'docx'
+    this.reportId = this.$route.params.reportId
     this.categoryId = (this.$route.query && this.$route.query.categoryId) || ''
     this.reportType = (this.$route.query && this.$route.query.reportType) || ''
-    this.reportId = this.$route.params.reportId
-    this.init()
+    this.currentChose = this.reportId
     this.setCollapsed(true)
   },
   filters: {
@@ -275,34 +270,7 @@ export default {
         this.editorHeight = viewportHeight - 170 + 'px'
       })
     },
-    init() {
-      getFirstDraftChapter(this.reportId).then((res) => {
-        this.draftTemplateList = res.data
-        // 判断树下的第一个templateId
-        const firstItem = findFirstTemplateId(res.data)
-        this.templateOptions = [firstItem.id]
-        this.currentOption = [firstItem.id]
-        this.currentChose = firstItem.id
-        this.templateId = firstItem.templateId
-        this.getinnerBodyHeight()
-      })
-    },
-    onOpenChange(openKeys) {
-      const latestOpenKey = openKeys.find((key) => this.templateOptions.indexOf(key) === -1)
-      if (this.draftTemplateList.findIndex((v) => v.id == latestOpenKey) === -1) {
-        this.templateOptions = openKeys
-      } else {
-        this.templateOptions = latestOpenKey ? [latestOpenKey] : []
-      }
-    },
-    templateChose(item) {
-      // 选择模块
-      this.currentOption = [item.id]
-      this.currentChose = item.id
-      this.templateId = item.templateId
-    },
     openRight(type) {
-      // 右侧抽屉展示内容
       this.showRightType = type
     },
     allViewPort() {
@@ -356,8 +324,13 @@ export default {
         document.webkitExitFullscreen()
       }
     },
+    resetReportFun() {
+      this.setReportName = false
+    },
+    updateEdit() {
+      this.$refs.editorR.refreshEditor()
+    },
     updateReportData() {
-      // 更新数据
       const { $notification, $confirm, $router } = this
       $confirm({
         title: '更新报告提醒',
@@ -381,10 +354,7 @@ export default {
                 duration: 6,
               })
               this.pageLoading = false
-              // this.init()
-              // this.$refs.editorR.refreshEditor()
               setTimeout(() => {
-                // 去草稿
                 $router.push({ path: '/homePage/reportList' })
               }, 500)
             }
@@ -392,51 +362,78 @@ export default {
         },
       })
     },
-    resetReportFun() {
-      if (this.setType === 'draft') {
-        this.saveAsDraft()
-      }
-    },
-    openDataYCFun(v) {
-      this.openDataYC = true
-    },
-    saveAsDraft() {
-      const { $notification, $router } = this
-      this.pageLoading = true
-      this.reportName = null
-      setDraftStatus(this.reportDetail.id, this.otherSaveReportName)
-        .then((res) => {
-          this.pageLoading = false
-          this.setReportName = false
-          this.$nextTick(() => {
-            this.reportName = this.otherSaveReportName
-          })
-          this.$refs.editorR.refreshEditor()
-          $notification['success']({
-            message: '通知：',
-            description: `${this.otherSaveReportName}，另存为草稿成功`,
-            duration: 6,
-          })
-          setTimeout(() => {
-            // 去草稿
-            $router.push({ path: '/homePage/draftList' })
-          }, 500)
-        })
-        .catch((err) => {
-          this.pageLoading = false
-          $notification['error']({
-            message: '通知：',
-            description: `操作失败：${err}`,
-            duration: 6,
-          })
-        })
-    },
-    updateEdit() {
-      this.$refs.editorR.refreshEditor()
-    },
-    lookUploadModal(v) {
-      this.uploadTableList = this.reportDetail.tableChangeInfos
+    lookUploadModal() {
+      this.uploadTableList = []
       this.udt = true
+    },
+    toggleDebug() {
+      this.debugVisible = !this.debugVisible
+    },
+    onOOInfo(info) {
+      if (info && info.type === 'save-success') {
+        this.lastSaveMeta = info.meta
+        this.$notification['success']({
+          message: '保存成功',
+          description: `已保存为 ${info.meta.physicalName}（仅保存在浏览器）`,
+          duration: 4,
+        })
+        this.saving = false
+      }
+      if (info && info.type === 'save-requested') {
+        this.saving = true
+        this.$message.loading('正在保存...', 1.5)
+      }
+      if (info && info.type === 'state') {
+        const dirty = info.dirty ? '已修改' : '已同步'
+        this.$message.success(`文档状态：${dirty}`, 1)
+      }
+      if (info && info.type === 'lock-exists') {
+        this.$notification['warning']({
+          message: '并发编辑提醒',
+          description: '检测到该文档在另一个标签或窗口正在编辑，建议只在一个窗口编辑以避免冲突。',
+          duration: 6,
+        })
+      }
+      const m = typeof info === 'string' ? info : JSON.stringify(info)
+      this.ooEvents.push(m)
+    },
+    onOOError(err) {
+      const m = typeof err === 'string' ? err : JSON.stringify(err)
+      this.ooEvents.push('ERROR:' + m)
+      this.saving = false
+      this.$notification['error']({
+        message: '编辑器错误',
+        description: typeof err === 'object' && err.message ? err.message : m,
+      })
+    },
+    toggleEditMode() {
+      if (this.saving) return
+      this.editableMode = !this.editableMode
+      this.$nextTick(() => {
+        this.$refs.editorR && this.$refs.editorR.refreshEditor()
+      })
+    },
+    saveCurrent() {
+      if (!this.editableMode) {
+        this.$message.warning('当前为预览模式，请先进入编辑')
+        return
+      }
+      if (this.saving) return
+      this.saving = true
+      this.$refs.editorR && this.$refs.editorR.saveDocument(this.fileType)
+    },
+    async runDiagnostics() {
+      this.diagResult = '...'
+      try {
+        const host = window.location.host
+        const urlHost = `http://${host}${this.docUrl}`
+        const r = await fetch(urlHost, { method: 'HEAD' })
+        const ok1 = r.ok
+        const txt = ok1 ? '前端可访问文件（HEAD 200）' : `前端访问失败 (状态 ${r.status})`
+        this.diagResult = `[前端可达测试] ${txt}；[DocServer内部URL] ${this.internalBase}${this.docUrl}`
+      } catch (e) {
+        this.diagResult = `诊断失败：${e && e.message ? e.message : e}`
+      }
     },
     toggleCollapsed() {
       this.collapsed = !this.collapsed
@@ -471,6 +468,14 @@ export default {
   width: 100%;
   padding: 10px 20px;
   border-bottom: 1px solid #ccc;
+}
+.flex-row-spacebetween {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.tools .flex:last-child {
+  margin-left: auto;
 }
 .sys-title {
   font-size: 22px;

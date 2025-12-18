@@ -65,13 +65,32 @@ router.beforeEach((to, from, next) => {
       }
     }
   } else {
-    if (allowList.includes(to.name)) {
-      // 在免登录名单，直接进入
-      next()
-    } else {
-      next({ path: loginRoutePath, query: { redirect: to.fullPath } })
-      NProgress.done() // if current page is login will not trigger afterEach hook, so manually handle it
-    }
+    // 演示模式：自动注入令牌并跳过登录
+    const demoToken = 'demo-token'
+    const expireAt = new Date().getTime() + 7 * 24 * 60 * 60 * 1000
+    storage.set(ACCESS_TOKEN, demoToken, expireAt)
+    store.commit('SET_TOKEN', demoToken)
+    store
+      .dispatch('GetInfo')
+      .then(res => {
+        store.dispatch('GenerateRoutes', { token: demoToken, ...res }).then(() => {
+          resetRouter()
+          store.getters.addRouters.forEach(r => {
+            router.addRoute(r)
+          })
+          const redirect = decodeURIComponent(from.query.redirect || to.path)
+          if (to.path === redirect || to.path === loginRoutePath) {
+            next({ path: defaultRoutePath, replace: true })
+          } else {
+            next({ path: redirect })
+          }
+        })
+      })
+      .catch(() => {
+        // 如果获取用户信息失败，仍然强制跳转到默认页，避免出现登录页
+        next({ path: defaultRoutePath })
+      })
+    NProgress.done()
   }
 })
 

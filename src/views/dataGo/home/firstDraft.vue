@@ -30,6 +30,18 @@
           />
         </div>
       </div>
+      <div class="flex">
+        <a-button type="primary" style="margin-right: 12px" @click="newReport" :disabled="uiDisabled">新建报告</a-button>
+        <a-upload
+          :showUploadList="false"
+          :beforeUpload="beforeUpload"
+          :customRequest="handleUpload"
+          :disabled="uiDisabled"
+          accept=".doc,.docx,.docm"
+        >
+          <a-button>上传Word文件</a-button>
+        </a-upload>
+      </div>
       <a-popconfirm title="是否删除已选中的草稿报告?" ok-text="是" cancel-text="否" @confirm="deleteMutil">
         <a-button>批量删除</a-button>
       </a-popconfirm>
@@ -134,6 +146,16 @@
         <span class="update-item-time">{{ item.changeTime }}</span>
       </div>
     </a-modal>
+    <div v-if="uploadStatus === 'uploading'" class="upload-overlay">
+      <div class="upload-overlay-center">
+        <a-spin :spinning="true" tip="正在上传...">
+          <div class="upload-overlay-progress">
+            <a-progress :percent="Math.round(uploadProgress)" :status="'active'" />
+            <div class="upload-overlay-text">{{ Math.round(uploadProgress) }}%</div>
+          </div>
+        </a-spin>
+      </div>
+    </div>
   </page-header-wrapper>
 </template>
 
@@ -171,10 +193,9 @@ const draftStatusList = [
   },
 ]
 import { mapState } from 'vuex'
-import { getFirstDraftList, deleteFirstDraft, batchDeleteFirstDraft, rebuildFirstDraft } from '@/api/report'
 import { STable } from '@/components'
+import md5 from 'md5'
 import { baseMixin } from '@/store/app-mixin'
-import { columns } from './util'
 
 export default {
   name: 'Analysis',
@@ -185,8 +206,52 @@ export default {
   data() {
     return {
       loading: true,
+      uiDisabled: false,
+      uploadModalVisible: false,
+      uploadProgress: 0,
+      uploadStatus: 'idle',
       udt: false,
-      columns,
+      columns: [
+        {
+          title: '序号',
+          dataIndex: 'id',
+          key: 'id',
+          width: '80px',
+          scopedSlots: { customRender: 'id' },
+        },
+        {
+          title: '报告名称',
+          dataIndex: 'reportName',
+          key: 'reportName',
+          scopedSlots: { customRender: 'reportName' },
+        },
+        {
+          title: '报告类型',
+          dataIndex: 'reportType',
+          key: 'reportType',
+          width: '140px',
+          scopedSlots: { customRender: 'reportType' },
+        },
+        {
+          title: '智能生成状态',
+          dataIndex: 'genStatus',
+          key: 'genStatus',
+          width: '180px',
+          scopedSlots: { customRender: 'genStatus' },
+        },
+        {
+          title: '最后更新时间',
+          dataIndex: 'updateTime',
+          key: 'updateTime',
+        },
+        {
+          title: '操作',
+          key: 'action',
+          width: '120px',
+          align: 'left',
+          scopedSlots: { customRender: 'action' },
+        },
+      ],
       draftTypeSelected: null,
       draftStatus: null,
       search: null,
@@ -200,31 +265,7 @@ export default {
         pageSize: 10,
         status: 0,
       },
-      loadData: (parameter) => {
-        let requestParameters = Object.assign({}, this.queryParam, parameter, {
-          pageNum: parameter.pageNo,
-          reportName: this.search,
-          reportType: this.draftTypeSelected,
-          genStatus: this.draftStatus,
-        })
-        if (parameter.pageSize !== this.queryParam.pageSize) {
-          requestParameters.pageNo = 1
-          requestParameters.pageNum = 1
-        }
-        this.queryParam = JSON.parse(JSON.stringify(requestParameters))
-        return new Promise((resolve, reject) => {
-          getFirstDraftList(requestParameters).then((res) => {
-            const reD = {
-              pageSize: requestParameters.pageSize,
-              pageNo: requestParameters.pageNo,
-              totalCount: res.total,
-              totalPage: Math.ceil(res.total / requestParameters.pageSize),
-              data: res.rows,
-            }
-            resolve(reD)
-          })
-        })
-      },
+      loadData: null,
     }
   },
   filters: {
@@ -250,12 +291,117 @@ export default {
       overview: (state) => state.user.overview,
     }),
   },
+  created() {
+    // 初始化 loadData 函数，避免在 data() 中使用 this
+    this.loadData = (parameter) => {
+      const req = Object.assign({}, this.queryParam, parameter, {
+        pageNum: parameter.pageNo,
+      })
+      if (parameter.pageSize !== this.queryParam.pageSize) {
+        req.pageNo = 1
+        req.pageNum = 1
+      }
+      this.queryParam = JSON.parse(JSON.stringify(req))
+      return new Promise(async (resolve) => {
+        const rowsAll = await this.listDrafts()
+        const filtered = this.search ? rowsAll.filter((x) => (x.reportName || '').toLowerCase().includes(this.search.toLowerCase())) : rowsAll
+        const total = filtered.length
+        const start = (req.pageNum - 1) * req.pageSize
+        const pageRows = filtered.slice(start, start + req.pageSize).map((r, idx) => {
+          return {
+            id: (req.pageNum - 1) * req.pageSize + idx + 1,
+            reportName: r.reportName,
+            reportType: 2,
+            genStatus: 1,
+            updateTime: this.formatTime(r.createdAt),
+            physicalName: r.physicalName,
+            fileType: r.fileType,
+            recordId: r.id,
+            size: r.size,
+          }
+        })
+        resolve({
+          pageSize: req.pageSize,
+          pageNo: req.pageNum,
+          totalCount: total,
+          totalPage: Math.ceil(total / req.pageSize),
+          data: pageRows,
+        })
+      })
+    }
+  },
   methods: {
+    formatTime(timestamp) {
+      if (!timestamp) return ''
+      const date = new Date(timestamp)
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      const hours = String(date.getHours()).padStart(2, '0')
+      const minutes = String(date.getMinutes()).padStart(2, '0')
+      const seconds = String(date.getSeconds()).padStart(2, '0')
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+    },
+    async openDB() {
+      return new Promise((resolve, reject) => {
+        const req = window.indexedDB.open('local-drafts', 1)
+        req.onupgradeneeded = (ev) => {
+          const db = ev.target.result
+          if (!db.objectStoreNames.contains('drafts')) {
+            const store = db.createObjectStore('drafts', { keyPath: 'id' })
+            store.createIndex('byName', 'reportName', { unique: false })
+            store.createIndex('byCreatedAt', 'createdAt', { unique: false })
+          }
+        }
+        req.onerror = () => reject(req.error)
+        req.onsuccess = () => resolve(req.result)
+      })
+    },
+    async listDrafts() {
+      const db = await this.openDB()
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction('drafts', 'readonly')
+        const store = tx.objectStore('drafts')
+        const req = store.openCursor()
+        const rows = []
+        req.onsuccess = (e) => {
+          const cursor = e.target.result
+          if (cursor) {
+            rows.push(cursor.value)
+            cursor.continue()
+          } else {
+            resolve(rows.sort((a, b) => b.createdAt - a.createdAt))
+          }
+        }
+        req.onerror = () => reject(req.error)
+      })
+    },
+    async putDraft(record) {
+      const db = await this.openDB()
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction('drafts', 'readwrite')
+        const store = tx.objectStore('drafts')
+        tx.oncomplete = () => resolve(true)
+        tx.onerror = () => reject(tx.error)
+        store.put(record)
+      })
+    },
+    async removeDraft(id) {
+      const db = await this.openDB()
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction('drafts', 'readwrite')
+        const store = tx.objectStore('drafts')
+        tx.oncomplete = () => resolve(true)
+        tx.onerror = () => reject(tx.error)
+        store.delete(id)
+      })
+    },
     handleChat(v) {
       const { $router } = this
+      const docUrl = `/local-storage/drafts/${v.physicalName || ''}`
       $router.push({
-        path: `/homePage/ViewReportFirstDraft/` + v.id,
-        query: { reportName: v.reportName, categoryId: v.categoryId, reportType: v.reportType },
+        path: `/homePage/ViewReportFirstDraft/` + (v.recordId || v.id),
+        query: { reportName: v.reportName, fileType: v.fileType || 'docx', docUrl },
       })
     },
     selectChange() {
@@ -274,28 +420,43 @@ export default {
         })
         return
       }
-      batchDeleteFirstDraft(this.expandedRowKeys).then((i) => {
-        if (i.code == 200) {
-          $notification['success']({
-            message: '通知：',
-            description: '删除成功',
-            duration: 8,
-          })
-          this.expandedRowKeys = []
-          this.$refs.table.refresh()
-        } else {
-          $notification['error']({
-            message: '通知：',
-            description: '删除失败' + i.msg,
-            duration: 8,
-          })
-          this.$refs.table.refresh()
+      Promise.all(this.expandedRowKeys.map(async (idx) => {
+        const rowsAll = await this.listDrafts()
+        const row = rowsAll[idx - 1]
+        if (row) {
+          try {
+            await this.deleteFS(row.physicalName)
+          } catch (e) {}
+          await this.removeDraft(row.id)
         }
+      })).then(() => {
+        $notification['success']({
+          message: '通知：',
+          description: '删除成功',
+          duration: 8,
+        })
+        this.expandedRowKeys = []
+        this.$refs.table.refresh()
+      }).catch(() => {
+        $notification['error']({
+          message: '通知：',
+          description: '删除失败',
+          duration: 8,
+        })
+        this.$refs.table.refresh()
       })
     },
     deleteChat(v) {
       const { $notification } = this
-      deleteFirstDraft(v.id).then((res) => {
+      const rid = v.recordId
+      Promise.resolve()
+        .then(async () => {
+          try {
+            await this.deleteFS(v.physicalName)
+          } catch (e) {}
+          await this.removeDraft(rid)
+        })
+        .then(() => {
         $notification['success']({
           message: '通知：',
           description: '删除成功',
@@ -308,25 +469,140 @@ export default {
       this.uploadTableList = v.tableChangeInfos
       this.udt = true
     },
-    rebuild(v) {
-      // 重新生产初稿
-      const { $notification } = this
-      rebuildFirstDraft(v.id).then((res) => {
-        if (res.code !== 200) {
-          $notification['error']({
-            message: '通知：',
-            description: `操作失败：${res.msg}`,
-            duration: 8,
-          })
-          return
+    rebuild(v) {},
+    beforeUpload(file) {
+      const ext = (file.name || '').toLowerCase()
+      const ok = ext.endsWith('.doc') || ext.endsWith('.docx') || ext.endsWith('.docm')
+      if (!ok) {
+        this.$notification['error']({
+          message: '错误',
+          description: '仅支持上传Word文件(.doc/.docx/.docm)',
+        })
+        return false
+      }
+      const limit = 50 * 1024 * 1024
+      if (file.size > limit) {
+        this.$notification['warning']({
+          message: '提示',
+          description: '文件过大，建议小于50MB',
+        })
+      }
+      return true
+    },
+    handleUpload({ file, onSuccess, onError }) {
+      this.uploadFile(file)
+        .then(() => {
+          onSuccess && onSuccess()
+        })
+        .catch((e) => {
+          onError && onError(e)
+        })
+    },
+    async uploadFile(file) {
+      try {
+        this.uiDisabled = true
+        this.uploadStatus = 'uploading'
+        this.uploadProgress = 0
+        const name = file.name
+        const fileType = name.split('.').pop().toLowerCase()
+        const now = Date.now()
+        const id = `draft-${md5(name + '-' + now)}`
+        const ts = new Date(now)
+        const pad = (x) => String(x).padStart(2, '0')
+        const tsStr = [
+          ts.getFullYear(),
+          pad(ts.getMonth() + 1),
+          pad(ts.getDate()),
+        ].join('') + '-' + [pad(ts.getHours()), pad(ts.getMinutes()), pad(ts.getSeconds())].join('')
+        const physicalName = `${name.replace(/\.[^\.]+$/, '')}_${tsStr}.${fileType}`
+        const chunkSize = 1024 * 256
+        const total = file.size
+        let offset = 0
+        const parts = []
+        while (offset < total) {
+          const end = Math.min(offset + chunkSize, total)
+          const chunk = file.slice(offset, end)
+          const buf = await chunk.arrayBuffer()
+          parts.push(new Uint8Array(buf))
+          offset = end
+          this.uploadProgress = (offset / total) * 100
         }
-        $notification['success']({
-          message: '通知：',
-          description: `操作成功`,
-          duration: 8,
+        const blob = new Blob(parts, { type: file.type || 'application/octet-stream' })
+        const record = {
+          id,
+          reportName: name,
+          physicalName,
+          fileType,
+          size: total,
+          createdAt: now,
+          blob,
+        }
+        await this.uploadToFS(record.physicalName, record.blob)
+        await this.putDraft(record)
+        this.uploadStatus = 'success'
+        this.$notification['success']({
+          message: '通知',
+          description: '上传完成',
+          duration: 3,
         })
         this.$refs.table.refresh()
+      } catch (e) {
+        this.uploadStatus = 'failed'
+        this.$notification['error']({
+          message: '错误',
+          description: '上传失败',
+          duration: 5,
+        })
+        throw e
+      } finally {
+        this.uiDisabled = false
+      }
+    },
+    async blobToBase64(blob) {
+      return new Promise((resolve, reject) => {
+        const fr = new FileReader()
+        fr.onload = () => {
+          const res = fr.result || ''
+          const s = typeof res === 'string' ? res : ''
+          const b64 = s.includes(',') ? s.split(',')[1] : s
+          resolve(b64)
+        }
+        fr.onerror = () => reject(fr.error)
+        fr.readAsDataURL(blob)
       })
+    },
+    async uploadToFS(filename, blob) {
+      const content = await this.blobToBase64(blob)
+      const r = await fetch('/__local-upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename, content }),
+      })
+      const j = await r.json().catch(() => null)
+      if (!r.ok || !j || !j.ok) {
+        throw new Error((j && j.error) || `文件写入失败(${r.status})`)
+      }
+    },
+    async deleteFS(filename) {
+      const url = `/__local-upload?filename=${encodeURIComponent(filename)}`
+      const r = await fetch(url, { method: 'DELETE' })
+      const j = await r.json().catch(() => null)
+      if (!r.ok || !j || !j.ok) {
+        throw new Error((j && j.error) || `文件删除失败(${r.status})`)
+      }
+    },
+    newReport() {
+      const input = document.createElement('input')
+      input.type = 'file'
+      input.accept = '.doc,.docx,.docm'
+      input.multiple = false
+      input.onchange = async (e) => {
+        const f = e.target.files && e.target.files[0]
+        if (f) {
+          await this.uploadFile(f)
+        }
+      }
+      input.click()
     },
   },
 }
@@ -401,5 +677,34 @@ export default {
   /deep/ .ant-table-small > .ant-table-content > .ant-table-body {
     margin: 0;
   }
+}
+.upload-overlay {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.75);
+  z-index: 2000;
+}
+.upload-overlay-center {
+  position: absolute;
+  left: 50%;
+  top: 35%;
+  transform: translate(-50%, -50%);
+  width: 360px;
+  max-width: 90vw;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  padding: 16px;
+}
+.upload-overlay-progress {
+  margin-top: 10px;
+}
+.upload-overlay-text {
+  margin-top: 8px;
+  text-align: center;
+  color: #666;
 }
 </style>

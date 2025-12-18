@@ -44,7 +44,7 @@ export default {
   },
   data() {
     return {
-      showMenu: true,
+      showMenu: false,
     }
   },
   computed: {

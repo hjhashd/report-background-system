@@ -102,45 +102,44 @@ const user = {
       })
     },
 
-    // 获取用户信息
-    GetInfo({ commit, dispatch }) {
-      return new Promise((resolve, reject) => {
-        // 请求后端获取用户信息 /api/user/info
-        AIGetInfo().then(async (response) => {
-          if (response.code === 200) {
-            const mockinfos = await info();
-            const { result } = mockinfos
-            const { user } = response;
-            if (result.role && result.role.permissions.length > 0) {
-              const role = { ...result.role }
-              role.permissions = result.role.permissions.map(permission => {
-                const per = {
-                  ...permission,
-                  actionList: (permission.actionEntitySet || {}).map(item => item.action)
-                }
-                return per
-              })
-              role.permissionList = role.permissions.map(permission => { return permission.permissionId })
-              // 覆盖响应体的 role, 供下游使用
-              result.role = role
-              const userInfo = Object.assign(result, user)
-              commit('SET_ROLES', role)
-              commit('SET_INFO', userInfo)
-              commit('SET_NAME', { name: userInfo.username || userInfo.name, welcome: welcome() })
-              commit('SET_AVATAR', userInfo.avatar)
-              // 下游
-              resolve(userInfo).then((re) => {
-                resolve(re)
-              })
-            } else {
-              dispatch('Logout')
+    // 获取用户信息（演示模式：优先使用本地 mock）
+    GetInfo({ commit }) {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const mockinfos = await info()
+          const { result } = mockinfos
+          let user = {}
+          try {
+            const response = await AIGetInfo()
+            if (response && response.code === 200) {
+              user = response.user || {}
             }
+          } catch (e) {
+            // ignore remote errors in demo mode
+          }
+          if (result.role && result.role.permissions.length > 0) {
+            const role = { ...result.role }
+            role.permissions = result.role.permissions.map(permission => {
+              const per = {
+                ...permission,
+                actionList: (permission.actionEntitySet || {}).map(item => item.action)
+              }
+              return per
+            })
+            role.permissionList = role.permissions.map(permission => { return permission.permissionId })
+            result.role = role
+            const userInfo = Object.assign(result, user)
+            commit('SET_ROLES', role)
+            commit('SET_INFO', userInfo)
+            commit('SET_NAME', { name: userInfo.username || userInfo.name, welcome: welcome() })
+            commit('SET_AVATAR', userInfo.avatar)
+            resolve(userInfo)
           } else {
             reject(new Error('getInfo: roles must be a non-null array !'))
           }
-        }).catch(error => {
+        } catch (error) {
           reject(error)
-        })
+        }
       })
     },
 
