@@ -55,7 +55,35 @@ export default {
       } else {
         this.config = await wopiFile(this.reportId)
       }
+      await this.ensureOnlyOfficeScript()
+      if (this.config && this.config.editorConfig) {
+        this.config.editorConfig.user = {
+          id: this.$store.getters.userInfo?.id?.toString() || 'anonymous',
+          name: this.$store.getters.nickname || '访客'
+        }
+        if (!this.config.editorConfig.customization) {
+          this.config.editorConfig.customization = {}
+        }
+        this.config.editorConfig.customization.spellcheck = false
+      }
       this.editor = new DocsAPI.DocEditor('onlyoffice-container', this.config)
+    },
+    async ensureOnlyOfficeScript() {
+      if (typeof window !== 'undefined' && window.DocsAPI) {
+        return
+      }
+      const hostEnv = (typeof process !== 'undefined' && process.env && process.env.VUE_APP_ONLYOFFICE_HOST) ? process.env.VUE_APP_ONLYOFFICE_HOST : '192.168.3.10'
+      const portEnv = (typeof process !== 'undefined' && process.env && process.env.VUE_APP_ONLYOFFICE_HTTP_PORT) ? process.env.VUE_APP_ONLYOFFICE_HTTP_PORT : '8082'
+      const url = `http://${hostEnv}:${portEnv}/web-apps/apps/api/documents/api.js`
+      
+      return new Promise((resolve, reject) => {
+        const s = document.createElement('script')
+        s.src = url
+        s.async = true
+        s.onload = resolve
+        s.onerror = () => reject(new Error(`Failed to load OnlyOffice script from ${url}`))
+        document.head.appendChild(s)
+      })
     },
     refreshEditor() {
       if (this.editor) {

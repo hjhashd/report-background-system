@@ -14,6 +14,7 @@ FROM node:20-alpine AS prod
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=builder /app/dist ./dist
-RUN yarn global add serve
+COPY --from=builder /app/server.js ./server.js
+COPY --from=builder /app/public ./public
 EXPOSE 8000
-CMD ["serve", "-s", "dist", "-l", "8000"]
+CMD ["node", "server.js"]

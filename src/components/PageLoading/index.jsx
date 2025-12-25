@@ -85,7 +85,8 @@ loading.newInstance = (Vue, options) => {
 
 const api = {
   show: function (options) {
-    this.instance.update({ ...options, visible: true })
+    // 全局禁用加载状态
+    // this.instance.update({ ...options, visible: true })
   },
   hide: function () {
     this.instance.update({ visible: false })

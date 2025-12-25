@@ -124,6 +124,30 @@ const vueConfig = {
 
   devServer: {
     port: 8000,
+    host: '0.0.0.0',
+    allowedHosts: 'all', // 允许任何 host 访问，解决 Invalid Host header 问题
+
+    // --- 新增下面这段配置 ---
+    // 告诉浏览器：热更新请走外部的 3004 端口，别走内部的 8000
+    client: {
+      webSocketURL: 'ws://192.168.3.10:3004/ws',
+    },
+    // ----------------------
+
+    // 🔥🔥🔥 核心修复：禁止 Webpack 监控存储目录，防止自动刷新 🔥🔥🔥
+    static: {
+      watch: {
+        ignored: /public\/local-storage/
+      }
+    },
+    // 如果上面的 static 写法在你的 vue-cli 版本不生效，请同时加上这个保险：
+    watchFiles: {
+      paths: ['src/**/*', 'public/**/*'],
+      options: {
+        ignored: ['**/public/local-storage/**']
+      }
+    },
+    // 🔥🔥🔥 结束 🔥🔥🔥
     setupMiddlewares(middlewares, devServer) {
       if (!devServer || !devServer.app) return middlewares
       
@@ -143,12 +167,26 @@ const vueConfig = {
             const raw = Buffer.concat(chunks).toString('utf-8')
             const json = raw ? JSON.parse(raw) : {}
             const nameRaw = json && json.filename ? json.filename : ''
-            const name = require('path').basename(nameRaw || '')
+            
+            // 解析目录和文件名
+            const path = require('path')
+            const fs = require('fs')
+            
+            let targetDir = path.join(__dirname, 'public', 'local-storage', 'drafts')
+            if (nameRaw.includes('word_upload')) {
+              targetDir = path.join(__dirname, 'public', 'local-storage', 'word_upload')
+            }
+            
+            const name = path.basename(nameRaw || '')
             const base64 = json && json.content ? json.content : ''
             const buf = base64 ? Buffer.from(base64, 'base64') : Buffer.alloc(0)
-            const dir = require('path').join(__dirname, 'public', 'local-storage', 'drafts')
-            require('fs').mkdirSync(dir, { recursive: true })
-            require('fs').writeFileSync(require('path').join(dir, name), buf)
+            
+            fs.mkdirSync(targetDir, { recursive: true })
+            try { 
+              fs.writeFileSync(path.join(targetDir, name), buf) 
+            } catch (e) {
+              console.error('Failed to write file:', e)
+            }
             res.status(200).json({ ok: true })
           } catch (e) {
             res.status(500).json({ ok: false, error: e && e.message ? e.message : String(e) })
@@ -162,13 +200,11 @@ const vueConfig = {
         const url = req.query && req.query.url ? req.query.url : ''
         if (!url) {
           res.status(400).json({ ok: false, error: 'missing url' })
-          return middlewares
+          return
         }
         try {
-          const u = new URL(url)
-          const mod = u.protocol === 'https:' ? require('https') : require('http')
-          const opts = { method: 'GET' }
-          const req2 = mod.request(url, opts, (r2) => {
+          const mod = url.startsWith('https') ? require('https') : require('http')
+          const req2 = mod.get(url, (r2) => {
             const chunks = []
             r2.on('data', (c) => chunks.push(c))
             r2.on('end', () => {
@@ -181,10 +217,148 @@ const vueConfig = {
           req2.on('error', (e) => {
             res.status(500).json({ ok: false, error: e && e.message ? e.message : String(e) })
           })
-          req2.end()
         } catch (e) {
           res.status(500).json({ ok: false, error: e && e.message ? e.message : String(e) })
         }
+      })
+      // 诊断接口
+      devServer.app.get('/__diagnostics', async (req, res) => {
+        const fs = require('fs')
+        const path = require('path')
+        const http = require('http')
+
+        const results = {
+          env: {
+            hostEnv: process.env.VUE_APP_ONLYOFFICE_HOST,
+            portEnv: process.env.VUE_APP_ONLYOFFICE_HTTP_PORT,
+            internalDocHost: process.env.VUE_APP_INTERNAL_DOC_HOST,
+            callbackUrl: process.env.VUE_APP_ONLYOFFICE_CALLBACK_URL
+          },
+          exists: {
+            publicDrafts: fs.existsSync(path.join(__dirname, 'public/local-storage/drafts'))
+          },
+          docsApiReachable: false
+        }
+
+        // 测试 OnlyOffice 可达性
+        const ooHost = process.env.VUE_APP_ONLYOFFICE_HOST || 'onlyoffice-document-server'
+        const ooPort = process.env.VUE_APP_ONLYOFFICE_HTTP_PORT || '80'
+        
+        try {
+          const checkUrl = `http://${ooHost}:${ooPort}/healthcheck`
+          const checkReq = http.get(checkUrl, (checkRes) => {
+            results.docsApiReachable = (checkRes.statusCode === 200)
+            res.json(results)
+          })
+          checkReq.on('error', () => {
+            res.json(results)
+          })
+          checkReq.setTimeout(2000, () => {
+            checkReq.abort()
+            res.json(results)
+          })
+        } catch (e) {
+          res.json(results)
+        }
+      })
+
+      devServer.app.post('/__onlyoffice-callback', (req, res) => {
+        const chunks = []
+        req.on('data', (c) => chunks.push(c))
+        req.on('end', async () => {
+          console.log('[OnlyOffice Callback] Received request:', {
+            query: req.query,
+            time: new Date().toLocaleString()
+          })
+          try {
+            const raw = Buffer.concat(chunks).toString('utf-8')
+            const json = raw ? JSON.parse(raw) : {}
+            console.log('[OnlyOffice Callback] Payload status:', json.status)
+            
+            // status 2 = ready for saving, status 6 = force save
+            if (json.status !== 2 && json.status !== 6) {
+              console.log('[OnlyOffice Callback] Status not 2 or 6, ignoring save. Status:', json.status)
+              res.status(200).json({ error: 0 })
+              return
+            }
+
+            const url = json && json.url ? json.url : null
+            const filetype = (json && json.filetype ? json.filetype : 'docx').replace('.', '')
+            const title = (req.query && req.query.name) ? req.query.name : (json && json.title ? json.title : '未命名文档')
+            
+            console.log('[OnlyOffice Callback] Payload details:', { url, filetype, title })
+            
+            if (!url) {
+              console.error('[OnlyOffice Callback] No URL in payload')
+              res.status(200).json({ error: 0 })
+              return
+            }
+
+            const hostEnv = process.env.VUE_APP_ONLYOFFICE_HOST || process.env.ONLYOFFICE_HOST
+            const portEnv = process.env.VUE_APP_ONLYOFFICE_HTTP_PORT || process.env.ONLYOFFICE_HTTP_PORT
+            let finalUrl = url
+            try {
+              const u = new URL(url)
+              if (hostEnv && portEnv) {
+                u.protocol = 'http:'
+                u.hostname = hostEnv
+                u.port = String(portEnv)
+                finalUrl = u.toString()
+                console.log('[OnlyOffice Callback] Rewrote URL for internal download:', finalUrl)
+              }
+            } catch (e) {
+              console.error('[OnlyOffice Callback] URL rewrite failed:', e.message)
+            }
+
+            const now = new Date()
+            const pad = (x) => String(x).padStart(2, '0')
+            const ts = [
+              now.getFullYear(),
+              pad(now.getMonth() + 1),
+              pad(now.getDate()),
+            ].join('') + '-' + [pad(now.getHours()), pad(now.getMinutes()), pad(now.getSeconds())].join('')
+            const base = String(title).replace(/\.[^\.]+$/, '')
+            const ext = filetype.startsWith('.') ? filetype : `.${filetype}`
+            const physicalName = `${base}_${ts}${ext}`
+            
+            console.log('[OnlyOffice Callback] Downloading from:', finalUrl, 'to:', physicalName)
+            
+            const mod = finalUrl.startsWith('https') ? require('https') : require('http')
+            const dir1 = require('path').join(__dirname, 'public', 'local-storage', 'drafts')
+            const fs = require('fs')
+            fs.mkdirSync(dir1, { recursive: true })
+            
+            const buf = await new Promise((resolve, reject) => {
+              const req2 = mod.get(finalUrl, (r2) => {
+                if (r2.statusCode !== 200) {
+                  reject(new Error(`Download failed with status ${r2.statusCode}`))
+                  return
+                }
+                const chunks2 = []
+                r2.on('data', (c) => chunks2.push(c))
+                r2.on('end', () => resolve(Buffer.concat(chunks2)))
+                r2.on('error', reject)
+              })
+              req2.on('error', reject)
+              req2.setTimeout(10000, () => {
+                req2.abort()
+                reject(new Error('Download timeout'))
+              })
+            })
+
+            const fullPath = require('path').join(dir1, physicalName)
+            fs.writeFileSync(fullPath, buf)
+            console.log('[OnlyOffice Callback] Save successful:', fullPath, 'Size:', buf.length)
+            
+            res.status(200).json({ error: 0 })
+          } catch (e) {
+            console.error('[OnlyOffice Callback] Error:', e && e.message ? e.message : String(e))
+            res.status(200).json({ error: 1 })
+          }
+        })
+      })
+      devServer.app.get('/__onlyoffice-callback/ping', (req, res) => {
+        res.status(200).json({ ok: true })
       })
       devServer.app.delete('/__local-upload', (req, res) => {
         try {
@@ -192,9 +366,18 @@ const vueConfig = {
           const fs = require('fs')
           const nameRaw = req.query && req.query.filename ? req.query.filename : ''
           const name = path.basename(nameRaw || '')
-          const dir = path.join(__dirname, 'public', 'local-storage', 'drafts')
-          const fp = path.join(dir, name)
-          fs.unlinkSync(fp)
+          const dir1 = path.join(__dirname, 'public', 'local-storage', 'drafts')
+          const fp1 = path.join(dir1, name)
+          let removed = false
+          try {
+            if (fs.existsSync(fp1)) {
+              fs.unlinkSync(fp1)
+              removed = true
+            }
+          } catch (e) {}
+          if (!removed) {
+            throw new Error('file not found')
+          }
           res.status(200).json({ ok: true })
         } catch (e) {
           res.status(500).json({ ok: false, error: e && e.message ? e.message : String(e) })
@@ -219,6 +402,63 @@ const vueConfig = {
             res.status(500).json({ ok: false, error: e && e.message ? e.message : String(e) })
           }
         })
+      })
+      devServer.app.get('/__debug/status', async (req, res) => {
+        try {
+          const fs = require('fs')
+          const path = require('path')
+          const hostEnv = process.env.VUE_APP_ONLYOFFICE_HOST || process.env.ONLYOFFICE_HOST || null
+          const portEnv = process.env.VUE_APP_ONLYOFFICE_HTTP_PORT || process.env.ONLYOFFICE_HTTP_PORT || null
+          const dsUrl = hostEnv && portEnv ? `http://${hostEnv}:${portEnv}/web-apps/apps/api/documents/api.js` : null
+          let docsApiReachable = false
+          if (dsUrl) {
+            try {
+              const mod = dsUrl.startsWith('https') ? require('https') : require('http')
+              docsApiReachable = await new Promise((resolve) => {
+                const r = mod.get(dsUrl, (r2) => resolve(r2.statusCode === 200))
+                r.on('error', () => resolve(false))
+              })
+            } catch (e) {}
+          }
+          const publicHost = process.env.VUE_APP_PUBLIC_HOST || null
+          const publicPort = process.env.VUE_APP_PUBLIC_PORT || null
+          const paths = {
+            publicDrafts: path.join(__dirname, 'public', 'local-storage', 'drafts'),
+          }
+          const exists = {
+            publicDrafts: fs.existsSync(paths.publicDrafts),
+          }
+          res.status(200).json({
+            ok: true,
+            env: { hostEnv, portEnv, publicHost, publicPort },
+            docsApiUrl: dsUrl,
+            docsApiReachable,
+            paths,
+            exists,
+          })
+        } catch (e) {
+          res.status(500).json({ ok: false, error: e && e.message ? e.message : String(e) })
+        }
+      })
+      devServer.app.get('/__local-list', (req, res) => {
+        try {
+          const fs = require('fs')
+          const path = require('path')
+          const dir = path.join(__dirname, 'public', 'local-storage', 'drafts')
+          fs.mkdirSync(dir, { recursive: true })
+          let files = []
+          try {
+            const names = fs.readdirSync(dir)
+            files = names.map((name) => {
+              const fp = path.join(dir, name)
+              const st = fs.statSync(fp)
+              return { name, size: st.size, mtimeMs: st.mtimeMs }
+            })
+          } catch (e) {}
+          res.status(200).json({ ok: true, files })
+        } catch (e) {
+          res.status(500).json({ ok: false, error: e && e.message ? e.message : String(e) })
+        }
       })
       return middlewares
     }

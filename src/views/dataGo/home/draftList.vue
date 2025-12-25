@@ -67,7 +67,7 @@
         </span>
         <template slot="genStatus" slot-scope="text, scoped">
           <span v-if="text == 1" class="table-status status1">已完成</span>
-          <span v-else-if="text == 0" class="table-status"> 生成中 </span>
+          <span v-else-if="text == 0" class="table-status"> 待配置 </span>
           <span v-else-if="text == 3" class="table-status"> 更新中 </span>
           <span class="table-status status4" v-else>生成失败</span>
           <a-badge
@@ -170,7 +170,6 @@ const draftStatusList = [
   },
 ]
 import { mapState } from 'vuex'
-import { reportList, deleteReport, batchDeleteReport, updateReport } from '@/api/report'
 import { STable } from '@/components'
 import { baseMixin } from '@/store/app-mixin'
 import { columns } from './util'
@@ -200,27 +199,37 @@ export default {
         status: 0,
       },
       loadData: (parameter) => {
-        let requestParameters = Object.assign({}, this.queryParam, parameter, {
+        const requestParameters = Object.assign({}, this.queryParam, parameter, {
           pageNum: parameter.pageNo,
-          reportName: this.search,
-          reportType: this.draftTypeSelected,
-          genStatus: this.draftStatus,
         })
         if (parameter.pageSize !== this.queryParam.pageSize) {
           requestParameters.pageNo = 1
           requestParameters.pageNum = 1
         }
         this.queryParam = JSON.parse(JSON.stringify(requestParameters))
-        return new Promise((resolve, reject) => {
-          reportList(requestParameters).then((res) => {
-            const reD = {
-              pageSize: requestParameters.pageSize,
-              pageNo: requestParameters.pageNo,
-              totalCount: res.total,
-              totalPage: Math.ceil(res.total / requestParameters.pageSize),
-              data: res.rows,
-            }
-            resolve(reD)
+        return new Promise(async (resolve) => {
+          const state = await this.readReportState()
+          let rows = Array.isArray(state.drafts) ? state.drafts.slice() : []
+          if (this.search) {
+            const s = String(this.search).toLowerCase()
+            rows = rows.filter((r) => String(r.reportName).toLowerCase().includes(s))
+          }
+          if (this.draftTypeSelected) {
+            rows = rows.filter((r) => String(r.reportType) === String(this.draftTypeSelected))
+          }
+          if (this.draftStatus !== null && this.draftStatus !== undefined) {
+            rows = rows.filter((r) => String(r.genStatus) === String(this.draftStatus))
+          }
+          const total = rows.length
+          const start = (requestParameters.pageNum - 1) * requestParameters.pageSize
+          const end = start + requestParameters.pageSize
+          const pageRows = rows.slice(start, end)
+          resolve({
+            pageSize: requestParameters.pageSize,
+            pageNo: requestParameters.pageNum,
+            totalCount: total,
+            totalPage: Math.ceil(total / requestParameters.pageSize),
+            data: pageRows,
           })
         })
       },
@@ -270,34 +279,37 @@ export default {
         })
         return
       }
-      batchDeleteReport(this.expandedRowKeys).then((i) => {
-        if (i.code == 200) {
-          $notification['success']({
-            message: '通知：',
-            description: '删除成功',
-            duration: 8,
-          })
-          this.expandedRowKeys = []
-          this.$refs.table.refresh()
-        } else {
-          $notification['error']({
-            message: '通知：',
-            description: '删除失败' + i.msg,
-            duration: 8,
-          })
-          this.$refs.table.refresh()
-        }
+      this.deleteByIds(this.expandedRowKeys).then(() => {
+        $notification['success']({
+          message: '通知：',
+          description: '删除成功',
+          duration: 8,
+        })
+        this.expandedRowKeys = []
+        this.$refs.table.refresh()
+      }).catch((e) => {
+        $notification['error']({
+          message: '通知：',
+          description: '删除失败' + e,
+          duration: 8,
+        })
       })
     },
     deleteChat(v) {
       const { $notification } = this
-      deleteReport(v.id).then((res) => {
+      this.deleteByIds([v.id]).then(() => {
         $notification['success']({
           message: '通知：',
           description: '删除成功',
           duration: 8,
         })
         this.$refs.table.refresh()
+      }).catch((e) => {
+        $notification['error']({
+          message: '通知：',
+          description: '删除失败' + e,
+          duration: 8,
+        })
       })
     },
     lookUploadModal(v) {
@@ -305,7 +317,6 @@ export default {
       this.udt = true
     },
     updateReportData(v) {
-      // 更新数据
       const { $notification, $confirm, $router } = this
       $confirm({
         title: '更新报告提醒',
@@ -313,25 +324,68 @@ export default {
         okText: '确定',
         cancelText: '取消',
         onOk: () => {
-          updateReport(v.id).then((res) => {
-            if (res.code != 200) {
-              this.pageLoading = false
-              $notification['error']({
-                message: '错误通知：',
-                description: res.msg,
-                duration: 8,
-              })
-            } else {
+          const delay = 1000 + Math.floor(Math.random() * 1000)
+          setTimeout(async () => {
+            const state = await this.readReportState()
+            let drafts = Array.isArray(state.drafts) ? state.drafts : []
+            let reports = Array.isArray(state.reports) ? state.reports : []
+            const idx = drafts.findIndex((d) => String(d.id) === String(v.id))
+            const now = new Date().toLocaleString()
+            if (idx >= 0) {
+              const item = drafts.splice(idx, 1)[0]
+              item.genStatus = 1
+              item.status = 1
+              item.updateTime = now
+              reports.unshift(item)
+              state.drafts = drafts
+              state.reports = reports
+              await this.writeReportState(state)
               $notification['success']({
                 message: '通知：',
-                description: `正在生成，请在草稿列表查看进度`,
-                duration: 6,
+                description: '更新完成，已移至报告列表',
+                duration: 4,
               })
               this.$refs.table.refresh()
+              $router.push({ path: '/homePage/reportList' })
+            } else {
+              $notification['error']({
+                message: '错误通知：',
+                description: '未找到草稿项',
+                duration: 6,
+              })
             }
-          })
+          }, delay)
         },
       })
+    },
+    async readReportState() {
+      try {
+        const r = await fetch('/local-storage/drafts/report-state.json')
+        if (r.ok) {
+          const j = await r.json().catch(() => null)
+          if (j && typeof j === 'object') return j
+        }
+      } catch (e) {}
+      return { drafts: [], reports: [] }
+    },
+    async writeReportState(state) {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' })
+      const content = await new Promise((resolve) => {
+        const fr = new FileReader()
+        fr.onload = () => resolve(fr.result.split(',')[1] || '')
+        fr.readAsDataURL(blob)
+      })
+      await fetch('/__local-upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: 'report-state.json', content }),
+      })
+    },
+    async deleteByIds(ids) {
+      const state = await this.readReportState()
+      const set = new Set(ids.map((x) => String(x)))
+      state.drafts = (Array.isArray(state.drafts) ? state.drafts : []).filter((r) => !set.has(String(r.id)))
+      await this.writeReportState(state)
     },
   },
 }

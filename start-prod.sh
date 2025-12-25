@@ -16,6 +16,6 @@ docker-compose -f docker-compose.yml --profile prod down
 echo "构建并启动生产环境..."
 docker-compose -f docker-compose.yml --profile prod up --build -d
 
-echo "生产环境已启动，访问地址: http://localhost:3003"
+echo "生产环境已启动，访问地址: http://localhost:3004"
 echo "注意: 容器内使用serve静态服务器运行在8000端口，通过3003端口映射到主机"
 echo "查看日志: docker-compose -f docker-compose.yml --profile prod logs -f"

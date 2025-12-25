@@ -77,7 +77,6 @@ const reportTypeList = [
 ]
 
 import { DataGoTabs, STable } from '@/components'
-import { reportList } from '@/api/report'
 import { tabColumns } from './util'
 export default {
   components: { DataGoTabs, STable },
@@ -131,17 +130,27 @@ export default {
               ? 0
               : '',
         })
-        return new Promise((resolve, reject) => {
-          reportList(requestParameters).then((res) => {
-            this.tabChangeStatuas = false
-            const reD = {
-              pageSize: requestParameters.pageSize,
-              pageNo: requestParameters.pageNo,
-              totalCount: res.total,
-              totalPage: Math.ceil(res.total / requestParameters.pageSize),
-              data: res.rows,
-            }
-            resolve(reD)
+        return new Promise(async (resolve) => {
+          const state = await this.readReportState()
+          let rows = []
+          const drafts = Array.isArray(state.drafts) ? state.drafts.map((r) => Object.assign({}, r, { status: 0 })) : []
+          const reports = Array.isArray(state.reports) ? state.reports.map((r) => Object.assign({}, r, { status: 1 })) : []
+          rows = drafts.concat(reports)
+          rows = rows.filter((r) => String(r.reportType) === String(requestParameters.reportType))
+          if (requestParameters.status !== '') {
+            rows = rows.filter((r) => String(r.status) === String(requestParameters.status))
+          }
+          const total = rows.length
+          const start = (requestParameters.pageNum - 1) * requestParameters.pageSize
+          const end = start + requestParameters.pageSize
+          const pageRows = rows.slice(start, end)
+          this.tabChangeStatuas = false
+          resolve({
+            pageSize: requestParameters.pageSize,
+            pageNo: requestParameters.pageNum,
+            totalCount: total,
+            totalPage: Math.ceil(total / requestParameters.pageSize),
+            data: pageRows,
           })
         })
       },
@@ -165,7 +174,14 @@ export default {
     },
     handleChat(v) {
       const { $router } = this
-      $router.push({ path: `/homePage/viewReport/` + v.id })
+      if (String(v.status) === '1') {
+        $router.push({ path: `/homePage/viewReport/` + v.id })
+      } else {
+        const DEFAULT_DOC = ''
+        const q = { docUrl: DEFAULT_DOC, fileType: 'doc' }
+        if (v.reportName) q.reportName = v.reportName
+        $router.push({ path: `/homePage/viewReportFirstDraft/${v.id}`, query: q })
+      }
     },
     selectChange() {
       this.$refs.table.refresh()
@@ -187,6 +203,16 @@ export default {
     },
     toPage(type) {
       this.$router.push({ path: '/homePage/addReport/' + type })
+    },
+    async readReportState() {
+      try {
+        const r = await fetch('/local-storage/drafts/report-state.json')
+        if (r.ok) {
+          const j = await r.json().catch(() => null)
+          if (j && typeof j === 'object') return j
+        }
+      } catch (e) {}
+      return { drafts: [], reports: [] }
     },
   },
 }

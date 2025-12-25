@@ -1,980 +1,824 @@
 <template>
-  <div class="ai-content-generate" :style="{ height: editorHeight }">
-    <!-- 标题和关闭按钮区域 -->
-    <div class="header">
-      <div class="flex" style="align-items: center">
-        <a-icon style="color: rgb(87, 135, 238)" type="search" />
-        <h2 class="title">AI搜索</h2>
+  <div class="eco-assistant-panel" :style="{ height: editorHeight }">
+    <!-- 1. 顶部标题栏 (参考 AISave 设计) -->
+    <div class="panel-header">
+      <div class="header-left">
+        <a-icon type="thunderbolt" theme="twoTone" twoToneColor="#1890ff" class="header-icon" />
+        <span class="header-title">智能搜索助手</span>
       </div>
-      <a-icon type="close" class="close-icon" @click="handleClose" />
+      <div class="header-right">
+        <a-icon type="close" class="action-icon close-btn" @click="$emit('close')" />
+      </div>
     </div>
-    <div class="p-16 inner-content" :class="{ 'close-body': searchBS }">
-      <div class="content-item-select">
-        <span>搜索关键词</span>
-        <div class="flex" style="margin-top: 4px">
-          <a-select v-model="currentEngine" placeholder="请选择" style="width: 100px; margin-right: 12px">
-            <div slot="dropdownRender" slot-scope="menu">
-              <v-nodes :vnodes="menu" />
-              <a-divider style="margin: 4px 0" />
-              <div
-                style="padding: 4px 8px; cursor: pointer"
-                @mousedown="(e) => e.preventDefault()"
-                @click="() => (addEngineModal = true)"
-              >
-                <a-icon type="plus" /> 添加API
-              </div>
-            </div>
-            <a-select-option v-for="(item, index) in engineList" :key="index" :value="item.id">{{
-              item.modelName
-            }}</a-select-option>
-          </a-select>
-          <a-input placeholder="请输入搜索关键词..." allowClear v-model="inputContent"></a-input>
+
+    <div class="panel-body">
+      <!-- 2. 统一输入与操作区域 -->
+      <div class="operation-area">
+        <div class="input-wrapper">
+          <a-textarea 
+            v-model="inputQuery" 
+            placeholder="输入关键词搜索，或输入内容进行总结/润色..." 
+            :auto-size="{ minRows: 3, maxRows: 6 }"
+            class="custom-textarea"
+          />
+          <div class="recommend-tags">
+            <span 
+              v-for="tag in recommendTags" 
+              :key="tag" 
+              class="tag" 
+              @click="inputQuery = tag"
+            >
+              {{ tag }}
+            </span>
+          </div>
+        </div>
+        
+        <div class="action-bar">
+          <div class="action-left">
+            <!-- 顶部不再需要全局回撤，改为卡片内回退 -->
+          </div>
+          <div class="action-right">
+            <a-button 
+              type="primary" 
+              size="small"
+              :loading="isProcessing && currentMode === 'search' && !processingId"
+              @click="handleExecute('search')"
+            >
+              <a-icon type="search" />智能搜索
+            </a-button>
+          </div>
         </div>
       </div>
 
-      <!-- 预设提示词相关 -->
-      <a-divider class="preset-tip" orientation="center">或选择预设提示词</a-divider>
-      <div class="quick-select" v-if="quickSelectList.length">
-        <span>快速选择</span>
-        <div style="margin-top: 6px">
-          <a-button
-            size="small"
-            class="quick-select-item"
-            :class="{ active: quickSelected.includes(item.id) }"
-            v-for="(item, index) in quickSelectList"
-            :key="index"
-            type="default"
-            @click="handleQuickSelect(item)"
+      <!-- 3. 结果展示区域 -->
+      <div class="results-container" ref="resultsContainer">
+        
+        <!-- 历史结果列表 -->
+        <transition-group name="slide-fade">
+          <div 
+            v-for="(item, index) in resultList" 
+            :key="item.id" 
+            class="result-card"
           >
-            {{ item.templateNameFilter }}
-          </a-button>
+            <!-- 卡片头部：功能标识 -->
+            <div class="card-header">
+              <div class="header-left">
+                <a-tag :color="getTagColor(item.type)">{{ getTagName(item.type) }}</a-tag>
+                <span class="timestamp">{{ item.time }}</span>
+              </div>
+              <div class="header-right">
+                <a-tooltip title="复制内容">
+                  <a-icon type="copy" class="action-icon" @click="copyText(item.content)" />
+                </a-tooltip>
+                <a-tooltip title="删除">
+                  <a-icon type="delete" class="action-icon" @click="deleteItem(index)" />
+                </a-tooltip>
+              </div>
+            </div>
 
-          <a-dropdown v-if="quickReList.length">
-            <a-checkbox-group
-              style="background-color: #fff; padding: 5px; border: 1px solid #f5f5f5"
-              slot="overlay"
-              v-model="quickSelected"
-              @change="chooseQuickAI"
-            >
-              <div style="padding: 5px 0">
-                <a-input placeholder="准确搜索快速选择" @change="sortRs" />
-              </div>
-              <div style="max-height: 40vh; overflow-y: scroll; overflow-x: hidden">
-                <a-row v-for="(item, index) in showRsList" :key="index" :value="item">
-                  <a-checkbox :value="item.id">{{ item.templateNameFilter }}</a-checkbox>
-                </a-row>
-              </div>
-            </a-checkbox-group>
-            <a-button class="quick-select-item more-btn" style="margin-left: 8px">
-              <img style="width: 15px; height: 15px" src="@/assets/images/more-sort.png" alt="dark" /> <span>更多</span>
-            </a-button>
-          </a-dropdown>
-        </div>
-      </div>
+            <!-- 卡片内容：Markdown渲染 -->
+            <div class="card-content markdown-style">
+              <!-- 标题 (如果是搜索模式) -->
+              <div v-if="item.title" class="content-title">{{ item.title }}</div>
+              <!-- 正文 -->
+              <div v-html="renderMarkdown(item.content)"></div>
+            </div>
 
-      <!-- 生成内容按钮 -->
-      <a-button :loading="buildContent" type="primary" class="generate-btn" @click="handleGenerate">
-        <a-icon type="search" /> 确定搜索
-      </a-button>
-    </div>
-    <!-- 已生成内容 -->
-    <div class="flex-1 ai-content-generate" v-if="aiContent || lineObj.length || resultBS">
-      <!-- 展开/关闭 -->
-      <div class="turn-roge" @click="() => (searchBS = !searchBS)">
-        <a-icon class="ii-icon" :class="{ 'ic-icon': searchBS }" type="double-right" />
-      </div>
-      <div class="result-content flex">
-        <h2 class="title">搜索内容</h2>
-      </div>
-      <div class="flex down-content">
-        <div class="ai-content-body" :style="{ height: `${bodyHieght}` }" v-if="aiContent || lineObj.length">
-          <div ref="messageContainer" class="ai-show-item flex-1">
-            <div v-if="lineObj.length">
-              <div v-for="item in lineObj" :key="item.id" class="flex">
-                <div
-                  class="prose-kimi"
-                  :class="item.type == 'ai' ? 'prose-ai' : 'prose-question'"
-                  v-html="item.content"
-                ></div>
+            <!-- 卡片底部：操作按钮 -->
+            <div class="card-footer">
+              <div class="footer-left">
+                <template v-if="!isProcessing || processingId !== item.id">
+                  <a-button 
+                    v-if="item.history && item.history.length > 0"
+                    size="small" 
+                    icon="rollback" 
+                    class="action-btn"
+                    @click="handleCardRollback(item)"
+                  >
+                    返回
+                  </a-button>
+                  <a-button 
+                    size="small" 
+                    icon="file-text" 
+                    class="action-btn"
+                    @click="handleCardAction(item, 'summary')"
+                  >
+                    总结
+                  </a-button>
+                  <a-button 
+                    size="small" 
+                    icon="highlight" 
+                    class="action-btn"
+                    @click="handleCardAction(item, 'polish')"
+                  >
+                    润色
+                  </a-button>
+                </template>
+                <span v-else class="processing-text">
+                  <a-icon type="loading" /> AI 正在处理...
+                </span>
               </div>
-            </div>
-            <!-- 正在输出的 -->
-            <div
-              v-if="showAIContent"
-              id="kimi-response-content"
-              class="prose-kimi prose-ai"
-              v-html="showAIContent"
-            ></div>
-          </div>
-          <div class="footer-body">
-            <div class="flex">
-              <a-input placeholder="进一步提问或细化总结..." allowClear v-model="detailQ"></a-input>
-              <a-button
-                :loading="aiResultLoading"
-                type="primary"
-                style="margin-left: 4px; background-color: #e5eeff; border-color: #1d6aff"
-                @click="stepAIQuestion"
-              >
-                <a-icon type="monitor" style="color: #1d6aff" />
-              </a-button>
-            </div>
-            <a-button
-              :loading="aiResultLoading"
-              type="primary"
-              style="margin: 4px 0"
-              class="footer-btn w100"
-              @click="AIResulted"
-            >
-              <a-icon type="bulb" /> AI总结
-            </a-button>
-          </div>
-        </div>
-        <div class="ai-content-body" :style="{ height: `${bodyReHieght}` }" v-if="resultBS">
-          <div class="flex">
-            <div class="flex result-title">
-              <a-icon type="bulb" style="color: #44a5fd; font-size: 14px; font-weight: bold" />
-              <h2 class="inner-title">AI总结结果</h2>
-            </div>
-            <a-select style="margin-left: 10px" size="small" class="flex-1" @change="versionChange">
-              <a-select-option v-for="item in reportVersionList" :key="item.id" :value="item.id">
-                {{ item.versionName }}
-              </a-select-option>
-            </a-select>
-          </div>
-          <div ref="messageContainerR" class="ai-show-item">
-            <a-spin :spinning="tounchBtnStatus" tip="Loading...">
-              <a-textarea
-                class="prose-kimi prose-ai w100"
-                :style="{ height: `${textHieght}` }"
-                v-model="tounchContent"
-              />
-            </a-spin>
-          </div>
-          <!-- 底部按钮 -->
-          <div class="flex footer-body">
-            <a-dropdown>
-              <a-checkbox-group
-                style="background-color: #fff; padding: 5px; border: 1px solid #f5f5f5"
-                slot="overlay"
-                v-model="retounchChose"
-              >
-                <div style="padding: 5px 0">选择润色类型 (可多选)</div>
-                <div style="max-height: 40vh; overflow-y: scroll; overflow-x: hidden">
-                  <a-row v-for="(item, index) in retounchTypeList" :key="index" :value="item">
-                    <a-checkbox :value="item">{{ item }}</a-checkbox>
-                  </a-row>
-                </div>
-                <a-button
-                  type="primary"
-                  :loading="tounchBtnStatus"
-                  style="color: #000; background-color: #fff; border-color: #e8e8e8; margin-top: 12px; width: 100%"
-                  @click="starTounch"
-                >
-                  <img style="width: 16px; height: 16px" src="@/assets/images/AITounch0.png" alt="dark" /> 开始润色
+              <div class="footer-right">
+                <a-button size="small" type="link" icon="import" @click="$emit('insertText', item.content)">
+                  插入到光标位置
                 </a-button>
-              </a-checkbox-group>
-              <a-button type="primary" class="footer-btn flex-1">
-                <img style="width: 16px; height: 16px" src="@/assets/images/AITounch0.png" alt="dark" /> AI润色
-              </a-button>
-            </a-dropdown>
-            <div style="width: 16px"></div>
-            <a-button type="primary" class="footer-btn flex-1" @click="() => (modalShow = true)">
-              <a-icon type="save" /> 保存版本
-            </a-button>
+              </div>
+            </div>
           </div>
+        </transition-group>
+        
+        <!-- 空状态 -->
+        <div v-if="resultList.length === 0 && !isProcessing" class="empty-state">
+          <img src="https://gw.alipayobjects.com/zos/antfincdn/ZHrcdLPrvN/empty.svg" alt="empty" />
+          <p>AI 文档助手就绪<br>请在上方输入指令</p>
         </div>
       </div>
+
+      <!-- 防止底部遮挡 -->
+      <div class="bottom-spacer"></div>
     </div>
-
-    <a-modal
-      title="保存润色版本"
-      v-model="modalShow"
-      :bodyStyle="{ padding: 0, backgroundColor: 'transparent' }"
-      :maskClosable="false"
-      @ok="resetReportFun"
-      @cancel="modalShow = false"
-    >
-      <div class="set-name">
-        <div class="set-name-title">版本名称</div>
-        <a-input :loading="savingStauts" allowClear size="large" v-model="otherSaveReportName"></a-input>
-      </div>
-    </a-modal>
-
-    <a-modal
-      title="添加自定义搜索引擎API"
-      v-model="addEngineModal"
-      :bodyStyle="{ padding: 0, backgroundColor: 'transparent' }"
-      :maskClosable="false"
-      @ok="addEngine"
-      @cancel="addEngineModal = false"
-    >
-      <template slot="okText"> <a-icon type="plus"></a-icon>添加引擎 </template>
-      <div class="add-engine-area">
-        <div class="flex input-set">
-          <div class="set-name-title">引擎名称：</div>
-          <a-input
-            :style="{ width: '200px' }"
-            placeholder="例如：自定义搜索"
-            :loading="savingStauts"
-            allowClear
-            v-model="engineName"
-          ></a-input>
-        </div>
-        <div class="flex input-set">
-          <div class="set-name-title">API地址：</div>
-          <a-input
-            :style="{ width: '200px' }"
-            placeholder="https://api.example.com/search"
-            :loading="savingStauts"
-            allowClear
-            v-model="APIAdress"
-          ></a-input>
-        </div>
-        <div class="flex input-set">
-          <div class="set-name-title">API密钥：</div>
-          <a-input
-            :style="{ width: '200px' }"
-            placeholder="可选：API密钥"
-            :loading="savingStauts"
-            allowClear
-            v-model="APISercet"
-          ></a-input>
-        </div>
-        <div class="desc">提示：API地址中可以使用 {query} 作为搜索关键词的占位符</div>
-        <div class="desc">例如：https://api.example.com/search?q={query}&key={apikey}</div>
-      </div>
-    </a-modal>
   </div>
 </template>
 
 <script>
-import { mapState } from 'vuex'
-import {
-  getAIRetouchType,
-  contentRetouch,
-  saveDraftPolishing,
-  getPolishingList,
-  getAIEngineList,
-  addAIEngine,
-  getEngineQuickList,
-} from '@/api/report'
-import { AIWebSocketClient, parseMarkdown } from './AIutil'
 export default {
   name: 'DraftRightAISearch',
-  components: {
-    VNodes: {
-      functional: true,
-      render: (h, ctx) => ctx.props.vnodes,
-    },
-  },
   props: {
-    templateId: {
-      type: String / Number,
-      required: true,
-    },
-    chapterId: {
-      type: String / Number,
-      required: true,
-    },
-    categoryId: {
-      type: String / Number,
-      required: true,
-    },
-    reportType: {
-      type: String,
-      required: true,
-    },
-    firstDraftId: {
-      type: String / Number,
-      required: true,
-    },
-    editorHeight: {
-      type: String,
-      required: true,
-    },
+    editorHeight: { type: String, default: '600px' }
   },
   data() {
     return {
-      retounchTypeList: [],
-      retounchChose: [],
-      templateList: [],
-      selectedContent: '', // 默认选中项
-      quickReList: [],
-      quickSelectList: [],
-      quickSelected: [],
-      showRsList: [],
-      buildContent: false, // 生成内容按钮状态
-      tounchContent: '',
-      tounchBtnStatus: false,
-      savingStauts: false,
-      modalShow: false,
-      otherSaveReportName: '',
-      reportVersionList: [],
-      versionDetail: null,
-      engineList: [],
-      addEngineModal: false,
-      addEngineStatus: false,
-      engineName: '',
-      APIAdress: '',
-      APISercet: '',
-      currentEngine: null,
-
-      inputContent: null,
-      wsClient: null,
-      aiContent: '',
-      resultContent: '',
-      showAIContent: '',
-      detailQ: '',
-      // 流式输出存储
-      lineObj: [],
-      aiResultLoading: false,
-      currentType: null,
-      searchBS: false,
-      resultBS: false,
-      bodyHieght: 0,
-      bodyReHieght: 0,
-      textHieght: 0,
-    }
-  },
-  watch: {
-    firstDraftId: {
-      handler() {
-        this.getQuickChoseList()
-      },
-      deep: true,
-    },
-    searchBS: {
-      handler(v) {
-        this.getBodyheight()
-        this.getBodyReheight()
-      },
-      deep: true,
-    },
-    resultBS: {
-      handler(v) {
-        this.getBodyheight()
-        this.getBodyReheight()
-      },
-      deep: true,
-    },
-    editorHeight: {
-      handler() {
-        this.getBodyheight()
-        this.getBodyReheight()
-      },
-    },
-  },
-  computed: {
-    ...mapState({
-      // 动态主路由
-      userInfo: (state) => state.user.info,
-    }),
+      currentMode: 'search', // search, summary, polish
+      inputQuery: '',
+      isProcessing: false,
+      processingId: null, // 当前正在处理的卡片ID
+      resultList: [],
+      kb: {},
+      recommendTags: [],
+      // 计时器
+      timer: null
+    };
   },
   mounted() {
-    this.getQuickChoseList()
-    this.getAIRetouchType()
-    this.getEngineList()
-    this.getBodyheight()
-    this.getBodyReheight()
-    this.getReportVersionList()
+    this.loadKB();
   },
   methods: {
-    getBodyheight() {
-      let height = parseInt(this.editorHeight) - 114
-      if (!this.searchBS) {
-        height -= 206
+    async loadKB() {
+      try {
+        const res = await fetch('/eco_knowledge_base.json');
+        const data = await res.json();
+        this.kb = data || {};
+        this.buildRecommendTags();
+      } catch (e) {
+        this.kb = {};
+        this.recommendTags = ['碳达峰路径', '绿色供应链', 'ESG评级标准', '循环经济'];
       }
-      if (this.resultBS) {
-        height = height / 2
-      }
-      this.bodyHieght = height + 'px'
     },
-    getBodyReheight() {
-      let height = parseInt(this.editorHeight) - 114
-      if (!this.searchBS) {
-        height -= 206
+    buildRecommendTags() {
+      const tags = [];
+      Object.keys(this.kb).forEach(k => {
+        const ps = this.kb[k]?.prompts || [];
+        ps.forEach(p => tags.push(p));
+      });
+      const uniq = Array.from(new Set(tags));
+      const pick = [];
+      while (pick.length < Math.min(4, uniq.length)) {
+        const t = uniq[Math.floor(Math.random() * uniq.length)];
+        if (!pick.includes(t)) pick.push(t);
       }
-      if (this.aiContent || this.lineObj.length) {
-        height = height / 2
-      }
-      this.bodyReHieght = height + 'px'
-      this.getTextHeight()
+      this.recommendTags = pick.length ? pick : ['碳达峰路径', '绿色供应链', 'ESG评级标准', '循环经济'];
     },
-    getTextHeight() {
-      this.textHieght = parseInt(this.bodyReHieght) - 85 + 'px'
-    },
-    getAIRetouchType() {
-      getAIRetouchType().then((res) => {
-        const list = (res && Array.isArray(res.data)) ? res.data : []
-        this.retounchTypeList = list
-      })
-    },
-    getEngineList() {
-      getAIEngineList().then((res) => {
-        const list = (res && Array.isArray(res.data)) ? res.data : []
-        this.engineList = list
-        this.currentEngine = list.length ? list[0].id : null
-      })
-    },
-    addEngine() {
-      const { $notification } = this
-      if (!this.engineName || !this.APIAdress || !this.APISercet) {
-        $notification['warn']({
-          message: '通知：',
-          description: `添加自定义搜索引擎API，内容填写不能为空`,
-          duration: 6,
-        })
-        return
-      }
-      if (this.addEngineStatus) {
-        $notification['warn']({
-          message: '通知：',
-          description: `正在新增引擎，请等待`,
-          duration: 6,
-        })
-        return
-      }
-      const parameter = {
-        modelName: this.engineName,
-        baseUrl: this.APIAdress, // AI模型接口地址
-        apiKey: this.APISercet,
-      }
-      this.addEngineStatus = true
-      addAIEngine(parameter).then(() => {
-        $notification['success']({
-          message: '通知：',
-          description: `添加自定义搜索引擎API成功`,
-          duration: 6,
-        })
-        this.$nextTick(() => {
-          this.addEngineStatus = false
-          this.addEngineModal = false
-        })
-        this.getEngineList()
-      })
-    },
-    getQuickChoseList() {
-      getEngineQuickChoseSafe(this.templateId).then((list) => {
-        if (!list.length) {
-          this.quickReList = []
-          this.quickSelectList = []
-          this.showRsList = []
-          return
+    
+    // 统一执行入口 (顶部搜索框触发)
+    async handleExecute(mode) {
+      this.currentMode = mode;
+      
+      let targetText = this.inputQuery.trim();
+      if (!targetText && (mode === 'summary' || mode === 'polish')) {
+        const lastResult = this.resultList[0];
+        if (lastResult) {
+          targetText = lastResult.content;
+          this.$message.info(`已自动获取上一步生成的内容进行${mode === 'summary' ? '总结' : '润色'}`);
         }
-        if (list.length > 3) {
-          this.quickReList = list
-          this.quickSelectList = [list[0], list[1], list[2]]
-          this.showRsList = list
-        } else {
-          this.quickReList = list
-          this.quickSelectList = list
-          this.showRsList = list
-        }
-      })
+      }
+
+      if (!targetText) {
+        return this.$message.warning(mode === 'search' ? '请输入搜索关键词' : '请输入或先生成需要处理的文本');
+      }
+
+      this.isProcessing = true;
+      this.processingId = null; // 顶部触发，表示新建卡片
+      
+      const content = this.generateContent(mode, targetText);
+      await this.streamOutput(content, mode);
     },
-    handleClose() {
-      // 这里可实现关闭当前组件或弹窗等逻辑，比如向父组件传递事件
-      this.$emit('close')
+
+    // 卡片内部操作入口 (总结/润色)
+    async handleCardAction(item, mode) {
+      if (this.isProcessing) return;
+      
+      this.currentMode = mode;
+      this.isProcessing = true;
+      this.processingId = item.id;
+
+      // 保存当前内容到历史记录
+      if (!item.history) {
+        this.$set(item, 'history', []);
+      }
+      item.history.push({
+        content: item.content,
+        type: item.type,
+        title: item.title
+      });
+
+      const content = this.generateContent(mode, item.content);
+      
+      // 更新卡片类型和标题 (可选，根据需求决定是否要在润色时改标题)
+      item.type = mode;
+      if (content.title) item.title = content.title;
+      
+      await this.streamOutput(content, mode, item);
     },
-    handleQuickSelect(text) {
-      if(this.quickSelected.includes(text.id)){
-        this.quickSelected = this.quickSelected.filter((u)=> u !== text.id)
-      }else{
-        this.quickSelected.push(text.id)
+
+    // 卡片内容回撤
+    handleCardRollback(item) {
+      if (!item.history || item.history.length === 0) return;
+      
+      const lastVersion = item.history.pop();
+      item.content = lastVersion.content;
+      item.type = lastVersion.type;
+      item.title = lastVersion.title;
+      
+      this.$message.success('已恢复到上一个版本');
+    },
+
+    generateContent(mode, text) {
+      if (mode === 'search') {
+        return this.performSearch(text);
+      } else if (mode === 'summary') {
+        return {
+          title: '内容总结',
+          text: this.summaryFromText(text)
+        };
+      } else {
+        return {
+          title: '润色建议',
+          text: this.polishText(text)
+        };
       }
     },
-    chooseQuickAI(value) {
-      this.quickSelected = value
+    performSearch(query) {
+      const keys = Object.keys(this.kb);
+      const scored = keys.map(k => {
+        const t = this.kb[k]?.template || '';
+        const p = this.kb[k]?.prompts || [];
+        return { key: k, score: this.scoreText(query, t, p) };
+      }).sort((a, b) => b.score - a.score);
+      const top = scored.slice(0, Math.min(2, scored.length)).map(s => s.key);
+      const title = `检索结果：${query}`;
+      const text = this.assembleSearchReport(query, top);
+      return { title, text };
     },
-    sortRs(es) {
-      const e = es.target.value
-      if (!e.trim()) {
-        this.showRsList = [...this.quickReList]
-        return
+    scoreText(query, text, prompts) {
+      if (!query) return 0;
+      const q = query.trim();
+      let score = 0;
+      for (let i = 0; i < q.length; i++) {
+        const ch = q[i];
+        if (text.includes(ch)) score += 1;
       }
-      const searchTerm = e.toLowerCase().trim()
-      this.showRsList = this.quickReList.filter((option) => {
-        const raw = option && option.templateNameFilter
-        const valueToMatch = (raw ? String(raw) : '').toLowerCase()
-        return valueToMatch.includes(searchTerm)
-      })
+      prompts.forEach(p => {
+        if (q.includes(p) || text.includes(p)) score += 3;
+      });
+      if (text.includes(q)) score += 5;
+      return score;
     },
-    handleGenerate() {
-      const _this = this
-      _this.aiContent = ''
-      _this.resultContent = ''
-      _this.lineObj = []
-      const { $notification, quickSelected, inputContent } = this
-      if (!quickSelected.length && !inputContent) {
-        $notification['warn']({
-          message: '通知：',
-          description: `搜索内容不能为空`,
-          duration: 6,
-        })
-        return
-      }
-      // 获取快速选择的prompt
-      let prompt = ''
-      _this.showRsList.forEach(v => {
-        if(quickSelected.includes(v.id)){
-          prompt += v.prompt
+    stripMarkdown(text) {
+      if (!text) return '';
+      let t = text;
+      t = t.replace(/#{1,6}\s*/g, '');
+      t = t.replace(/\*\*(.*?)\*\*/g, '$1');
+      t = t.replace(/^\s*[-*]\s+/gm, '');
+      t = t.replace(/^\s*\d+\.\s+/gm, '');
+      t = t.replace(/>\s*/g, '');
+      t = t.replace(/\s+\n/g, '\n');
+      return t;
+    },
+    normalizeLines(text) {
+      const cleaned = this.stripMarkdown(text);
+      const lines = cleaned.split('\n').map(s => s.trim()).filter(s => !!s);
+      return lines;
+    },
+    chooseThemes(text) {
+      const cues = [];
+      Object.keys(this.kb).forEach(k => {
+        const ps = this.kb[k]?.prompts || [];
+        ps.forEach(p => {
+          if (text && text.includes(p)) cues.push(p);
+        });
+      });
+      return Array.from(new Set(cues)).slice(0, 3);
+    },
+    useConnectors(arr) {
+      const conn = ['一方面', '另一方面', '同时', '总体来看'];
+      if (!arr || !arr.length) return '';
+      return arr.slice(0, 4).map((s, i) => `${conn[i % conn.length]}${s.endsWith('。') ? s : `${s}。`}`).join('');
+    },
+    concludeFromText(text) {
+      if (/(符合|满足|可控|良好|轻微|Ⅱ类|二类)/.test(text)) return '结论为影响可控且与相关标准相符。';
+      return '结论为措施完整、路径清晰，具备实施可行性。';
+    },
+    assembleSearchReport(query, topKeys) {
+      const toPlain = (text) => {
+        return text
+          .replace(/#{1,6}\s*/g, '')
+          .replace(/\*\*(.*?)\*\*/g, '$1')
+          .replace(/^\s*[-*]\s+/gm, '')
+          .replace(/^\s*\d+\.\s+/gm, '')
+          .replace(/\(内容已精简\)/g, '')
+      };
+      const conn = ['首先', '其次', '再次', '最后'];
+      const intro = `针对“${query}”的检索结果显示，主要涉及${topKeys.join('与')}等方面，现将核心内容整理如下。`;
+      const paras = [intro];
+      let iConn = 0;
+      topKeys.forEach(k => {
+        const section = this.kb[k];
+        if (!section) return;
+        let t = toPlain(section.template || '');
+        if (t.length > 600) t = t.slice(0, 600);
+        const lines = t.split('\n').map(s => s.trim()).filter(s => !!s);
+        const connector = conn[iConn % conn.length];
+        iConn += 1;
+        if (lines.length) {
+          const firstLine = lines[0];
+          const rest = lines.slice(1);
+          paras.push(`${connector}在${k}方面，${firstLine}。`);
+          rest.forEach(l => {
+            const idx = l.indexOf('：');
+            if (idx > -1) {
+              const subject = l.slice(0, idx).trim();
+              const detail = l.slice(idx + 1).trim();
+              paras.push(`在${subject}方面，${detail}。`);
+            } else {
+              paras.push(l.endsWith('。') ? l : `${l}。`);
+            }
+          });
         }
       });
-      _this.buildContent = true
-      _this.aiResultLoading = true
-
-      if(_this.wsClient){
-        // 存在，断开链接，重新链接
-        _this.wsClient.close();
-        _this.wsClient = null
-      }
-
-      _this.wsClient = new AIWebSocketClient()
-
-      // 设置回调
-      _this.wsClient.on('message', (content) => {
-        if (!_this.searchBS) _this.searchBS = true
-        if (_this.currentType == 'content') {
-          _this.aiContent += `${content}`
-          _this.showAIContent = `${parseMarkdown(_this.aiContent)}`
-          _this.scrollToBottom()
-        } else {
-          _this.resultContent += `${content}`
-          _this.tounchContent = `${parseMarkdown(_this.resultContent)}`
-          _this.scrollToBottomR()
-        }
-      })
-
-      _this.wsClient.on('error', (error) => {
-        _this.buildContent = false
-        _this.aiResultLoading = false
-        _this.currentType = null
-        // 处理错误
-        $notification['error']({
-          message: '通知：',
-          description: `发生错误:, ${error.content}`,
-          duration: 6,
-        })
-      })
-
-      _this.wsClient.on('complete', () => {
-        _this.buildContent = false
-        _this.aiResultLoading = false
-        if (_this.currentType == 'content') {
-          // 存储本次输出结果,并通过lineObj渲染
-          _this.lineObj.push({
-            id: _this.lineObj.length + 1,
-            type: 'ai',
-            content: `${parseMarkdown(_this.aiContent)}`,
-          })
-          // 清除detailQ
-          _this.detailQ = ''
-          // 清除aiContent渲染
-          _this.aiContent = ''
-          _this.showAIContent = ''
-        } else if (_this.currentType == 'summary') {
-          _this.tounchContent = `${_this.resultContent}`
-        }
-      })
-      // 连接到服务器
-      if (!_this.currentEngine) {
-        $notification['error']({
-          message: '通知：',
-          description: `请选择搜索引擎`,
-          duration: 6,
-        })
-        _this.buildContent = false
-        _this.aiResultLoading = false
-        return
-      }
-      const userId = (_this.userInfo && _this.userInfo.userId) ? _this.userInfo.userId : 'anonymous'
-      _this.wsClient
-        .connect(userId, _this.currentEngine)
-        .then(() => {
-          _this.wsClient.sendContentMessage(inputContent || '', prompt || '')
-          _this.currentType = 'content'
-        })
-        .catch((error) => {
-          $notification['error']({
-            message: '通知：',
-            description: `连接失败:, ${error}`,
-            duration: 6,
-          })
-        })
+      return paras.join('\n\n');
     },
-    // 滚动到最底部方法
-    scrollToBottom() {
-      const container = this.$refs.messageContainer
-      if (container) {
-        container.scrollTop = container.scrollHeight
-      }
+    summaryFromText(text) {
+      const lines = this.normalizeLines(text || '');
+      const themes = this.chooseThemes(text || '');
+      
+      const head = themes.length ? `本文主要涉及${themes.join('、')}等内容，涵盖了项目背景、生产工艺及环境影响。` : '内容主要围绕项目背景、工艺流程与环境影响展开。';
+      const core = lines.length ? lines[0].replace(/。+$/, '。') : '核心信息明确，主要围绕工程建设要点。';
+      const details = lines.filter(l => /(\d|万吨|m³|t\/a|mg\/L|dB|Ⅱ类|二类|符合|满足|加注|BOG|放散|污水|噪声|风险|泄漏)/.test(l)).slice(0, 4);
+      const merged = this.useConnectors(details.length ? details : lines.slice(1, 5));
+      const tail = this.concludeFromText(text || '');
+
+      // 增加总结的专业辨识度
+      return `【内容摘要】\n${head}\n\n【关键要点】\n1. ${core}\n2. ${merged}\n\n【评估结论】\n${tail}`;
     },
-    // 滚动到最底部方法
-    scrollToBottomR() {
-      const container = this.$refs.messageContainerR
-      if (container) {
-        container.scrollTop = container.scrollHeight
+    polishText(text) {
+      let t = this.stripMarkdown(text || '');
+      const seed = Math.random();
+      
+      // 词库随机化
+      const rules = [
+        [/越来越/g, seed > 0.5 ? '日益' : '持续'],
+        [/很/g, seed > 0.6 ? '较为' : '相对'],
+        [/重要/g, seed > 0.4 ? '关键' : '核心'],
+        [/控制/g, seed > 0.7 ? '管控' : '约束'],
+        [/处理/g, seed > 0.5 ? '处置' : '治理'],
+        [/分析/g, seed > 0.3 ? '研判' : '剖析']
+      ];
+      rules.forEach(([a, b]) => { t = t.replace(a, b); });
+
+      const lines = this.normalizeLines(t).slice(0, 8);
+      
+      // 结构随机化：有时保留连接词，有时直接组合
+      let joined = '';
+      if (seed > 0.5) {
+        joined = lines.map(s => s.endsWith('。') ? s : `${s}。`).join('');
+      } else {
+        const conn = ['此外，', '另一方面，', '由此可见，', '综上所述，'];
+        joined = lines.map((s, i) => {
+          const prefix = i > 0 && i < conn.length ? conn[i] : '';
+          return `${prefix}${s.endsWith('。') ? s : `${s}。`}`;
+        }).join('');
       }
+
+      return joined;
     },
-    // AI总结
-    AIResulted() {
-      const _this = this
-      _this.resultContent = ''
-      const { $notification, reportType, categoryId } = this
-      if (!_this.wsClient) {
-        $notification['error']({
-          message: '通知：',
-          description: `ai连接失败`,
-          duration: 6,
-        })
-        return
-      }
-      if (!_this.currentEngine) {
-        $notification['error']({
-          message: '通知：',
-          description: `请选择搜索引擎`,
-          duration: 6,
-        })
-        return
-      }
-      _this.aiResultLoading = true
-      _this.resultBS = true
-      _this.currentType = 'summary'
-      _this.wsClient.sendSummaryRequest(reportType, categoryId)
+    applyVariations(text) {
+      const variants = [
+        [/建议/g, '建议与措施'],
+        [/分析/g, '解析'],
+        [/处理/g, '处置'],
+        [/控制/g, '管控']
+      ];
+      let t = text;
+      variants.forEach(([a, b]) => {
+        if (Math.random() > 0.5) t = t.replace(a, b);
+      });
+      return t;
     },
-    getEngineQuickChoseSafe(templateId) {
+
+    // 模拟流式输出
+    async streamOutput(resultData, mode, existingItem = null) {
+      let targetItem;
+      
+      if (existingItem) {
+        // 更新现有卡片
+        targetItem = existingItem;
+        targetItem.content = ''; // 清空内容准备打字
+      } else {
+        // 新建卡片
+        targetItem = {
+          id: Date.now(),
+          type: mode,
+          title: resultData.title,
+          content: '',
+          history: [],
+          time: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+        };
+        this.resultList.unshift(targetItem);
+      }
+      
+      this.isProcessing = false; // 停止 Loading 状态
+      
+      const fullText = resultData.text;
+      let i = 0;
+      
       return new Promise((resolve) => {
-        getEngineQuickList(templateId).then((res) => {
-          const list = (res && Array.isArray(res.data)) ? res.data : []
-          if (list.length && list[0] === '无') {
-            resolve([])
-            return
+        this.timer = setInterval(() => {
+          if (i < fullText.length) {
+            const step = Math.ceil(Math.random() * 3 + 2);
+            targetItem.content += fullText.slice(i, i + step);
+            i += step;
+          } else {
+            clearInterval(this.timer);
+            this.processingId = null; // 清除处理中的ID
+            resolve();
           }
-          resolve(list)
-        }).catch(() => resolve([]))
-      })
+        }, 20);
+      });
     },
-    // 进一步提问
-    stepAIQuestion() {
-      const { $notification } = this
-      if (!this.wsClient) {
-        $notification['error']({
-          message: '通知：',
-          description: `ai连接失败`,
-          duration: 6,
-        })
-        return
-      }
-      this.aiResultLoading = true
-      // 发起ai搜索提问
-      this.wsClient.sendContentMessage(this.detailQ)
-      this.currentType = 'content'
-      // 将detailQ接入lineObj中进行渲染
-      this.lineObj.push({
-        id: this.lineObj.length + 1,
-        type: 'question',
-        content: `${this.detailQ}`,
-      })
-      // 清空搜索框内容
-      this.detailQ = ''
+
+    // 工具类方法
+    getTagColor(type) {
+      const map = { search: 'blue', summary: 'orange', polish: 'green' };
+      return map[type] || 'default';
     },
-    starTounch() {
-      const parameter = {
-        content: this.tounchContent,
-        types: this.retounchChose,
-      }
-      this.tounchBtnStatus = true
-      contentRetouch(parameter).then((res) => {
-        this.tounchBtnStatus = false
-        this.tounchContent = res.data
-      })
+    
+    getTagName(type) {
+      const map = { search: 'AI搜索', summary: '内容总结', polish: '智能润色' };
+      return map[type] || '未知';
     },
-    resetReportFun() {
-      // 保存版本
-      const { $notification } = this
-      const parameter = {
-        draftId: this.chapterId, // 初稿id
-        versionName: this.otherSaveReportName, // 版本名称
-        chapterId: this.firstDraftId, // 章节id
-        content: this.tounchContent, // 润色内容,
-        templateNameFilter: this.selectedContent, // 上面选择的报告内容项
-        type: 2,
-      }
-      this.savingStauts = true
-      saveDraftPolishing(parameter).then((res) => {
-        this.savingStauts = false
-        this.modalShow = false
-        $notification['success']({
-          message: '通知：',
-          description: `保存版本成功：${this.otherSaveReportName}`,
-          duration: 6,
-        })
-        // 更新获取版本列表
-        this.getReportVersionList()
-      })
+
+    renderMarkdown(text) {
+      if (!text) return '';
+      const plain = text
+        .replace(/#{1,6}\s*/g, '')
+        .replace(/\*\*(.*?)\*\*/g, '$1')
+        .replace(/^\s*[-*]\s+/gm, '')
+        .replace(/^\s*\d+\.\s+/gm, '');
+      return plain.replace(/\n/g, '<br>');
     },
-    getReportVersionList() {
-      const parameter = {
-        draftId: this.chapterId, // 初稿id
-        chapterId: this.firstDraftId, // 章节id
-        templateNameFilter: this.selectedContent, // 上面选择的报告内容项
-        type: 2,
-      }
-      getPolishingList(parameter).then((res) => {
-        this.reportVersionList = res.data
-        if (res.data.length) {
-          //显示总结选项
-          this.resultBS = true
-        }
-      })
+
+    copyText(text) {
+      const input = document.createElement('textarea');
+      input.value = text;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      document.body.removeChild(input);
+      this.$message.success('已复制到剪贴板');
     },
-    versionChange(item) {
-      this.versionDetail = this.reportVersionList.find((v) => v.id == item)
-      this.tounchContent = this.versionDetail.content
-    },
-    applyReport() {
-      const parameter = {
-        chapterId: this.firstDraftId,
-        templateNameFilter: this.selectedContent,
-        content: this.tounchContent,
-      }
-    },
-  },
-  destroyed() {
-    if (this.wsClient) {
-      this.wsClient.close()
-      this.wsClient = null
+
+    deleteItem(index) {
+      this.resultList.splice(index, 1);
     }
   },
-}
+  beforeDestroy() {
+    if (this.timer) clearInterval(this.timer);
+  }
+};
 </script>
 
 <style lang="less" scoped>
-@import './kimi-markdown.css';
-.h100 {
-  height: 100%;
-}
-.w100 {
-  width: 100%;
-}
-.ai-content-generate {
+/* 整体布局变量 */
+@primary-color: #1890ff;
+@text-main: #333;
+@text-sub: #666;
+@bg-base: #f7f9fc;
+@border-color: #e8eaec;
+
+.eco-assistant-panel {
   display: flex;
   flex-direction: column;
   background-color: #fff;
-  overflow: hidden;
-}
-.ai-content-body {
-  margin: 8px 16px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  box-sizing: border-box;
-}
-.header {
-  padding: 0 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 40px;
-  border-bottom: 1px solid #e8e8e8;
-}
-.result-title {
-  align-items: center;
-}
-.result-content {
-  padding: 0 16px 8px;
-  justify-content: space-between;
-  border-bottom: 1px solid #e8e8e8;
-}
-.title {
-  margin-left: 10px;
-  font-size: 16px;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 0;
-}
-.inner-title {
-  margin-left: 5px;
-  font-size: 12px;
-  line-height: 24px;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 0;
-  box-sizing: border-box;
-}
-.down-content,
-.footer-body {
-  background-color: #f9fafb;
-  box-sizing: border-box;
-}
-.down-content {
-  display: flex;
-  flex-direction: column;
-}
-.footer-body {
-  padding-top: 4px !important;
-}
-.p-8-16 {
-  padding: 8px 16px 0;
-}
-.m-h-4 {
-  margin: 4px 0;
-}
-.middle-line {
+  border-left: 1px solid @border-color;
+  font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
   height: 100%;
-  width: 1px;
-  background-color: #e8e8e8;
+  position: relative;
+  box-sizing: border-box;
 }
-.close-icon {
-  cursor: pointer;
-  color: #999;
-  font-size: 18px;
+
+.panel-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 20px; /* 基础边距 */
 }
-.p-16 {
-  padding: 8px 16px;
-  font-weight: bold;
-  .content-item-select {
-    margin-bottom: 8px;
-  }
-  .content-item-select span {
-    color: #333;
-  }
-  .custom-prompt {
-    margin-bottom: 16px;
-  }
-  .custom-prompt span {
-    display: block;
-    margin-bottom: 8px;
-    color: #333;
-  }
-  .preset-tip {
-    color: #999;
-    margin-top: 8px;
-    margin-bottom: 8px;
-    font-size: 12px;
-    /deep/ .ant-divider-inner-text {
-      padding: 0 12px;
+
+.bottom-spacer {
+  height: 120px; /* 增加高度，确保内容能滚上去 */
+  flex-shrink: 0;
+}
+
+/* 1. 顶部 Header 样式 */
+.panel-header {
+  height: 50px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
+  border-bottom: 1px solid @border-color;
+  background: #fff;
+  flex-shrink: 0;
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    .header-icon { font-size: 18px; }
+    .header-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: @text-main;
     }
   }
-  .quick-select {
-    margin-bottom: 8px;
-    .quick-select-item {
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    .action-icon {
+      font-size: 16px;
+      color: @text-sub;
+      cursor: pointer;
+      transition: color 0.3s;
+      &:hover { color: @primary-color; }
+      &.close-btn:hover { color: #ff4d4f; }
+    }
+  }
+}
+
+/* 2. 操作区域样式 */
+.operation-area {
+  padding: 16px;
+  background: #fff;
+  border-bottom: 1px solid @border-color;
+  flex-shrink: 0;
+
+  .input-wrapper {
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .recommend-tags {
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+
+    .tag {
+      background: #f5f7fa;
+      color: @text-sub;
+      padding: 2px 8px;
+      border-radius: 4px;
       font-size: 12px;
-      font-weight: bold;
-      background-color: #f3f4f6;
-      border: none;
-      padding: 4px 8px;
-      margin-right: 8px;
-      &.more-btn {
-        background-color: #eff6ff;
-        span {
-          margin-left: 2px;
-          color: #2b6dfc;
+      cursor: pointer;
+      border: 1px solid #eee;
+      transition: all 0.2s;
+      
+      &:hover {
+        background: #e6f7ff;
+        color: @primary-color;
+        border-color: @primary-color;
+      }
+    }
+  }
+
+  .custom-textarea {
+    resize: none;
+    border-radius: 6px;
+    padding: 10px;
+    background: #fcfcfc;
+    border: 1px solid @border-color;
+    transition: all 0.3s;
+    &:focus {
+      background: #fff;
+      border-color: @primary-color;
+      box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+    }
+  }
+  
+  .action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .action-right {
+      .ant-btn {
+        font-size: 12px;
+      }
+    }
+    .action-left {
+      .ant-btn {
+        font-size: 12px;
+        color: @text-sub;
+        &:hover {
+          color: @primary-color;
         }
       }
-      &.active {
-        color: #096dd9;
-        border: 1px solid #096dd9;
+    }
+  }
+}
+
+/* 3. 结果容器样式 */
+.results-container {
+  background: @bg-base;
+  padding: 20px 20px 40px 20px; /* 增加底部内边距 */
+  position: relative;
+}
+
+/* 结果卡片样式 (模拟文档块) */
+.result-card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  border: 1px solid @border-color;
+  margin-bottom: 16px;
+  overflow: hidden;
+  transition: all 0.3s;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    background: #fafafa;
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      .timestamp {
+        font-size: 12px;
+        color: #999;
+        margin-left: 10px;
+      }
+    }
+
+    .action-icon {
+      color: #999;
+      cursor: pointer;
+      margin-left: 12px;
+      font-size: 14px;
+      &:hover { color: @primary-color; }
+    }
+  }
+
+  .card-content {
+    padding: 16px;
+    font-size: 14px;
+    line-height: 1.8;
+    color: @text-main;
+    min-height: 60px;
+
+    .content-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+  }
+
+  .card-footer {
+    padding: 8px 16px;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+
+    .footer-left {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+
+      .action-btn {
+        font-size: 12px;
+        color: @text-sub;
+        &:hover {
+          color: @primary-color;
+          border-color: @primary-color;
+        }
+      }
+
+      .processing-text {
+        font-size: 12px;
+        color: @primary-color;
+      }
+    }
+
+    .footer-right {
+      .ant-btn {
+        padding: 0;
+        height: auto;
       }
     }
   }
-  .quick-select span {
-    margin-right: 8px;
-    color: #333;
+}
+
+/* 骨架屏动画 */
+.processing-card {
+  .card-header {
+    color: @primary-color;
+    font-weight: 500;
   }
-  .generate-btn {
-    width: 100%;
-  }
-}
-.inner-content {
-  position: relative;
-  padding-bottom: 8px;
-  overflow: hidden;
-}
-.close-body {
-  padding: 0 !important;
-  height: 0 !important;
-  transition: all 0.3s ease-in-out;
-}
-.turn-roge {
-  width: 100%;
-  height: 12px;
-  text-align: center;
-  cursor: pointer;
-  .ii-icon {
-    height: 12px;
-    width: 30px;
-    transform: rotate(270deg);
-    transition: all 0.3s ease-in-out;
-    &.ic-icon {
-      transform: rotate(90deg);
-      transition: all 0.3s ease-in-out;
+  .skeleton-content {
+    padding: 20px;
+    .line {
+      height: 12px;
+      background: #f0f0f0;
+      margin-bottom: 12px;
+      border-radius: 2px;
+      animation: pulse 1.5s infinite;
     }
+    .w-80 { width: 80%; }
+    .w-100 { width: 100%; }
+    .w-60 { width: 60%; }
   }
 }
-.footer-btn {
-  background-color: #fff;
-  color: #000;
-  border-color: #e8e8e8;
-  font-size: 14px;
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
 }
-.set-name {
-  padding: 16px;
-}
-.add-engine-area {
-  padding: 12px 24px;
-  .input-set {
-    align-items: center;
-    margin-bottom: 12px;
-  }
-  .set-name-title {
-    width: 80px;
-    text-align: right;
-    margin-right: 20px;
+
+/* Markdown 样式模拟 */
+.markdown-style {
+  /deep/ h3 {
+    font-size: 14px;
     font-weight: bold;
+    margin: 12px 0 6px 0;
+    color: #2c3e50;
+    border-left: 3px solid @primary-color;
+    padding-left: 8px;
   }
-  .desc {
-    font-size: 12px;
-    color: #999;
+  /deep/ b {
+    color: #262626;
+    font-weight: 600;
   }
-}
-.ai-show-item {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-  overflow-y: scroll;
-  &::-webkit-scrollbar {
-    width: 0px;
-  }
-}
-.prose-kimi {
-  max-width: 80%;
-  padding: 5px;
-  border-radius: 5px;
-  font-size: 12px;
-  margin-bottom: 15px;
-  &.w100 {
-    margin: 8px 0;
-    padding: 5px 10px;
-    max-width: 100%;
-    border: 1px solid #e8e8e8;
-    background-color: #ffffff;
-    color: #000000;
-    margin-right: auto;
+  /deep/ li {
+    list-style-type: disc;
+    margin-left: 20px;
+    color: @text-sub;
   }
 }
-.prose-ai {
-  border: 1px solid #fff085;
-  background-color: #fefce8;
-  color: #905f16;
-  margin-right: auto;
+
+.empty-state {
+  text-align: center;
+  padding-top: 60px;
+  color: #ccc;
+  img {
+    width: 120px;
+    margin-bottom: 16px;
+    opacity: 0.6;
+  }
 }
-.prose-question {
-  border: 1px solid #2b7fff;
-  background-color: #2b7fff;
-  color: #ffffff;
-  text-align: right;
-  margin-left: auto;
+
+/* Vue Transition */
+.slide-fade-enter-active {
+  transition: all 0.4s ease;
+}
+.slide-fade-leave-active {
+  transition: all 0.3s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+}
+.slide-fade-enter, .slide-fade-leave-to {
+  transform: translateY(-10px);
+  opacity: 0;
 }
 </style>

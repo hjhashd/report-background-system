@@ -26,8 +26,8 @@ const user = {
     info: {},
     overview: null,
     buildQrCodePop: false,
-    collapsed: false,
-    fullScreen: false,
+    collapsed: true,
+    fullScreen: true,
     entery: null
   },
 
@@ -102,7 +102,7 @@ const user = {
       })
     },
 
-    // 获取用户信息（演示模式：优先使用本地 mock）
+    // 获取用户信息（访客模式：优先使用本地预设）
     GetInfo({ commit }) {
       return new Promise(async (resolve, reject) => {
         try {
@@ -115,7 +115,7 @@ const user = {
               user = response.user || {}
             }
           } catch (e) {
-            // ignore remote errors in demo mode
+            // ignore remote errors in visitor mode
           }
           if (result.role && result.role.permissions.length > 0) {
             const role = { ...result.role }

@@ -13,12 +13,12 @@ export const asyncRouterMap = [
     name: 'index',
     component: BasicLayout,
     meta: { title: 'menu.homepage' },
-    redirect: '/homePage/index',
+    redirect: '/homePage/firstDraft',
     children: [
       {
         path: "/homePage/index",
         name: 'home',
-        redirect: 'homePage/qrCodeList',
+        redirect: '/homePage/firstDraft',
         component: RouteView,
         meta: { title: 'menu.dataReady', keepAlive: true, icon: 'database', permission: ['home'] },
         children: [

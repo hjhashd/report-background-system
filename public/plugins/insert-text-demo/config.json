@@ -1,0 +1,27 @@
+{
+  "name": "AI Content Inserter",
+  "guid": "asc.{A1105DEE-7544-4C33-B3D5-168406D92F72}",
+  "version": "1.0.1",
+  "description": "AI assistant plugin to insert text at cursor via external message",
+  "isViewer": false,
+  "isModal": false,
+  "isInside": false,
+  "editor": "word",
+  "url": "index.html",
+  "icons": [
+    "icon.png",
+    "icon@2x.png"
+  ],
+  "initDataType": "none",
+  "initData": "",
+  "variations": [
+    {
+      "description": "AI content inserter",
+      "url": "index.html",
+      "icons": [
+        "icon.png",
+        "icon@2x.png"
+      ]
+    }
+  ]
+}

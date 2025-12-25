@@ -12,10 +12,10 @@ NProgress.configure({ showSpinner: false }) // NProgress Configuration
 
 const allowList = ['login', 'register', 'registerResult'] // no redirect allowList
 const loginRoutePath = '/user/login'
-const defaultRoutePath = '/dashboard/workplace'
+const defaultRoutePath = '/homePage/firstDraft'
 
 router.beforeEach((to, from, next) => {
-  NProgress.start() // start progress bar
+  // NProgress.start() // start progress bar
   to.meta && typeof to.meta.title !== 'undefined' && setDocumentTitle(`${i18nRender(to.meta.title)} - ${domTitle}`)
   /* has token */
   const token = storage.get(ACCESS_TOKEN)
@@ -65,15 +65,15 @@ router.beforeEach((to, from, next) => {
       }
     }
   } else {
-    // 演示模式：自动注入令牌并跳过登录
-    const demoToken = 'demo-token'
+    // 访客模式：自动注入令牌并跳过登录
+    const visitorToken = 'visitor-token'
     const expireAt = new Date().getTime() + 7 * 24 * 60 * 60 * 1000
-    storage.set(ACCESS_TOKEN, demoToken, expireAt)
-    store.commit('SET_TOKEN', demoToken)
+    storage.set(ACCESS_TOKEN, visitorToken, expireAt)
+    store.commit('SET_TOKEN', visitorToken)
     store
       .dispatch('GetInfo')
       .then(res => {
-        store.dispatch('GenerateRoutes', { token: demoToken, ...res }).then(() => {
+        store.dispatch('GenerateRoutes', { token: visitorToken, ...res }).then(() => {
           resetRouter()
           store.getters.addRouters.forEach(r => {
             router.addRoute(r)

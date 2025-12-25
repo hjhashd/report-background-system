@@ -19,4 +19,5 @@ docker-compose -f "$SCRIPT_DIR/docker-compose.yml" --profile dev up --build -d
 
 echo "开发环境已启动，访问地址: http://localhost:3004"
 echo "注意: 容器内运行在8000端口，通过3004端口映射到主机"
-echo "查看日志: docker-compose -f \"$SCRIPT_DIR/docker-compose.yml\" --profile dev logs -f"
+echo "正在查看实时日志 (按 Ctrl+C 退出日志查看，容器将继续在后台运行)..."
+docker-compose -f "$SCRIPT_DIR/docker-compose.yml" --profile dev logs -f

@@ -9,8 +9,8 @@
 -->
 <template>
   <!-- <page-header-wrapper> -->
-  <a-spin :spinning="pageLoading">
-    <div ref="reportViewDetail" class="page-content flex-col" style="padding: 0; width: 100%">
+  <a-spin :spinning="pageLoading" class="full-height-spin">
+    <div ref="reportViewDetail" class="page-content flex-col" style="padding: 0; width: 100%; height: 100vh;">
       <div class="report-view">
         <div class="flex-row-spacebetween tools">
           <div class="flex">
@@ -22,16 +22,6 @@
             </a-tooltip>
           </div>
         <div class="flex">
-          <a-tooltip>
-            <template slot="title">
-              <span>{{ editableMode ? '退出编辑' : '进入编辑' }}</span>
-            </template>
-            <div class="btn-item" @click="toggleEditMode">
-              <div class="icon-box">
-                <a-icon style="color: #5787ee" :type="editableMode ? 'lock' : 'edit'" />
-              </div>
-            </div>
-          </a-tooltip>
           <a-tooltip>
             <template slot="title">
               <span>保存</span>
@@ -119,7 +109,7 @@
           class="right-content"
           v-if="debugVisible || showRightType"
         >
-          <div v-if="showRightType == 'ai-save'">
+          <div v-if="showRightType == 'ai-save'" style="height: 100%;">
             <AiContentGenerate
               :firstDraftId="currentChose"
               :templateId="templateId"
@@ -127,9 +117,10 @@
               :editorHeight="editorHeight"
               @close="() => (showRightType = '')"
               @updateTemplateContent="updateEdit"
+              @insertText="insertTextIntoDoc"
             ></AiContentGenerate>
           </div>
-          <div v-else-if="showRightType == 'ai-search'">
+          <div v-else-if="showRightType == 'ai-search'" style="height: 100%;">
             <DraftRightAISearch
               :firstDraftId="currentChose"
               :templateId="templateId"
@@ -138,6 +129,7 @@
               :categoryId="categoryId"
               :reportType="reportType"
               @close="() => (showRightType = '')"
+              @insertText="insertTextIntoDoc"
             ></DraftRightAISearch>
           </div>
           <div v-else-if="debugVisible" style="padding: 12px">
@@ -154,40 +146,22 @@
             <FileSelectPanel
               :editorHeight="editorHeight"
               @close="() => (showRightType = '')"
+              @insertText="insertTextIntoDoc"
             />
           </div>
         </div>
       </div>
 
-      <a-modal
-        class="qr-modal"
-        v-model="setReportName"
-        :bodyStyle="{ padding: 0, backgroundColor: 'transparent' }"
-        :maskClosable="false"
-        @ok="resetReportFun"
-        @cancel="setReportName = false"
-      >
-        <div class="set-name">
-          <div class="set-name-title">{{ popTitle }}</div>
-          <a-input allowClear size="large" v-model="otherSaveReportName"></a-input>
-        </div>
-      </a-modal>
-      <!-- 打开弹窗 -->
-      <a-modal
-        class="view-page-pop"
-        v-model="openDataYC"
-        width="80vw"
-        :bodyStyle="{ height: '80vh', padding: 0, backgroundColor: 'transparent' }"
-        :footer="null"
-      >
-        <anomaly-content :customerDetail="customerDetail"></anomaly-content>
-      </a-modal>
-      <a-modal :footer="null" v-model="udt" title="数据更新提醒">
-        <div class="update-item-line" v-for="item in uploadTableList" :key="item.id">
-          <span class="update-item-title">{{ item.tableNameC }}</span>
-          <span class="update-item-time">{{ item.changeTime }}</span>
-        </div>
-      </a-modal>
+      <ViewReportModals
+        :setReportName.sync="setReportName"
+        :otherSaveReportName.sync="otherSaveReportName"
+        :popTitle="popTitle"
+        :openDataYC.sync="openDataYC"
+        :customerDetail="customerDetail"
+        :udt.sync="udt"
+        :uploadTableList="uploadTableList"
+        @reset-report="resetReportFun"
+      />
     </div>
   </a-spin>
   <!-- </page-header-wrapper> -->
@@ -196,16 +170,17 @@
 <script>
 import { mapActions } from 'vuex'
 import { OnlyOfficeEditorFD } from '@/components'
+import ViewReportModals from './components/ViewReportModals.vue'
 import { debounce } from '@/utils/util'
 import AiContentGenerate from './components/draftRightAISave.vue'
 import DraftRightAISearch from './components/draftRightAISearch.vue'
 import FileSelectPanel from './components/fileSelectPanel.vue'
-import { mergeTemplate } from '@/api/report'
 
 export default {
   name: 'addReport',
   components: {
     OnlyOfficeEditorFD,
+    ViewReportModals,
     AiContentGenerate,
     DraftRightAISearch,
     FileSelectPanel,
@@ -220,6 +195,7 @@ export default {
       docUrl: '',
       setReportName: false,
       otherSaveReportName: '',
+      popTitle: '保存版本',
       showRightType: '',
       udt: false,
       uploadTableList: [],
@@ -241,7 +217,8 @@ export default {
   },
   created() {
     this.reportName = (this.$route.query && this.$route.query.reportName) || ''
-    this.docUrl = (this.$route.query && this.$route.query.docUrl) || ''
+    const DEFAULT_DOC = '/local-storage/drafts/广东智环创新环境科技有限公司知识智库搭建-需求-终稿.doc'
+    this.docUrl = (this.$route.query && this.$route.query.docUrl) || DEFAULT_DOC
     this.fileType = (this.$route.query && this.$route.query.fileType) || 'docx'
     this.reportId = this.$route.params.reportId
     this.categoryId = (this.$route.query && this.$route.query.categoryId) || ''
@@ -261,17 +238,22 @@ export default {
   mounted() {
     window.addEventListener('resize', debounce(this.getinnerBodyHeight))
     this.getinnerBodyHeight()
-  },
-  methods: {
+    },
+    methods: {
     ...mapActions(['setCollapsed', 'setFullScreen']),
     getinnerBodyHeight() {
       this.$nextTick(() => {
-        const viewportHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
-        this.editorHeight = viewportHeight - 170 + 'px'
+        // 使用 flex 布局，editorHeight 设置为 100% 即可
+        this.editorHeight = '100%'
       })
     },
     openRight(type) {
       this.showRightType = type
+      this.$nextTick(() => {
+        try {
+          window.dispatchEvent(new Event('resize'))
+        } catch (e) {}
+      })
     },
     allViewPort() {
       // 打开全屏
@@ -339,28 +321,137 @@ export default {
         cancelText: '取消',
         onOk: () => {
           this.pageLoading = true
-          mergeTemplate(this.reportId).then((res) => {
-            if (res.code != 200) {
+          const delay = 1000 + Math.floor(Math.random() * 1000)
+          setTimeout(async () => {
+            try {
+              // 写入 modal_marker.json 的 formalReports
+              const markerUrl = '/local-storage/drafts/modal_marker.json'
+              let marker = { formalReports: [], draftReports: [] }
+              try {
+                const r = await fetch(markerUrl)
+                if (r.ok) {
+                  const j = await r.json()
+                  if (j && typeof j === 'object') marker = j
+                }
+              } catch (e) {}
+              if (!Array.isArray(marker.formalReports)) marker.formalReports = []
+              const nowTS = Date.now()
+              const physicalName = (this.docUrl || '').split('/').pop() || ''
+              const newFormal = {
+                id: `formal-${nowTS}`,
+                title: this.reportName || '未命名报告',
+                type: this.reportType ? parseInt(this.reportType) : 1,
+                createTime: nowTS,
+                status: 'published',
+                physicalName
+              }
+              marker.formalReports.unshift(newFormal)
+              const blob = new Blob([JSON.stringify(marker, null, 2)], { type: 'application/json' })
+              if (this.$refs && this.$refs.editorR && typeof this.$refs.editorR.uploadToFS === 'function') {
+                await this.$refs.editorR.uploadToFS('local-storage/drafts/modal_marker.json', blob)
+              } else {
+                const content = await new Promise((resolve) => {
+                  const fr = new FileReader()
+                  fr.onload = () => resolve(fr.result.split(',')[1] || '')
+                  fr.readAsDataURL(blob)
+                })
+                await fetch('/__local-upload', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ filename: 'local-storage/drafts/modal_marker.json', content }),
+                })
+              }
+              
+              // 同步到 report-state.json
+              await this.syncToReportState(marker)
+
+              $notification['success']({
+                message: '通知：',
+                description: '已完成更新，并在报告列表新增一条记录',
+                duration: 4,
+              })
+              this.pageLoading = false
+              $router.push({ path: '/homePage/firstDraft', query: { view: 'reports' } })
+            } catch (e) {
               this.pageLoading = false
               $notification['error']({
                 message: '错误通知：',
-                description: res.msg,
-                duration: 8,
-              })
-            } else {
-              $notification['success']({
-                message: '通知：',
-                description: `正在生成，请在草稿列表查看进度`,
+                description: String(e),
                 duration: 6,
               })
-              this.pageLoading = false
-              setTimeout(() => {
-                $router.push({ path: '/homePage/reportList' })
-              }, 500)
             }
-          })
+          }, delay)
         },
       })
+    },
+    async readReportState() {
+      try {
+        const r = await fetch('/local-storage/drafts/report-state.json')
+        if (r.ok) {
+          const j = await r.json().catch(() => null)
+          if (j && typeof j === 'object') return j
+        }
+      } catch (e) {}
+      return { drafts: [], reports: [] }
+    },
+    async writeReportState(state) {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' })
+      if (this.$refs && this.$refs.editorR && typeof this.$refs.editorR.uploadToFS === 'function') {
+        await this.$refs.editorR.uploadToFS('report-state.json', blob)
+      } else {
+        const content = await new Promise((resolve) => {
+          const fr = new FileReader()
+          fr.onload = () => resolve(fr.result.split(',')[1] || '')
+          fr.readAsDataURL(blob)
+        })
+        await fetch('/__local-upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filename: 'report-state.json', content }),
+        })
+      }
+    },
+    async syncToReportState(markerData) {
+      try {
+        const state = await this.readReportState()
+        const formatDate = (ts) => {
+          if (!ts) return new Date().toLocaleString()
+          const d = new Date(ts)
+          return isNaN(d.getTime()) ? ts : d.toLocaleString()
+        }
+
+        state.drafts = (markerData.draftReports || []).map(d => ({
+          id: d.id,
+          reportName: d.title,
+          reportType: d.type,
+          enterpriseName: "-",
+          genStatus: 0,
+          status: 0,
+          updateTime: formatDate(d.createTime),
+          docUrl: `/local-storage/drafts/${d.physicalName}`,
+          fileType: (d.physicalName || '').split('.').pop(),
+          tableChangeInfos: []
+        }))
+        
+        if (markerData.formalReports) {
+          state.reports = markerData.formalReports.map(f => ({
+            id: f.id,
+            reportName: f.title,
+            reportType: f.type,
+            enterpriseName: "-",
+            genStatus: 1,
+            status: 1,
+            updateTime: formatDate(f.createTime),
+            docUrl: `/local-storage/drafts/${f.physicalName}`,
+            fileType: (f.physicalName || '').split('.').pop(),
+            tableChangeInfos: []
+          }))
+        }
+
+        await this.writeReportState(state)
+      } catch (e) {
+        console.error('同步 report-state 失败:', e)
+      }
     },
     lookUploadModal() {
       this.uploadTableList = []
@@ -374,7 +465,7 @@ export default {
         this.lastSaveMeta = info.meta
         this.$notification['success']({
           message: '保存成功',
-          description: `已保存为 ${info.meta.physicalName}（仅保存在浏览器）`,
+          description: `已覆盖原文件 ${info.meta.overwrittenName}（已写入文件系统）`,
           duration: 4,
         })
         this.saving = false
@@ -413,6 +504,58 @@ export default {
         this.$refs.editorR && this.$refs.editorR.refreshEditor()
       })
     },
+    async insertTextIntoDoc(text) {
+      console.log('[AI Debug] insertTextIntoDoc called');
+      const t = text || '';
+      if (!t) return;
+
+      if (!this.editableMode) {
+        this.$message.warning('当前为预览模式，请先进入编辑');
+        return;
+      }
+
+      // 1. 优先尝试自动写入剪贴板（最稳妥的兜底方案）
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(t);
+          console.log('[AI Debug] 已写入剪贴板');
+        } else {
+          // 降级方案
+          const textArea = document.createElement("textarea");
+          textArea.value = t;
+          document.body.appendChild(textArea);
+          textArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+          console.log('[AI Debug] 已通过 execCommand 写入剪贴板');
+        }
+      } catch (err) {
+        console.error('[AI Debug] 写入剪贴板失败:', err);
+      }
+
+      // 2. 尝试自动插入（针对同源或支持的高级版本）
+      try {
+        // BroadcastChannel 尝试
+        const channel = new BroadcastChannel('onlyoffice-ai-channel');
+        channel.postMessage({ type: "ai-insert-text", text: t });
+        setTimeout(() => channel.close(), 1000);
+
+        // 组件方法尝试
+        if (this.$refs.editorR) {
+          this.$refs.editorR.insertTextAtCursor(t);
+        }
+      } catch (e) {
+        console.error('[AI Debug] 自动插入尝试失败:', e);
+      }
+
+      // 3. 无论自动插入是否成功，都提示用户（因为跨域场景下我们无法得知自动插入是否真的成功）
+      this.$notification['info']({
+        message: 'AI 内容已生成',
+        description: '内容已自动复制。如果文档未自动插入，请直接在文档中按 Ctrl+V 粘贴。',
+        duration: 4,
+        icon: (h) => h('a-icon', { props: { type: 'copy', theme: 'twoTone', twoToneColor: '#52c41a' } }),
+      });
+    },
     saveCurrent() {
       if (!this.editableMode) {
         this.$message.warning('当前为预览模式，请先进入编辑')
@@ -423,16 +566,23 @@ export default {
       this.$refs.editorR && this.$refs.editorR.saveDocument(this.fileType)
     },
     async runDiagnostics() {
-      this.diagResult = '...'
+      this.diagResult = '正在运行深度诊断...'
       try {
-        const host = window.location.host
-        const urlHost = `http://${host}${this.docUrl}`
-        const r = await fetch(urlHost, { method: 'HEAD' })
-        const ok1 = r.ok
-        const txt = ok1 ? '前端可访问文件（HEAD 200）' : `前端访问失败 (状态 ${r.status})`
-        this.diagResult = `[前端可达测试] ${txt}；[DocServer内部URL] ${this.internalBase}${this.docUrl}`
+        const r = await fetch('/__diagnostics')
+        if (r.ok) {
+          const j = await r.json()
+          // 添加客户端信息
+          j.client = {
+            origin: window.location.origin,
+            userAgent: navigator.userAgent,
+            time: new Date().toLocaleString()
+          }
+          this.diagResult = JSON.stringify(j, null, 2)
+        } else {
+          this.diagResult = `诊断接口返回错误: ${r.status}`
+        }
       } catch (e) {
-        this.diagResult = `诊断失败：${e && e.message ? e.message : e}`
+        this.diagResult = `诊断失败: ${e.message}`
       }
     },
     toggleCollapsed() {
@@ -453,6 +603,14 @@ export default {
 }
 </style>
 <style lang="less" scoped>
+.full-height-spin {
+  height: 100vh;
+  /deep/ .ant-spin-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+}
 /deep/ .ant-page-header-heading {
   display: none;
 }
@@ -520,10 +678,8 @@ export default {
   border-right: 1px solid #e8e8e8;
   position: relative;
   overflow: hidden;
-  overflow-y: scroll;
-  &::-webkit-scrollbar {
-    width: 0px;
-  }
+  overflow-y: auto;
+  min-height: 0;
 }
 .left-content {
   z-index: 1;
@@ -548,9 +704,10 @@ export default {
 .right-content {
   width: 0;
   transition: all 0.3s ease-in-out;
+  min-width: 0;
 }
 .open-right {
-  width: calc(50% - 150px) !important;
+  width: calc(40% - 80px) !important;
   transition: all 0.3s ease-in-out;
 }
 .open-right-five {

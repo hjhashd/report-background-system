@@ -35,6 +35,12 @@
                   :key="f.name"
                   @click="previewFile(f)"
                 >
+                  <a-checkbox
+                    :checked="selectedPaths.includes(f.path)"
+                    @click.stop
+                    @change="(e) => toggleSelection(f.path, e.target.checked)"
+                    style="margin-right: 8px"
+                  />
                   <a-icon type="file" style="color: #999; margin-right: 6px" />
                   <span class="file-name single-line-text">{{ f.name }}</span>
                 </div>
@@ -51,11 +57,46 @@
       <a-spin :spinning="recoLoading" tip="推荐中...">
         <div class="recommendations">
           <div class="recommend-item rec-item-clickable" v-for="item in recommendations" :key="item.name" @click="openRec(item)">
-            <div class="rec-name">{{ item.name }}</div>
-            <div class="rec-reason">{{ item.reason }}</div>
+            <div class="flex-row-center">
+              <a-checkbox
+                :checked="selectedPaths.includes(item.path)"
+                @click.stop
+                @change="(e) => toggleSelection(item.path, e.target.checked)"
+                style="margin-right: 8px"
+              />
+              <div class="flex-1 overflow-hidden">
+                <div class="rec-name single-line-text">{{ item.name }}</div>
+                <div class="rec-reason single-line-text">{{ item.reason }}</div>
+              </div>
+            </div>
           </div>
         </div>
       </a-spin>
+    </div>
+    <div class="section">
+      <div class="section-title">
+        <span>AI 辅助撰写</span>
+      </div>
+      <div class="ai-box">
+        <a-input
+          type="textarea"
+          :rows="5"
+          v-model="aiPrompt"
+          placeholder="请输入提示词，例如：生成一段关于节能降碳的政策综述，包含背景、目标与建议。"
+        ></a-input>
+        <div class="ai-actions">
+          <a-button type="primary" size="small" :loading="aiGenerating" @click="generateAI">AI生成</a-button>
+          <a-button size="small" :disabled="aiGenerating" @click="regenerate">重新生成</a-button>
+          <a-button type="dashed" size="small" :disabled="!aiResult || aiGenerating" @click="applyInsert">应用并插入</a-button>
+          <span class="ai-hint">将在光标处插入到左侧文档</span>
+        </div>
+        <a-spin :spinning="aiGenerating" tip="正在生成...">
+          <div class="ai-result" v-if="aiResult && !aiGenerating">
+            <div class="ai-result-title">生成结果预览：</div>
+            <div class="ai-result-text">{{ aiResult }}</div>
+          </div>
+        </a-spin>
+      </div>
     </div>
     <a-modal
       v-model="previewVisible"
@@ -87,10 +128,14 @@
       return {
         uploadList: [],
         collapsed: {},
+        selectedPaths: [],
         previewVisible: false,
         previewFileUrl: '',
         recoLoading: false,
-        selectedFileName: '1212广东智环创新环境科技有限公司知识智库搭建-需求',
+        selectedFileName: '',
+        aiPrompt: '请生成一段约200字的材料综述，主题为节能降碳工作推进，包含背景、重点举措与预期成效，语气正式、结构清晰。',
+        aiGenerating: false,
+        aiResult: '',
         treeData: [
           {
             name: '环境文件',
@@ -169,7 +214,7 @@
             path: '/database/环境文件/对外交流与合作/2025年丝绸之路电视共同体高峰论坛在阳江举行 黄坤明慎海雄出席开幕式并启动论坛广东省人民政府门户网站.pdf'
           }
         ]
-        if (this.selectedFileName === '1212广东智环创新环境科技有限公司知识智库搭建-需求') {
+        if (false) {
           return base
         }
         return base.slice(0, 3)
@@ -194,6 +239,18 @@
       isCollapsed(key) {
         return this.collapsed[key] !== false
       },
+      toggleSelection(path, checked) {
+        if (checked) {
+          if (!this.selectedPaths.includes(path)) {
+            this.selectedPaths.push(path)
+          }
+        } else {
+          const index = this.selectedPaths.indexOf(path)
+          if (index > -1) {
+            this.selectedPaths.splice(index, 1)
+          }
+        }
+      },
       previewFile(f) {
         this.selectedFileName = f.name
         this.previewFileUrl = encodeURI(f.path)
@@ -205,6 +262,26 @@
           this.previewFileUrl = encodeURI(item.path)
           this.previewVisible = true
         }
+      },
+      generateAI() {
+        if (this.aiGenerating) return
+        this.aiGenerating = true
+        this.aiResult = ''
+        setTimeout(() => {
+          this.aiGenerating = false
+          this.aiResult = `【AI生成内容】
+为贯彻国家关于节能降碳的工作部署，各地持续完善政策体系与协同机制，推动重点行业工艺升级与设备更新，提升能源利用效率。围绕公共机构与工业企业两类主体，开展示范项目与绩效评价，形成可复制经验。结合区域产业结构与资源禀赋，建立数据监测与动态评估机制，强化过程管理与结果应用，助力实现经济发展与绿色转型协同提升。`
+        }, 1000)
+      },
+      regenerate() {
+        this.generateAI()
+      },
+      applyInsert() {
+        if (!this.aiResult) {
+          this.$message.warning('请先进行AI生成')
+          return
+        }
+        this.$emit('insertText', this.aiResult)
       }
     },
     created() {
@@ -300,6 +377,16 @@
     white-space: nowrap;
     text-overflow: ellipsis;
   }
+  .flex-row-center {
+    display: flex;
+    align-items: center;
+  }
+  .flex-1 {
+    flex: 1;
+  }
+  .overflow-hidden {
+    overflow: hidden;
+  }
   .recommendations {
     border: 1px solid #e8e8e8;
     border-radius: 4px;
@@ -341,5 +428,40 @@
     padding: 10px 12px;
     text-align: right;
     border-top: 1px solid #f0f0f0;
+  }
+  .ai-box {
+    border: 1px solid #e8e8e8;
+    border-radius: 4px;
+    background: #fff;
+    padding: 8px 10px;
+  }
+  .ai-actions {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .ai-hint {
+    font-size: 12px;
+    color: #717682;
+  }
+  .ai-result {
+    margin-top: 10px;
+    border: 1px dashed #c7d7ff;
+    background: #f6f9ff;
+    border-radius: 4px;
+    padding: 8px 10px;
+  }
+  .ai-result-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #4a7ce2;
+    margin-bottom: 6px;
+  }
+  .ai-result-text {
+    font-size: 13px;
+    color: #333;
+    line-height: 1.6;
+    white-space: pre-wrap;
   }
   </style>

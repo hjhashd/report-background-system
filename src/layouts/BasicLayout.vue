@@ -1,6 +1,6 @@
 <template>
   <pro-layout
-    :menus="menus"
+    :menus="[]"
     :collapsed="collapsed"
     :mediaQuery="query"
     :isMobile="isMobile"
@@ -8,58 +8,16 @@
     :handleCollapse="handleCollapse"
     :i18nRender="i18nRender"
     :open-keys="openKeys"
+    :menuRender="false"
+    :headerRender="false"
+    :siderWidth="0"
+    :collapsedButtonRender="false"
     @openChange="onOpenChange"
     v-bind="settings"
   >
     <template v-slot:menuHeaderRender>
-      <div class="logo-top mini-logo" style="margin-bottom: 0" v-if="collapsed">
-        <img src="@/assets/logow.png" />
-      </div>
-      <div style="z-index: 1000" @click="preventStop" v-if="!collapsed">
-        <div class="logo-top">
-          <img src="@/assets/logow.png" />
-          <!-- <h1>{{ title }}</h1> -->
-        </div>
-        <div class="user-box flex-row-spacearound">
-          <div class="user-ava">
-            <a-avatar :src="userInfo.avatar" style="width: 48px; height: 48px" />
-            <a-tooltip placement="right">
-              <template slot="title">
-                <div class="user-name">{{ userInfo.userName }}</div>
-              </template>
-              <div class="user-name single-line-text">{{ userInfo.userName }}</div>
-            </a-tooltip>
-          </div>
-          <div style="text-align: center">
-            <div @click="buildQRcode">
-              <img
-                class="code-img"
-                src="@/assets/images/apply-data.png"
-                alt="点击生产二维码"
-                style="width: 52px; height: 52px"
-              />
-            </div>
-            <a-button style="margin-top: 20px" type="link" size="small" @click="buildQRcode"> 数据申请 </a-button>
-          </div>
-        </div>
-        <div class="user-report-info" v-if="overview">
-          <div class="report-info-item" @click="turnToUrl('customer')">
-            <div class="num">{{ overview[0].sum }}</div>
-            <div class="item-name">客户</div>
-          </div>
-          <div class="report-info-item" @click="turnToUrl('report')">
-            <div class="num num1">{{ overview[2].sum }}</div>
-            <div class="item-name">报告</div>
-          </div>
-          <div class="report-info-item" @click="turnToUrl('draft')">
-            <div class="num num2">{{ overview[4].sum }}</div>
-            <div class="item-name">草稿</div>
-          </div>
-        </div>
-      </div>
     </template>
     <template v-slot:rightContentRender>
-      <right-content :top-menu="settings.layout === 'topmenu'" :is-mobile="isMobile" :theme="settings.theme" />
     </template>
     <router-view />
 
@@ -263,6 +221,14 @@ export default {
 
 <style lang="less">
 @import './BasicLayout.less';
+.ant-layout-content {
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+}
+.ant-pro-basicLayout-content {
+  margin: 0 !important;
+}
 .ant-pro-sider-menu-logo {
   height: auto;
 }

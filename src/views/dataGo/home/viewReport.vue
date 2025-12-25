@@ -94,7 +94,16 @@
       </div>
       <div class="flex flex-1">
         <div ref="editorContainerRef" class="editor-container">
-          <OnlyOfficeEditor ref="editorR" :typeFrom="typeFrom" :reportId="reportId" :editorHeight="editorHeight" />
+          <OnlyOfficeEditorFD
+            ref="editorR"
+            :typeFrom="typeFrom"
+            :reportId="reportId"
+            :editorHeight="editorHeight"
+            :docUrl="docUrl"
+            :docTitle="reportName || '报告预览'"
+            :docFileType="fileType"
+            :editable="true"
+          />
         </div>
         <div
           class="right-content"
@@ -260,22 +269,12 @@
 <script>
 import { mapActions } from 'vuex'
 import AnomalyContent from '../anomaly/innerContent.vue'
-import {
-  getReportDetail,
-  customerData,
-  getCustomerDetail,
-  updateReportDate,
-  updateReport,
-  applyReport,
-  setDraftStatus,
-} from '@/api/report'
-import { OnlyOfficeEditor } from '@/components'
+import { OnlyOfficeEditorFD } from '@/components'
 import EditModal from './editModal.vue'
-import { getCurrentDate, getCurrentTime } from './util'
-import { classifyDataByClassName, classifyDataByTemplateName } from '../client/util'
+import { getCurrentDate } from './util'
 export default {
   name: 'addReport',
-  components: { OnlyOfficeEditor, EditModal, AnomalyContent },
+  components: { OnlyOfficeEditorFD, EditModal, AnomalyContent },
   data() {
     return {
       applyIcon: require('@/assets/images/apply.png'),
@@ -295,6 +294,8 @@ export default {
       fullView: false,
       typeFrom: null,
       reportName: null,
+      fileType: 'docx',
+      docUrl: '',
       setType: null,
       otherSaveReportName: '',
       setReportName: false,
@@ -308,6 +309,9 @@ export default {
     this.typeFrom = (this.$route.query && this.$route.query.typeFrom) || ''
     this.reportName = (this.$route.query && this.$route.query.reportName) || ''
     this.reportId = this.$route.params.reportId
+    const DEFAULT_DOC = '/双碳大模型底座_标准格式版.docx'
+    this.docUrl = (this.$route.query && this.$route.query.docUrl) || DEFAULT_DOC
+    this.fileType = (this.$route.query && this.$route.query.fileType) || 'docx'
     this.init()
     this.setCollapsed(true)
   },
@@ -328,25 +332,40 @@ export default {
   },
   methods: {
     ...mapActions(['setCollapsed', 'setFullScreen']),
-    judgeShowDataRoute(v) {
-      const showbtnList = ['资产负债表', '利润表', '现金流量表']
-      return showbtnList.includes(v.tableNameZh)
-    },
     init() {
       if (this.typeFrom && this.typeFrom === 'industryReport') {
         return
-      } else {
-        getReportDetail(this.reportId).then((res) => {
-          this.reportDetail = res.data
-          this.reportName = res.data.reportName
-          getCustomerDetail(res.data.appUserId).then((result) => {
-            this.customerDetail = Object.assign(result.data, {
-              logoName: result.data.enterpriseName.substring(0, 1),
-            })
-            this.getData()
-          })
-        })
       }
+      this.loadReportLocal()
+    },
+    async loadReportLocal() {
+      const state = await this.readReportState()
+      const list = Array.isArray(state.reports) ? state.reports : []
+      const idx = list.findIndex((r) => String(r.id) === String(this.reportId))
+      if (idx >= 0) {
+        const item = list[idx]
+        this.reportDetail = item
+        this.reportName = item.reportName
+        const DEFAULT_DOC = ''
+        const url = item.docUrl || ''
+        const name = url.split('/').pop() || ''
+        let exists = false
+        try {
+          const r = await fetch('/__local-list')
+          if (r.ok) {
+            const j = await r.json().catch(() => null)
+            const files = (j && Array.isArray(j.files)) ? j.files : []
+            exists = !!files.find((f) => f && f.name === name && Number(f.size) > 0)
+          }
+        } catch (e) {}
+        const finalUrl = exists ? url : DEFAULT_DOC
+        this.docUrl = finalUrl
+        this.fileType = finalUrl.endsWith('.docx') ? 'docx' : 'doc'
+      }
+    },
+    judgeShowDataRoute(v) {
+      const showbtnList = ['资产负债表', '利润表', '现金流量表']
+      return showbtnList.includes(v.tableNameZh)
     },
     allViewPort() {
       // 打开全屏
@@ -417,39 +436,43 @@ export default {
         cancelText: '取消',
         onOk: () => {
           this.pageLoading = true
-          updateReport(this.reportDetail.id).then((res) => {
-            if (res.code != 200) {
-              this.pageLoading = false
-              $notification['error']({
-                message: '错误通知：',
-                description: res.msg,
-                duration: 8,
+          const delay = 1000 + Math.floor(Math.random() * 1000)
+          setTimeout(async () => {
+            try {
+              const state = await this.readReportState()
+              const now = new Date().toLocaleString()
+              const reports = Array.isArray(state.reports) ? state.reports : []
+              const idx = reports.findIndex((r) => String(r.id) === String(this.reportDetail.id))
+              const item = idx >= 0 ? reports.splice(idx, 1)[0] : this.reportDetail
+              const draft = Object.assign({}, item, {
+                id: Date.now(),
+                status: 0,
+                genStatus: 3,
+                updateTime: now,
               })
-            } else {
+              state.reports = reports
+              state.drafts = Array.isArray(state.drafts) ? state.drafts : []
+              state.drafts.unshift(draft)
+              await this.writeReportState(state)
+              this.pageLoading = false
               $notification['success']({
                 message: '通知：',
                 description: `正在生成，请在草稿列表查看进度`,
                 duration: 6,
               })
-              this.pageLoading = false
-              // this.init()
-              // this.$refs.editorR.refreshEditor()
               setTimeout(() => {
-                // 去草稿
                 $router.push({ path: '/homePage/draftList' })
               }, 500)
+            } catch (e) {
+              this.pageLoading = false
+              $notification['error']({
+                message: '错误通知：',
+                description: String(e),
+                duration: 8,
+              })
             }
-          })
+          }, delay)
         },
-      })
-    },
-    getData() {
-      customerData({
-        creditCode: this.customerDetail.enterpriseCreditCode,
-        reportType: this.reportDetail.reportType,
-        template: JSON.parse(this.reportDetail.template),
-      }).then((response) => {
-        this.customerReportDetail = classifyDataByTemplateName(response.data)
       })
     },
     openSetName(type) {
@@ -482,61 +505,60 @@ export default {
     saveAsDraft() {
       const { $notification, $router } = this
       this.pageLoading = true
-      this.reportName = null
-      setDraftStatus(this.reportDetail.id, this.otherSaveReportName)
-        .then((res) => {
+      const delay = 800 + Math.floor(Math.random() * 800)
+      setTimeout(async () => {
+        try {
+          const state = await this.readReportState()
+          const now = new Date().toLocaleString()
+          const draft = {
+            id: Date.now(),
+            reportName: this.otherSaveReportName || (this.reportDetail && this.reportDetail.reportName) || '未命名报告',
+            reportType: this.reportDetail ? this.reportDetail.reportType : 1,
+            enterpriseName: this.reportDetail ? this.reportDetail.enterpriseName : '-',
+            genStatus: 0,
+            status: 0,
+            updateTime: now,
+            docUrl: this.docUrl || '',
+            fileType: this.fileType || 'docx',
+            tableChangeInfos: [],
+          }
+          state.drafts = Array.isArray(state.drafts) ? state.drafts : []
+          state.drafts.unshift(draft)
+          await this.writeReportState(state)
           this.pageLoading = false
           this.setReportName = false
-          this.$nextTick(() => {
-            this.reportName = this.otherSaveReportName
-          })
-          this.$refs.editorR.refreshEditor()
           $notification['success']({
             message: '通知：',
-            description: `${this.otherSaveReportName}，另存为草稿成功`,
+            description: `${draft.reportName}，另存为草稿成功`,
             duration: 6,
           })
           setTimeout(() => {
-            // 去草稿
             $router.push({ path: '/homePage/draftList' })
           }, 500)
-        })
-        .catch((err) => {
+        } catch (err) {
           this.pageLoading = false
           $notification['error']({
             message: '通知：',
             description: `操作失败：${err}`,
             duration: 6,
           })
-        })
+        }
+      }, delay)
     },
     applyReport() {
       const { $notification } = this
       this.pageLoading = true
-      this.reportName = ''
-      applyReport(this.reportDetail.id, this.otherSaveReportName)
-        .then((res) => {
-          this.pageLoading = false
-          this.setReportName = false
-          this.$nextTick(() => {
-            this.reportName = this.otherSaveReportName
-          })
-          this.$refs.editorR.refreshEditor()
-          this.startDownload()
-          $notification['success']({
-            message: '通知：',
-            description: `发布成功`,
-            duration: 6,
-          })
+      const delay = 600 + Math.floor(Math.random() * 600)
+      setTimeout(() => {
+        this.pageLoading = false
+        this.setReportName = false
+        this.startDownload()
+        $notification['success']({
+          message: '通知：',
+          description: `发布成功`,
+          duration: 6,
         })
-        .catch((err) => {
-          this.pageLoading = false
-          $notification['error']({
-            message: '通知：',
-            description: `操作失败：${err}`,
-            duration: 6,
-          })
-        })
+      }, delay)
     },
     showDrawer() {
       this.visible = true
@@ -584,40 +606,19 @@ export default {
     },
     uploadFile(options) {
       const { $notification } = this
-      const { file, onSuccess, onError } = options
-      const formData = new FormData()
-      const item = this.clickItem
-      if (this.disabledList.findIndex((i) => i.tableName == item.tableName) != -1) {
-        $notification['info']({
-          message: '上传通知：',
-          description: `该文档文件正在上传，请稍后再试`,
-          duration: 6,
-        })
-        return
-      }
-      formData.append(item.tableName, file)
+      const { file } = options
+      if (!file) return
       this.uploading = true
       this.pageLoading = true
-      this.disabledList.push(item.tableName)
-      updateReportDate(formData, this.reportDetail.id).then((res) => {
+      setTimeout(() => {
         this.pageLoading = false
         this.uploading = false
-        this.disabledList = this.disabledList.filter((item) => item != item.tableName)
-        if (res.code && res.code == 200) {
-          $notification['success']({
-            message: '上传通知：',
-            description: `上传文件成功：${file.name}`,
-            duration: 6,
-          })
-          this.getData()
-        } else {
-          $notification['error']({
-            message: '上传通知：',
-            description: `${res.msg}`,
-            duration: 6,
-          })
-        }
-      })
+        $notification['success']({
+          message: '上传通知：',
+          description: `上传文件成功：${file.name}`,
+          duration: 6,
+        })
+      }, 800)
     },
     lookUploadModal(v) {
       this.uploadTableList = this.reportDetail.tableChangeInfos
@@ -637,27 +638,33 @@ export default {
       })
     },
     startDownload() {
-      getReportDetail(this.reportId).then((res) => {
-        this.reportDetail = res.data
-        this.reportName = res.data.reportName
-        const url = this.reportDetail.fileUrl
-        const name = this.reportDetail.fileUrl.split('/')
-        const filename = `${name[name.length - 1]}`
-        const xhr = new XMLHttpRequest()
-        xhr.open('GET', url, true)
-        xhr.responseType = 'blob'
-        xhr.onload = function () {
-          if (xhr.status === 200) {
-            const blob = xhr.response
-            const urlObject = URL.createObjectURL(blob)
-            const a = document.createElement('a')
-            a.href = urlObject
-            a.download = filename
-            a.click()
-            URL.revokeObjectURL(urlObject)
-          }
+      try {
+        if (this.$refs && this.$refs.editorR && typeof this.$refs.editorR.saveDocument === 'function') {
+          this.$refs.editorR.saveDocument(this.fileType || 'docx')
         }
-        xhr.send()
+      } catch (e) {}
+    },
+    async readReportState() {
+      try {
+        const r = await fetch('/local-storage/drafts/report-state.json')
+        if (r.ok) {
+          const j = await r.json().catch(() => null)
+          if (j && typeof j === 'object') return j
+        }
+      } catch (e) {}
+      return { drafts: [], reports: [] }
+    },
+    async writeReportState(state) {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' })
+      const content = await new Promise((resolve) => {
+        const fr = new FileReader()
+        fr.onload = () => resolve(fr.result.split(',')[1] || '')
+        fr.readAsDataURL(blob)
+      })
+      await fetch('/__local-upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: 'report-state.json', content }),
       })
     },
   },

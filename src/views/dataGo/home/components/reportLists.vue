@@ -123,7 +123,6 @@ const reportTypeList = [
   },
 ]
 import { mapState } from 'vuex'
-import { reportList, deleteReport, batchDeleteReport } from '@/api/report'
 import { STable } from '@/components'
 import { baseMixin } from '@/store/app-mixin'
 import { columns } from '../util'
@@ -151,26 +150,34 @@ export default {
         status: 1,
       },
       loadData: (parameter) => {
-        let requestParameters = Object.assign({}, this.queryParam, parameter, {
+        const requestParameters = Object.assign({}, this.queryParam, parameter, {
           pageNum: parameter.pageNo,
-          reportName: this.search,
-          reportType: this.draftTypeSelected,
         })
         if (parameter.pageSize !== this.queryParam.pageSize) {
           requestParameters.pageNo = 1
           requestParameters.pageNum = 1
         }
         this.queryParam = requestParameters
-        return new Promise((resolve, reject) => {
-          reportList(requestParameters).then((res) => {
-            const reD = {
-              pageSize: requestParameters.pageSize,
-              pageNo: requestParameters.pageNo,
-              totalCount: res.total,
-              totalPage: Math.ceil(res.total / requestParameters.pageSize),
-              data: res.rows,
-            }
-            resolve(reD)
+        return new Promise(async (resolve) => {
+          const state = await this.readReportState()
+          let rows = Array.isArray(state.reports) ? state.reports.slice() : []
+          if (this.search) {
+            const s = String(this.search).toLowerCase()
+            rows = rows.filter((r) => String(r.reportName).toLowerCase().includes(s))
+          }
+          if (this.draftTypeSelected) {
+            rows = rows.filter((r) => String(r.reportType) === String(this.draftTypeSelected))
+          }
+          const total = rows.length
+          const start = (requestParameters.pageNum - 1) * requestParameters.pageSize
+          const end = start + requestParameters.pageSize
+          const pageRows = rows.slice(start, end)
+          resolve({
+            pageSize: requestParameters.pageSize,
+            pageNo: requestParameters.pageNum,
+            totalCount: total,
+            totalPage: Math.ceil(total / requestParameters.pageSize),
+            data: pageRows,
           })
         })
       },
@@ -202,7 +209,11 @@ export default {
   methods: {
     handleChat(v) {
       const { $router } = this
-      $router.push({ path: `/homePage/viewReport/` + v.id })
+      const DEFAULT_DOC = ''
+      $router.push({
+        path: `/homePage/viewReportFirstDraft/` + v.id,
+        query: { reportName: v.reportName, fileType: 'doc', docUrl: DEFAULT_DOC }
+      })
     },
     rowChange(_, selectedRows) {
       this.expandedRowKeys = selectedRows.map((u) => u.id)
@@ -217,23 +228,20 @@ export default {
         })
         return
       }
-      batchDeleteReport(this.expandedRowKeys).then((i) => {
-        if (i.code == 200) {
-          $notification['success']({
-            message: '通知：',
-            description: '删除成功',
-            duration: 8,
-          })
-          this.expandedRowKeys = []
-          this.$refs.table.refresh()
-        } else {
-          $notification['error']({
-            message: '通知：',
-            description: '删除失败' + i.msg,
-            duration: 8,
-          })
-          this.$refs.table.refresh()
-        }
+      this.deleteByIds(this.expandedRowKeys).then(() => {
+        $notification['success']({
+          message: '通知：',
+          description: '删除成功',
+          duration: 8,
+        })
+        this.expandedRowKeys = []
+        this.$refs.table.refresh()
+      }).catch((e) => {
+        $notification['error']({
+          message: '通知：',
+          description: '删除失败' + e,
+          duration: 8,
+        })
       })
     },
     selectChange() {
@@ -241,18 +249,53 @@ export default {
     },
     deleteChat(v) {
       const { $notification } = this
-      deleteReport(v.id).then((res) => {
+      this.deleteByIds([v.id]).then(() => {
         $notification['success']({
           message: '通知：',
           description: '删除成功',
           duration: 8,
         })
         this.$refs.table.refresh()
+      }).catch((e) => {
+        $notification['error']({
+          message: '通知：',
+          description: '删除失败' + e,
+          duration: 8,
+        })
       })
     },
     lookUploadModal(v) {
       this.uploadTableList = v.tableChangeInfos
       this.udt = true
+    },
+    async readReportState() {
+      try {
+        const r = await fetch('/local-storage/drafts/report-state.json')
+        if (r.ok) {
+          const j = await r.json().catch(() => null)
+          if (j && typeof j === 'object') return j
+        }
+      } catch (e) {}
+      return { drafts: [], reports: [] }
+    },
+    async writeReportState(state) {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' })
+      const content = await new Promise((resolve) => {
+        const fr = new FileReader()
+        fr.onload = () => resolve(fr.result.split(',')[1] || '')
+        fr.readAsDataURL(blob)
+      })
+      await fetch('/__local-upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: 'report-state.json', content }),
+      })
+    },
+    async deleteByIds(ids) {
+      const state = await this.readReportState()
+      const set = new Set(ids.map((x) => String(x)))
+      state.reports = (Array.isArray(state.reports) ? state.reports : []).filter((r) => !set.has(String(r.id)))
+      await this.writeReportState(state)
     },
   },
 }

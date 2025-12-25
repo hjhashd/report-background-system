@@ -23,6 +23,7 @@
 <script>
 import draftList from './draftList.vue'
 import reportLists from './components/reportLists.vue'
+import { mapActions } from 'vuex'
 export default {
   name: 'listTab',
   components: { draftList, reportLists },
@@ -39,6 +40,16 @@ export default {
         },
       ],
     }
+  },
+  created() {
+    this.setCollapsed(true)
+    this.setFullScreen(true)
+  },
+  beforeDestroy() {
+    this.setFullScreen(true)
+  },
+  methods: {
+    ...mapActions(['setCollapsed', 'setFullScreen']),
   },
 }
 </script>

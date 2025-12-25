@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Insert Text Demo</title>
+  <script type="text/javascript">
+    // 动态确定 OnlyOffice SDK 地址，避免硬编码 IP
+    (function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      let sdkUrl = urlParams.get('sdkUrl');
+      if (!sdkUrl) {
+        // 回退逻辑：尝试从当前页面的 origin 推断，或者使用默认端口
+        const host = window.location.hostname;
+        sdkUrl = `http://${host}:8082/sdkjs-plugins/v1/plugins.js`;
+      }
+      document.write('<script type="text/javascript" src="' + sdkUrl + '"><\/script>');
+    })();
+  </script>
+  <script type="text/javascript" src="./plugin.js"></script>
+  <style>
+    body { font-family: sans-serif; margin: 10px; }
+    .hidden { display: none; }
+  </style>
+  </head>
+<body>
+  <div id="root" class="hidden">Insert Text Demo</div>
+</body>
+</html>
